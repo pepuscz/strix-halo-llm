@@ -1,29 +1,35 @@
 # Strix Halo LLM
 
-Qualified local LLM setups, benchmarks, and pinned Ansible recipes for a **128 GiB AMD Ryzen AI Max+ 395 / Radeon 8060S** Strix Halo box (BOSGAME M5 / Sixunited AXB35-02).
+Ansible recipes and measured performance for running Qwen and DeepSeek locally on a **128 GiB AMD Ryzen AI Max+ 395 / Radeon 8060S** Strix Halo box (BOSGAME M5 / Sixunited AXB35-02).
 
-**Winning setup for Qwen:** Qwen3.8-Flash-Next with **Strata HIP UD-Q4_K_XL**, four 256K slots, and 30/30 quality.
+**Winning setup for Qwen:** Qwen3.8-Flash-Next with **Strata HIP UD-Q4_K_XL**, up to **four simultaneous conversations**, each with **256K tokens of context**. It passes all **30 quality tests**.
 
-**Winning setup for DeepSeek:** DeepSeek-V4-Flash-0731 with **Strix Halo llama.cpp Vulkan IQ3_XXS**, one 512K slot, and 30/30 quality.
+**Winning setup for DeepSeek:** DeepSeek-V4-Flash-0731 with **Strix Halo llama.cpp Vulkan IQ3_XXS**, **one conversation with 512K tokens of context**. It passes all **30 quality tests**.
 
-The matched 128K Qwen retrieval workload completes in **168.3 seconds versus 329.4 seconds** with the Qwen Vulkan baseline: **1.96× faster** with four slots.
+On the long-text test (114,089 input tokens), the winning Qwen recipe takes **168.3 seconds versus 329.4 seconds** for the Qwen Vulkan comparison setup: **1.96× faster**.
 
 ## Setups in the comparison
 
-The table and chart show the same four setups: one winning setup and one comparison baseline for each model.
+Winning setups are bold.
 
-| Selection | Model | Stack | Context | Quality | Recipe / measurement settings |
-|---|---|---|---:|---:|---|
-| **Winning setup for Qwen** | Qwen3.8-Flash-Next | **Strata HIP UD-Q4_K_XL** | **4 × 262,144** | **30/30** | [strata-qwen-q4xl-4x256k.yml](ansible/releases/strata-qwen-q4xl-4x256k.yml) |
-| Qwen comparison baseline | Qwen3.8-Flash-Next | Strix Halo llama.cpp Vulkan UD-Q4_K_XL | 1 × 262,144 measured curve | 30/30 | [Measurement settings](docs/BENCHMARKS.md#qwen-context-scaling) |
-| **Winning setup for DeepSeek** | DeepSeek-V4-Flash-0731 | **Strix Halo llama.cpp Vulkan IQ3_XXS** | **1 × 524,288** | **30/30** | [vulkan-iq3xxs-512k.yml](ansible/releases/vulkan-iq3xxs-512k.yml) |
-| DeepSeek comparison baseline | DeepSeek-V4-Flash-0731 | Lucebox ROCm ROCmFPX | 1 × 131,072 | 29/30 | [rocm-rocmfpx-128k.yml](ansible/releases/rocm-rocmfpx-128k.yml) |
+| Model | Stack | Conversation limits | Quality tests passed | Recipe / measurement settings |
+|---|---|---|---:|---|
+| Qwen3.8-Flash-Next | **Strata HIP UD-Q4_K_XL** | 4 conversations × 256K tokens | 30/30 | [strata-qwen-q4xl-4x256k.yml](ansible/releases/strata-qwen-q4xl-4x256k.yml) |
+| Qwen3.8-Flash-Next | Strix Halo llama.cpp Vulkan UD-Q4_K_XL | 1 conversation, up to 256K tokens in the speed tests | 30/30 | [Measurement settings](docs/BENCHMARKS.md#qwen-context-scaling) |
+| DeepSeek-V4-Flash-0731 | **Strix Halo llama.cpp Vulkan IQ3_XXS** | 1 conversation × 512K tokens | 30/30 | [vulkan-iq3xxs-512k.yml](ansible/releases/vulkan-iq3xxs-512k.yml) |
+| DeepSeek-V4-Flash-0731 | Lucebox ROCm ROCmFPX | 1 conversation × 128K tokens | 29/30 | [rocm-rocmfpx-128k.yml](ansible/releases/rocm-rocmfpx-128k.yml) |
+
+Tokens are the pieces of text a model reads and writes. The context limit is the total length of the input and conversation history the model can keep for a conversation. Quality is measured with 10 coding and 20 maths questions.
 
 ## Benchmarks
 
-![Matched Qwen and DeepSeek single-session input-processing and generation throughput on Strix Halo](docs/benchmark.svg)
+The speed test places five labelled phrases in a long text—for example, `BOSGAME_ALPHA: violet canoe`—then asks the model to find them. Every run shown returned all five phrases correctly.
 
-All retrieval points recover five of five values exactly. The chart compares single-session context curves for both winning setups and their respective baselines. Four-slot qualification is reported separately in the benchmark tables. [BENCHMARKS.md](docs/BENCHMARKS.md) contains every measurement, quality budgets, and the protocol; [results.json](benchmarks/results.json) contains the pinned identities and aggregates.
+The top chart shows how quickly each setup reads the input. The bottom chart shows how quickly it writes the answer. Higher is better. Each dot measures one request at the input length shown on the horizontal axis.
+
+![Qwen and DeepSeek reading and answer-writing speeds at different input lengths, measured one request at a time](docs/benchmark.svg)
+
+[Full measurements and test method](docs/BENCHMARKS.md) · [Exact software versions, settings, and result data](benchmarks/results.json)
 
 ## Install
 
@@ -49,7 +55,7 @@ The installer verifies the hardware and kernel, downloads publisher artifacts wi
 
 Ubuntu 26.04 LTS, 128 GiB RAM, swap and Secure Boot disabled, and the BIOS/large-GTT settings in [HOST-PLATFORM.md](docs/HOST-PLATFORM.md). Qwen uses kernel `7.0.0-31-generic` and requires 220 GB free on `/`; DeepSeek uses `7.0.0-29-generic` and requires 120 GB free.
 
-Every recipe applies 120 W package limits and model-scoped cooling. Qwen uses CPU boost off, GPU DPM auto, and systemd memory limits of 123G/125G. Its four-slot qualification retained **14.23 GiB effective non-CMA headroom**, recovered all four long prompts, and passed all four continued conversations.
+Every recipe applies 120 W package limits and model-scoped cooling. Qwen uses CPU boost off, GPU DPM auto, and systemd memory limits of 123G/125G. In the concurrency test, Qwen answered four long prompts at the same time, kept the conversations separate, and answered a follow-up in each conversation.
 
 [OPERATIONS.md](docs/OPERATIONS.md) covers service controls and updates. [ARCHITECTURE.md](docs/ARCHITECTURE.md) describes the runtime settings and current limits. [SOURCES.md](docs/SOURCES.md) records upstream provenance.
 

@@ -1,6 +1,10 @@
 # Benchmarks
 
-Measured on the same BOSGAME M5, Ryzen AI Max+ 395 / Radeon 8060S, 128 GiB RAM, and 120 W package policy. Requests disable thinking. Matched points use identical frozen prompt bytes and require five byte-exact retrieval values.
+These tests measure how fast each setup reads a long input and writes an answer, and whether the answer is correct. All setups run on the same BOSGAME M5 with Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM, and a 120 W power limit. Reasoning mode is disabled.
+
+The input contains five labelled phrases at different positions, such as `BOSGAME_ALPHA: violet canoe`. The model is asked to find and repeat all five. Every speed-test run returned all five phrases correctly. Compared setups receive the same text.
+
+The chart measures one request at a time. Qwen's recommended recipe also supports four simultaneous conversations; that capacity is tested separately below. A server **slot** means capacity for one active conversation.
 
 ## Qwen3.8-Flash-Next UD-Q4_K_XL
 
@@ -9,10 +13,10 @@ Measured on the same BOSGAME M5, Ryzen AI Max+ 395 / Radeon 8060S, 128 GiB RAM, 
 | Configuration | Exact input | Input processing | Generation | Request time | Quality |
 |---|---:|---:|---:|---:|---:|
 | Strix Halo llama.cpp Vulkan UD-Q4_K_XL | 114,089 | 347.96 tok/s | 34.69 tok/s | 329.35 s | 30/30 |
-| Strata HIP UD-Q4_K_XL · single session | 114,089 | 790.40 tok/s | 42.40 tok/s | 145.79 s | 30/30 |
-| **Strata HIP UD-Q4_K_XL · four-slot** | **114,089** | **683.50 tok/s** | **43.60 tok/s** | **168.31 s** | **30/30** |
+| Strata HIP UD-Q4_K_XL · one conversation | 114,089 | 790.40 tok/s | 42.40 tok/s | 145.79 s | 30/30 |
+| **Strata HIP UD-Q4_K_XL · capacity for four conversations** | **114,089** | **683.50 tok/s** | **43.60 tok/s** | **168.31 s** | **30/30** |
 
-The four-slot recipe reduces request time by **48.9% (1.96× faster)** versus Vulkan. The single-session profile is **2.26× faster** at this matched workload.
+The recipe with capacity for four conversations reduces request time by **48.9% (1.96× faster)** versus Vulkan. The one-conversation profile is **2.26× faster** at this matched workload.
 
 ![Matched Qwen and DeepSeek single-session throughput curves](benchmark.svg)
 
@@ -33,9 +37,9 @@ The four-slot recipe reduces request time by **48.9% (1.96× faster)** versus Vu
 
 The curves use one session with 131,072-token allocation through the 128K workload and 262,144 thereafter. Strata uses a 16K prefill cap, native UD-Q4_K_XL expert/PLE tensors, BF16-compatible dense tensors, int8 KV, and MTP speculation. Vulkan uses q8_0 K/V, a 2,048-token batch, 256-token microbatch, and shared Q8_0 MTP draft with maximum draft length 2. The separate four-slot result uses four 262,144-token slots, an 8K prefill cap, QFUSE=0, and no prefill borrowing.
 
-### Four-slot capacity
+### Four simultaneous conversations
 
-Four simultaneous independent 228,244-token prompts passed exact retrieval, session isolation, and continued two-turn conversations. Four slots decoded simultaneously. Minimum effective non-CMA available memory was 14,921,348 KiB (14.23 GiB). Four slots are qualified; higher counts have no published qualification.
+Four conversations each received a different long prompt containing 228,244 tokens. All four found their own requested phrases, kept their contents separate, and answered a follow-up correctly. All four generated answers simultaneously. At least 14,921,348 KiB (14.23 GiB) of memory remained available outside the reserved CMA pool. Four simultaneous conversations are tested; higher counts are not tested.
 
 ## DeepSeek-V4-Flash-0731
 

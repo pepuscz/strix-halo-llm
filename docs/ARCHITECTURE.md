@@ -2,7 +2,7 @@
 
 The winning setups are Strata HIP UD-Q4_K_XL for Qwen and Strix Halo llama.cpp Vulkan IQ3_XXS for DeepSeek. This table describes the three published Ansible recipes; the measured Qwen Vulkan baseline settings are recorded in [BENCHMARKS.md](BENCHMARKS.md#qwen-context-scaling).
 
-| Layer | Winning Qwen setup / Strata HIP UD-Q4_K_XL | Winning DeepSeek setup / Strix Halo llama.cpp Vulkan IQ3_XXS | DeepSeek comparison baseline / Lucebox ROCm ROCmFPX |
+| Layer | **Qwen / Strata HIP UD-Q4_K_XL** | **DeepSeek / Strix Halo llama.cpp Vulkan IQ3_XXS** | DeepSeek / Lucebox ROCm ROCmFPX |
 |---|---|---|---|
 | Runtime | Strata v0.1.40, unmodified pinned source | Official strix-halo-llamacpp v0.7.0 portable release | Unmodified Lucebox commit `5eb4fbe` |
 | GPU | HIP gfx1151, isolated ROCm 7.14.1 SDK | Bundled Mesa RADV / Vulkan | Ubuntu ROCm 7.1, HIP gfx1151, rocWMMA |
