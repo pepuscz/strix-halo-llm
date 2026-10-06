@@ -296,7 +296,8 @@
       "tool_contract_passed": true,
       "model": "DeepSeek-V4-Flash-0731",
       "manifest_sha256": "8793196283a5ab53f462fe9e868359254d292a851484b119f98c5cee8e1f8251",
-      "release_id": "vulkan-iq3xxs-512k-v4"
+      "release_id": "vulkan-iq3xxs-512k-v4",
+      "selection": "winning_setup"
     },
     "rocm-rocmfpx": {
       "name": "Lucebox ROCm ROCmFPX",
@@ -395,7 +396,8 @@
       "tool_contract_passed": true,
       "model": "DeepSeek-V4-Flash-0731",
       "manifest_sha256": "6bf8d354d04dfe8d9e1171535fdaa0de2aa034d8bc5adca50158214675a1cdf0",
-      "release_id": "rocm-rocmfpx-128k-v5"
+      "release_id": "rocm-rocmfpx-128k-v5",
+      "selection": "comparison_baseline"
     },
     "qwen-vulkan-q4xl": {
       "name": "Strix Halo llama.cpp Vulkan UD-Q4_K_XL",
@@ -603,7 +605,8 @@
         "kv": "q8_0 K/V",
         "speculation": "draft-mtp, maximum 2"
       },
-      "power_watts": 120
+      "power_watts": 120,
+      "selection": "comparison_baseline"
     },
     "strata-qwen-q4xl": {
       "name": "Strata HIP UD-Q4_K_XL",
@@ -893,7 +896,12 @@
         }
       ],
       "manifest_sha256": "3bdb1d5044aadfcdf1bbc597772a348bc3ee9d7031ad97c2b9bf8b290d16d671",
-      "release_id": "strata-qwen-q4xl-4x256k-v1"
+      "release_id": "strata-qwen-q4xl-4x256k-v1",
+      "selection": "winning_setup"
     }
+  },
+  "winning_setups": {
+    "Qwen3.8-Flash-Next": "strata-qwen-q4xl",
+    "DeepSeek-V4-Flash-0731": "vulkan-iq3xxs"
   }
 }

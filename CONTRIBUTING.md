@@ -9,4 +9,4 @@ Changes to a qualified setup must be deterministic and reviewable:
 5. Update the current documentation and regenerate `docs/benchmark.svg` from `benchmarks/results.json`.
 6. Exclude private prompts, host logs, credentials, and model/runtime binaries. Keep rejected configurations in the private qualification source.
 
-Matched comparisons use identical prompt bytes and quality fixtures on the same hardware. Record request budgets and engine settings alongside the results. Each supported stack has one current recipe; Qwen / Strata is the explicit default.
+Matched comparisons use identical prompt bytes and quality fixtures on the same hardware. Record request budgets and engine settings alongside the results. Keep the winning setup for Qwen and the winning setup for DeepSeek explicit, and label the comparison baselines consistently in tables and charts. The controller defaults to Qwen / Strata.

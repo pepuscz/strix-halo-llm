@@ -1,21 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 775" role="img" aria-labelledby="title desc">
 <title id="title">Strix Halo LLM throughput: Qwen and DeepSeek</title>
-<desc id="desc">Matched cold five-key retrieval on a 128 GiB Ryzen AI Max+ 395. Four runtime curves show input and generation throughput. A diamond marks the four-slot Qwen Strata result. Prompt length uses a logarithmic axis.</desc>
+<desc id="desc">Matched cold five-key retrieval on a 128 GiB Ryzen AI Max+ 395. The winning setup for Qwen and the winning setup for DeepSeek are shown with their respective comparison baselines. The chart shows single-session context scaling. Prompt length uses a logarithmic axis.</desc>
 <style>text{font-family:Arial,sans-serif;fill:#24292f}.title{font-size:26px;font-weight:700}.sub{font-size:15px;fill:#57606a}.label{font-size:14px}.tick{font-size:12px;fill:#57606a}.panel{font-size:17px;font-weight:700}.grid{stroke:#d8dee4;stroke-dasharray:3 5}.value{font-size:13px;font-weight:700}</style>
 <rect width="1100" height="775" fill="white"/>
 <text x="70" y="40" class="title">Strix Halo LLM benchmarks</text>
 <text x="70" y="67" class="sub">Ryzen AI Max+ 395 · Radeon 8060S · 128 GiB RAM · 120 W · thinking off</text>
 <line x1="70" y1="99" x2="98" y2="99" stroke="#0969da" stroke-width="3"/>
-<text x="110" y="104" class="label">Qwen · Strata HIP UD-Q4_K_XL</text>
+<text x="110" y="104" class="label">Winning setup for Qwen · Strata HIP UD-Q4_K_XL</text>
 <line x1="70" y1="123" x2="98" y2="123" stroke="#008577" stroke-width="3"/>
-<text x="110" y="128" class="label">Qwen · Strix Halo llama.cpp Vulkan UD-Q4_K_XL</text>
+<text x="110" y="128" class="label">Qwen comparison baseline · Strix Halo llama.cpp Vulkan UD-Q4_K_XL</text>
 <line x1="70" y1="147" x2="98" y2="147" stroke="#8957e5" stroke-width="3"/>
-<text x="110" y="152" class="label">DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS</text>
+<text x="110" y="152" class="label">Winning setup for DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS</text>
 <line x1="70" y1="171" x2="98" y2="171" stroke="#bc4c00" stroke-width="3"/>
-<text x="110" y="176" class="label">DeepSeek · Lucebox ROCm ROCmFPX</text>
-<path d="M760 96 l6 6 -6 6 -6 -6 Z" fill="#0969da" stroke="white" stroke-width="2"/>
-<text x="775" y="107" class="label">Qwen Strata · 4 × 256K</text>
-<text x="752" y="133" class="value">128K workload: 1.96× faster · quality 30/30</text>
+<text x="110" y="176" class="label">DeepSeek comparison baseline · Lucebox ROCm ROCmFPX</text>
 <text x="80" y="215" class="panel">Input processing (tok/s) · higher is better</text>
 <line class="grid" x1="80" y1="400.00" x2="1020" y2="400.00"/>
 <text class="tick" x="68" y="404.00" text-anchor="end">0</text>
@@ -87,8 +84,6 @@
 <circle cx="550.00" cy="363.02" r="4" fill="#bc4c00"><title>30,720 tokens: 201.68</title></circle>
 <circle cx="779.65" cy="373.82" r="4" fill="#bc4c00"><title>122,879 tokens: 142.82</title></circle>
 <text class="value" x="779.65" y="394.82" text-anchor="end" style="fill:#bc4c00">142.8</text>
-<path d="M767.36 267.69 l7 7 -7 7 -7 -7 Z" fill="#0969da" stroke="white" stroke-width="2"><title>4 × 256K: 683.50</title></path>
-<text class="value" x="780.36" y="279.69" style="fill:#0969da">683.5 · four-slot</text>
 <text x="80" y="460" class="panel">Generation (tok/s) · higher is better</text>
 <line class="grid" x1="80" y1="645.00" x2="1020" y2="645.00"/>
 <text class="tick" x="68" y="649.00" text-anchor="end">0</text>
@@ -160,9 +155,7 @@
 <circle cx="550.00" cy="557.00" r="4" fill="#bc4c00"><title>30,720 tokens: 32.00</title></circle>
 <circle cx="779.65" cy="563.60" r="4" fill="#bc4c00"><title>122,879 tokens: 29.60</title></circle>
 <text class="value" x="779.65" y="584.60" text-anchor="end" style="fill:#bc4c00">29.6</text>
-<path d="M767.36 518.10 l7 7 -7 7 -7 -7 Z" fill="#0969da" stroke="white" stroke-width="2"><title>4 × 256K: 43.60</title></path>
-<text class="value" x="780.36" y="500.10" style="fill:#0969da">43.6 · four-slot</text>
 <text x="550" y="700" text-anchor="middle" class="label">Actual input tokens · logarithmic scale · identical frozen prompt bytes at matched points</text>
-<text x="550" y="735" text-anchor="middle" class="tick">Qwen curves: 1 session, Strata prefill 16K. Four-slot marker: 4 sessions, prefill 8K, QFUSE=0, no prefill borrowing.</text>
+<text x="550" y="735" text-anchor="middle" class="tick">Single-session context curves. Qwen Strata: 16K prefill.</text>
 <text x="550" y="757" text-anchor="middle" class="tick">Every retrieval point: 5/5 exact values. Source revisions, exact counts, budgets and settings: benchmarks/results.json.</text>
 </svg>

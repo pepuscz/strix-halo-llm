@@ -3,9 +3,9 @@
 ## Select a setup
 
 ```bash
-export STRIX_SYSTEM=strata-qwen-q4xl  # Qwen / Strata; default when unset
-# export STRIX_SYSTEM=vulkan-iq3xxs  # DeepSeek / Vulkan
-# export STRIX_SYSTEM=rocm-rocmfpx   # DeepSeek / Lucebox
+export STRIX_SYSTEM=strata-qwen-q4xl  # Winning Qwen setup; default when unset
+# export STRIX_SYSTEM=vulkan-iq3xxs  # Winning DeepSeek setup
+# export STRIX_SYSTEM=rocm-rocmfpx   # DeepSeek comparison baseline
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify

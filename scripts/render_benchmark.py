@@ -10,17 +10,17 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'benchmarks/results.json'
 OUTPUT = ROOT / 'docs/benchmark.svg'
 SERIES = [
-    ('strata-qwen-q4xl', '#0969da', 'Qwen · Strata HIP UD-Q4_K_XL'),
-    ('qwen-vulkan-q4xl', '#008577', 'Qwen · Strix Halo llama.cpp Vulkan UD-Q4_K_XL'),
-    ('vulkan-iq3xxs', '#8957e5', 'DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS'),
-    ('rocm-rocmfpx', '#bc4c00', 'DeepSeek · Lucebox ROCm ROCmFPX'),
+    ('strata-qwen-q4xl', '#0969da', 'Winning setup for Qwen · Strata HIP UD-Q4_K_XL'),
+    ('qwen-vulkan-q4xl', '#008577', 'Qwen comparison baseline · Strix Halo llama.cpp Vulkan UD-Q4_K_XL'),
+    ('vulkan-iq3xxs', '#8957e5', 'Winning setup for DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS'),
+    ('rocm-rocmfpx', '#bc4c00', 'DeepSeek comparison baseline · Lucebox ROCm ROCmFPX'),
 ]
 
 
 def render(data):
     lines = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 775" role="img" aria-labelledby="title desc">',
              '<title id="title">Strix Halo LLM throughput: Qwen and DeepSeek</title>',
-             '<desc id="desc">Matched cold five-key retrieval on a 128 GiB Ryzen AI Max+ 395. Four runtime curves show input and generation throughput. A diamond marks the four-slot Qwen Strata result. Prompt length uses a logarithmic axis.</desc>',
+             '<desc id="desc">Matched cold five-key retrieval on a 128 GiB Ryzen AI Max+ 395. The winning setup for Qwen and the winning setup for DeepSeek are shown with their respective comparison baselines. The chart shows single-session context scaling. Prompt length uses a logarithmic axis.</desc>',
              '<style>text{font-family:Arial,sans-serif;fill:#24292f}.title{font-size:26px;font-weight:700}.sub{font-size:15px;fill:#57606a}.label{font-size:14px}.tick{font-size:12px;fill:#57606a}.panel{font-size:17px;font-weight:700}.grid{stroke:#d8dee4;stroke-dasharray:3 5}.value{font-size:13px;font-weight:700}</style>',
              '<rect width="1100" height="775" fill="white"/>',
              '<text x="70" y="40" class="title">Strix Halo LLM benchmarks</text>',
@@ -29,9 +29,6 @@ def render(data):
         yy = 99 + i * 24
         lines += [f'<line x1="70" y1="{yy}" x2="98" y2="{yy}" stroke="{color}" stroke-width="3"/>',
                   f'<text x="110" y="{yy+5}" class="label">{html.escape(name)}</text>']
-    lines += ['<path d="M760 96 l6 6 -6 6 -6 -6 Z" fill="#0969da" stroke="white" stroke-width="2"/>',
-              '<text x="775" y="107" class="label">Qwen Strata · 4 × 256K</text>',
-              '<text x="752" y="133" class="value">128K workload: 1.96× faster · quality 30/30</text>']
     left, right, height = 80, 1020, 165
     xmin, xmax = 1800, 524288
 
@@ -65,11 +62,8 @@ def render(data):
             xx,yy=coords[-1];value=points[-1][key]
             offset=-12 if sid in ('strata-qwen-q4xl','vulkan-iq3xxs') or (sid == 'qwen-vulkan-q4xl' and key != 'decode_tokens_per_second') else 21
             lines.append(f'<text class="value" x="{xx:.2f}" y="{yy+offset:.2f}" text-anchor="end" style="fill:{color}">{value:.1f}</text>')
-        p=data['systems']['strata-qwen-q4xl']['four_slot_context_scaling'][0];xx,yy=x(p['actual_input_tokens']),y(p[key])
-        lines.append(f'<path d="M{xx:.2f} {yy-7:.2f} l7 7 -7 7 -7 -7 Z" fill="#0969da" stroke="white" stroke-width="2"><title>4 × 256K: {p[key]:.2f}</title></path>')
-        lines.append(f'<text class="value" x="{xx+13:.2f}" y="{yy + {'prefill_tokens_per_second': 5, 'decode_tokens_per_second': -25, 'server_seconds': 27}[key]:.2f}" style="fill:#0969da">{p[key]:.1f} · four-slot</text>')
     lines += ['<text x="550" y="700" text-anchor="middle" class="label">Actual input tokens · logarithmic scale · identical frozen prompt bytes at matched points</text>',
-              '<text x="550" y="735" text-anchor="middle" class="tick">Qwen curves: 1 session, Strata prefill 16K. Four-slot marker: 4 sessions, prefill 8K, QFUSE=0, no prefill borrowing.</text>',
+              '<text x="550" y="735" text-anchor="middle" class="tick">Single-session context curves. Qwen Strata: 16K prefill.</text>',
               '<text x="550" y="757" text-anchor="middle" class="tick">Every retrieval point: 5/5 exact values. Source revisions, exact counts, budgets and settings: benchmarks/results.json.</text>',
               '</svg>', '']
     return '\n'.join(lines)
