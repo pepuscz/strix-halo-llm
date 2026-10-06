@@ -1,6 +1,6 @@
 # Contributing
 
-model service changes must be deterministic and reviewable:
+Changes to a qualified setup must be deterministic and reviewable:
 
 1. Pin every source revision, downloaded artifact, build input, and model identity in a release manifest. Never silently edit a published tag.
 2. Preserve each recipe's qualified memory floor, cgroup limits, power envelope, and cooling policy.
