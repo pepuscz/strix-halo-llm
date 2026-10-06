@@ -1,7 +1,7 @@
 ---
 all:
   children:
-    deepseek_hosts:
+    strix_hosts:
       hosts:
         strix-halo:
           ansible_host: strix-halo.example.net

@@ -1,40 +1,25 @@
 # Operations
 
-## Select a system
-
-Select Strix Halo llama.cpp Vulkan IQ3_XXS:
+## Select a setup
 
 ```bash
-export DEEPSEEK_SYSTEM=vulkan-iq3xxs
+export STRIX_SYSTEM=strata-qwen-q4xl  # Qwen / Strata; default when unset
+# export STRIX_SYSTEM=vulkan-iq3xxs  # DeepSeek / Vulkan
+# export STRIX_SYSTEM=rocm-rocmfpx   # DeepSeek / Lucebox
+bin/strixctl validate
+bin/strixctl install --allow-reboot
+bin/strixctl verify
 ```
 
-Or select Lucebox ROCm ROCmFPX:
-
-```bash
-export DEEPSEEK_SYSTEM=rocm-rocmfpx
-```
-
-Then use the same commands for either system:
-
-```bash
-bin/deepseekctl validate
-bin/deepseekctl install --allow-reboot
-bin/deepseekctl verify
-```
-
-Keep the same `DEEPSEEK_SYSTEM` value for later start, stop, status, and verify
-commands. If unset, it defaults to `vulkan-iq3xxs`. Switching systems runs the
-selected immutable manifest and replaces the shared
-`deepseek-v4-flash.service` definition; it does not overwrite the other
-system's release directory.
+Keep the same `STRIX_SYSTEM` selection for later commands. Installing a different setup replaces the shared `strix-halo-inference.service` and retains the other release's immutable artifacts. The installer retires the previous model service names. The initial Qwen build and tensor conversion run on the target host; the controller observes their progress.
 
 ## Service controls
 
 ```bash
-bin/deepseekctl status
-bin/deepseekctl stop
-bin/deepseekctl start
-bin/deepseekctl verify
+bin/strixctl status
+bin/strixctl stop
+bin/strixctl start
+bin/strixctl verify
 ```
 
 Stop restores the captured CPU, GPU, and package-power policy. The cooling
@@ -43,21 +28,21 @@ runtime identity, context allocation, model representation, cgroup events,
 memory headroom, memory PSI, temperatures, cooling state, package-power
 readback, kernel errors, and a bounded API request.
 
-For the default, `deepseek-fan-governor.service` holds fixed level 5 during GPU
+For the default, `strix-fan-governor.service` holds fixed level 5 during GPU
 work and for 300 seconds afterward, then returns the fans to firmware-auto. A
 missing GPU-busy counter, fan-control fault, governor stop, or governor failure
 selects fixed level 5. The controller samples sysfs once per second and never
 polls the model API.
 
-Set `deepseek_verify_full_model_hashes=true` for an explicit full model scrub.
+Set `strix_verify_full_model_hashes=true` for an explicit full model scrub.
 Normal operation verifies immutable download markers and byte sizes to avoid
-rehashing approximately 109–111 GB on each run.
+rehashing approximately 100–111 GB on each run.
 
 ## Updates and rollback
 
-Persistent production changes are made through release manifests and roles.
+Persistent model service changes are made through release manifests and roles.
 Do not edit the active systemd unit, GRUB drop-in, hardware policy, DKMS files,
-or immutable `/opt/m5/releases/<release-id>` content manually.
+or immutable release-directory content manually.
 
 An update requires a new or reviewed immutable manifest, successful lint and
 validation, installation, live verification, and benchmark evidence. Rollback

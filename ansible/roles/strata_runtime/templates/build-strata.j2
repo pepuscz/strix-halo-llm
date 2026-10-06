@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+readonly root={{ strix_paths.release | quote }}
+readonly model={{ (strix_paths.models + '/' + strix_target.files[0].name) | quote }}
+readonly source_commit={{ strix_runtime.source_commit | quote }}
+readonly source_tree={{ strix_runtime.source_tree | quote }}
+readonly fetch={{ (strix_paths.bin + '/fetch-verified-artifact') | quote }}
+cd "$root"
+recipe_sha=$(sha256sum "$0" | awk '{print $1}')
+if [[ -f build-recipe.sha256 ]]; then
+    [[ "$(cat build-recipe.sha256)" == "$recipe_sha" ]] || { echo 'Immutable recipe changed; select a new release directory.' >&2; exit 1; }
+    sha256sum --check runtime.sha256
+    printf 'STRATA_RUNTIME_BUILT=0\n'
+    exit 0
+fi
+[[ "$(/usr/bin/g++ -dumpfullversion)" == {{ strix_runtime.gcc_version | quote }} ]]
+[[ "$(/usr/bin/cmake --version | head -1)" == 'cmake version {{ strix_runtime.cmake_version }}' ]]
+[[ "$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')" == 3.14 ]]
+if [[ ! -d source/.git ]]; then
+    git init source
+    git -C source remote add origin {{ strix_runtime.repository | quote }}
+    git -C source fetch --depth 1 origin "$source_commit"
+    git -C source checkout --detach FETCH_HEAD
+fi
+[[ "$(git -C source rev-parse HEAD)" == "$source_commit" ]]
+[[ "$(git -C source rev-parse 'HEAD^{tree}')" == "$source_tree" ]]
+[[ -z "$(git -C source status --porcelain)" ]]
+"$fetch" {{ strix_strata.sdk_url | quote }} "$root/downloads/rocm.tar.gz" {{ strix_strata.sdk_size }} {{ strix_strata.sdk_sha256 }}
+if [[ ! -x sdk/bin/hipconfig ]]; then
+    mkdir -p sdk
+    tar -xzf downloads/rocm.tar.gz -C sdk
+fi
+export ROCM_PATH="$root/sdk" HIP_PATH="$root/sdk" HIP_PLATFORM=amd
+export PATH="$root/sdk/bin:$root/sdk/lib/llvm/bin:$PATH"
+export LD_LIBRARY_PATH="$root/sdk/lib:$root/sdk/lib/rocm_sysdeps/lib:$root/sdk/lib/llvm/lib"
+# The archive digest pins the complete HIP compiler/runtime, not the host's global ROCm.
+[[ "$(sha256sum requirements.lock | awk '{print $1}')" == {{ strix_strata.requirements_sha256 | quote }} ]]
+[[ "$(sha256sum mtp-tensors.json | awk '{print $1}')" == {{ strix_draft.tensor_manifest_sha256 | quote }} ]]
+python3 -m venv "$root/venv"
+"$root/venv/bin/python" -m pip install --require-hashes -r "$root/requirements.lock"
+if [[ ! -f downloads/llama.cpp.zip ]]; then
+    curl --fail --location --retry 3 --output downloads/llama.cpp.zip.part {{ strix_runtime.ggml_archive_url | quote }}
+    printf '%s  %s\n' {{ strix_runtime.ggml_archive_sha256 | quote }} downloads/llama.cpp.zip.part | sha256sum --check
+    mv downloads/llama.cpp.zip.part downloads/llama.cpp.zip
+fi
+printf '%s  %s\n' {{ strix_runtime.ggml_archive_sha256 | quote }} downloads/llama.cpp.zip | sha256sum --check
+"$root/venv/bin/python" - "$root" <<'PY'
+import pathlib, sys, zipfile
+root = pathlib.Path(sys.argv[1])
+with zipfile.ZipFile(root / 'downloads/llama.cpp.zip') as archive:
+    prefix = archive.namelist()[0]
+    destination = root / 'source/third_party/llama.cpp'
+    for member in archive.infolist():
+        relative = pathlib.PurePosixPath(member.filename[len(prefix):])
+        if member.is_dir() or not relative.parts:
+            continue
+        if relative.is_absolute() or '..' in relative.parts:
+            raise RuntimeError('unsafe archive member')
+        output = destination / relative
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes(archive.read(member))
+PY
+cd "$root/source"
+/usr/bin/cmake -S . -B "$root/build" -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    -DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF -DSTRATA_PREFILL_MMQ=ON \
+    -DCMAKE_HIP_ARCHITECTURES=gfx1151 \
+    -DCMAKE_HIP_COMPILER="$root/sdk/lib/llvm/bin/clang++" \
+    -DCMAKE_HIP_COMPILER_ROCM_ROOT="$root/sdk" \
+    "-DCMAKE_PREFIX_PATH=$root/sdk;$root/sdk/lib/rocm_sysdeps;$root/sdk/lib/llvm" \
+    "-DCMAKE_HIP_FLAGS=--rocm-path=$root/sdk --rocm-device-lib-path=$root/sdk/lib/llvm/amdgcn/bitcode" \
+    -DSTRATA_GGML_DIR="$root/source/third_party/llama.cpp"
+/usr/bin/cmake --build "$root/build" --target strata strata-device -j {{ strix_strata.build_jobs }}
+"$root/venv/bin/python" tools/iq_pack.py --gguf "$model" --out "$root/pack" --compat-bf16
+export STRATA_MTP_REVISION={{ strix_draft.revision | quote }}
+"$root/venv/bin/python" tools/mtp_fetch.py fetch --out "$root/mtp"
+"$root/venv/bin/python" tools/mtp_fetch.py verify --out "$root/mtp"
+# Match every tensor to the sealed byte digest; a mutable-revision fallback cannot change accepted data.
+"$root/venv/bin/python" - "$root" <<'PY'
+import hashlib, json, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+for tensor in json.loads((root / 'mtp-tensors.json').read_text()):
+    path = root / 'mtp' / tensor['file']
+    if path.stat().st_size != tensor['bytes']:
+        raise RuntimeError('MTP size mismatch: ' + tensor['name'])
+    with path.open('rb') as stream:
+        actual = hashlib.file_digest(stream, 'sha256').hexdigest()
+    if actual != tensor['sha256']:
+        raise RuntimeError('MTP SHA256 mismatch: ' + tensor['name'])
+PY
+"$root/venv/bin/python" tools/mtp_pack.py --src "$root/mtp" --experts q2_0 --out "$root/mtp/mtp-q2_0.gguf"
+"$root/venv/bin/python" tools/mtp_rt.py --gguf "$root/mtp/mtp-q2_0.gguf" --out "$root/mtp/rt"
+cp data/draft_vocab.bin "$root/mtp/rt/draft_vocab.bin"
+cd "$root"
+cat > generated.sha256 <<'HASHES'
+{{ strix_strata.pack_dense_sha256 }}  pack/dense.bin
+{{ strix_strata.mtp_experts_sha256 }}  mtp/rt/experts.bin
+{{ strix_strata.mtp_dense_sha256 }}  mtp/rt/dense.bin
+{{ strix_strata.draft_vocab_sha256 }}  mtp/rt/draft_vocab.bin
+{% for name, digest in strix_strata.tokenizer_sha256.items() %}{{ digest }}  pack/tokenizer/{{ name }}
+{% endfor %}HASHES
+sha256sum --check generated.sha256
+cd "$root/source"
+"$root/build/strata-device" --selftest
+cd "$root"
+sha256sum build/strata sdk/bin/hipconfig > runtime.sha256
+cat generated.sha256 >> runtime.sha256
+printf '%s\n' "$source_commit" > source.commit
+printf '%s\n' "$source_tree" > source.tree
+printf '%s\n' "$recipe_sha" > build-recipe.sha256
+printf 'STRATA_RUNTIME_BUILT=1\n'

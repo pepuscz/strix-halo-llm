@@ -1,16 +1,12 @@
 # Contributing
 
-Production changes must be deterministic and reviewable:
+model service changes must be deterministic and reviewable:
 
-1. Add a new immutable release manifest; never silently edit a published tag.
-2. Pin every source revision and downloaded artifact hash.
-3. Preserve the 4 GiB effective non-CMA floor and systemd memory limits.
-4. Run `bin/deepseekctl lint` and the read-only `verify` playbook.
-5. Publish benchmark changes with workload identity, power/clock policy,
-   temperatures, memory headroom, and quality results.
-6. Do not add personal data, credentials, raw host logs, model output containing
-   private prompts, or model/runtime binaries.
+1. Pin every source revision, downloaded artifact, build input, and model identity in a release manifest. Never silently edit a published tag.
+2. Preserve each recipe's qualified memory floor, cgroup limits, power envelope, and cooling policy.
+3. Run the CI release validators, Ansible lint, template rendering, playbook syntax checks, chart freshness check, and fan-controller tests.
+4. Qualify runtime or serving changes on the target host before promotion; publish matched aggregates with workload identity, settings, quality, and memory headroom.
+5. Update the current documentation and regenerate `docs/benchmark.svg` from `benchmarks/results.json`.
+6. Exclude private prompts, host logs, credentials, and model/runtime binaries. Keep rejected configurations in the private qualification source.
 
-Performance claims need an unchanged control on the same host. A faster run
-that changes quality, prompt, output budget, context depth, power, or cooling
-must say so explicitly.
+Matched comparisons use identical prompt bytes and quality fixtures on the same hardware. Record request budgets and engine settings alongside the results. Each supported stack has one current recipe; Qwen / Strata is the explicit default.

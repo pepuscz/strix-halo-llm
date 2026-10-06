@@ -1,0 +1,12 @@
+[Unit]
+Description=Maximum cooling for the Strix Halo model workload
+After=systemd-modules-load.service
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/strix-axb35-fan max
+ExecStop=/usr/local/sbin/strix-axb35-fan auto
+RemainAfterExit=yes
+TimeoutStartSec=30
+TimeoutStopSec=15

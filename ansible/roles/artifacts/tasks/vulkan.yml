@@ -2,12 +2,12 @@
 - name: Fetch or adopt the pinned runtime archive
   ansible.builtin.command:
     argv:
-      - "{{ deepseek_paths.bin }}/fetch-verified-artifact"
-      - "{{ deepseek_runtime.archive_url }}"
-      - "{{ deepseek_paths.downloads }}/{{ deepseek_runtime.archive_name }}"
-      - "{{ deepseek_runtime.archive_size }}"
-      - "{{ deepseek_runtime.archive_sha256 }}"
-      - "{{ deepseek_runtime_archive_seed_path | default('') }}"
+      - "{{ strix_paths.bin }}/fetch-verified-artifact"
+      - "{{ strix_runtime.archive_url }}"
+      - "{{ strix_paths.downloads }}/{{ strix_runtime.archive_name }}"
+      - "{{ strix_runtime.archive_size }}"
+      - "{{ strix_runtime.archive_sha256 }}"
+      - "{{ strix_runtime_archive_seed_path | default('') }}"
   register: artifacts_runtime_fetch
   changed_when: "'downloaded' in artifacts_runtime_fetch.stdout or 'adopted' in artifacts_runtime_fetch.stdout"
   async: 86400
@@ -16,37 +16,37 @@
 - name: Fetch or adopt the pinned runtime manifest
   ansible.builtin.command:
     argv:
-      - "{{ deepseek_paths.bin }}/fetch-verified-artifact"
-      - "{{ deepseek_runtime.manifest_url }}"
-      - "{{ deepseek_paths.downloads }}/{{ deepseek_runtime.manifest_name }}"
-      - "{{ deepseek_runtime.manifest_size }}"
-      - "{{ deepseek_runtime.manifest_sha256 }}"
-      - "{{ deepseek_runtime_manifest_seed_path | default('') }}"
+      - "{{ strix_paths.bin }}/fetch-verified-artifact"
+      - "{{ strix_runtime.manifest_url }}"
+      - "{{ strix_paths.downloads }}/{{ strix_runtime.manifest_name }}"
+      - "{{ strix_runtime.manifest_size }}"
+      - "{{ strix_runtime.manifest_sha256 }}"
+      - "{{ strix_runtime_manifest_seed_path | default('') }}"
   register: artifacts_manifest_fetch
   changed_when: "'downloaded' in artifacts_manifest_fetch.stdout or 'adopted' in artifacts_manifest_fetch.stdout"
 
 - name: Fetch or adopt the pinned Vulkan loader package
   ansible.builtin.command:
     argv:
-      - "{{ deepseek_paths.bin }}/fetch-verified-artifact"
-      - "{{ deepseek_vulkan_loader.url }}"
-      - "{{ deepseek_paths.downloads }}/libvulkan1_{{ deepseek_vulkan_loader.version }}_{{ deepseek_vulkan_loader.architecture }}.deb"
-      - "{{ deepseek_vulkan_loader.size }}"
-      - "{{ deepseek_vulkan_loader.sha256 }}"
-      - "{{ deepseek_vulkan_loader_seed_path | default('') }}"
+      - "{{ strix_paths.bin }}/fetch-verified-artifact"
+      - "{{ strix_vulkan_loader.url }}"
+      - "{{ strix_paths.downloads }}/libvulkan1_{{ strix_vulkan_loader.version }}_{{ strix_vulkan_loader.architecture }}.deb"
+      - "{{ strix_vulkan_loader.size }}"
+      - "{{ strix_vulkan_loader.sha256 }}"
+      - "{{ strix_vulkan_loader_seed_path | default('') }}"
   register: artifacts_loader_fetch
   changed_when: "'downloaded' in artifacts_loader_fetch.stdout or 'adopted' in artifacts_loader_fetch.stdout"
 
 - name: Inspect extracted runtime launcher
   ansible.builtin.stat:
-    path: "{{ deepseek_paths.release }}/vulkan/_run"
+    path: "{{ strix_paths.release }}/vulkan/_run"
     checksum_algorithm: sha256
     get_checksum: true
   register: artifacts_runtime_launcher_before
 
 - name: Inspect extracted Vulkan backend
   ansible.builtin.stat:
-    path: "{{ deepseek_paths.release }}/vulkan/bin/libggml-vulkan.so.0.20.1"
+    path: "{{ strix_paths.release }}/vulkan/bin/libggml-vulkan.so.0.20.1"
     checksum_algorithm: sha256
     get_checksum: true
   register: artifacts_vulkan_backend_before
@@ -54,29 +54,29 @@
 - name: Refuse an unrecognized runtime in the immutable release directory
   ansible.builtin.fail:
     msg: >-
-      {{ deepseek_paths.release }} contains an unrecognized runtime. Select a new
+      {{ strix_paths.release }} contains an unrecognized runtime. Select a new
       release_id; immutable releases are not overwritten.
   when:
     - artifacts_runtime_launcher_before.stat.exists
-    - artifacts_runtime_launcher_before.stat.checksum != deepseek_runtime.launcher_sha256
+    - artifacts_runtime_launcher_before.stat.checksum != strix_runtime.launcher_sha256
 
 - name: Refuse an unrecognized Vulkan backend in the immutable release directory
   ansible.builtin.fail:
     msg: >-
-      {{ deepseek_paths.release }} contains an unrecognized Vulkan backend.
+      {{ strix_paths.release }} contains an unrecognized Vulkan backend.
       Select a new release_id; immutable releases are not overwritten.
   when:
     - artifacts_vulkan_backend_before.stat.exists
-    - artifacts_vulkan_backend_before.stat.checksum != deepseek_runtime.vulkan_backend_sha256
+    - artifacts_vulkan_backend_before.stat.checksum != strix_runtime.vulkan_backend_sha256
 
 - name: Extract the verified portable runtime once
   ansible.builtin.unarchive:
-    src: "{{ deepseek_paths.downloads }}/{{ deepseek_runtime.archive_name }}"
-    dest: "{{ deepseek_paths.release }}"
+    src: "{{ strix_paths.downloads }}/{{ strix_runtime.archive_name }}"
+    dest: "{{ strix_paths.release }}"
     remote_src: true
     owner: root
-    group: "{{ deepseek_service.group }}"
-    creates: "{{ deepseek_paths.release }}/vulkan/_run"
+    group: "{{ strix_service.group }}"
+    creates: "{{ strix_paths.release }}/vulkan/_run"
   when: not artifacts_runtime_launcher_before.stat.exists
 
 - name: Extract the pinned Vulkan loader
@@ -84,10 +84,10 @@
     argv:
       - dpkg-deb
       - -x
-      - "{{ deepseek_paths.downloads }}/libvulkan1_{{ deepseek_vulkan_loader.version }}_{{ deepseek_vulkan_loader.architecture }}.deb"
-      - "{{ deepseek_paths.release }}/loader"
+      - "{{ strix_paths.downloads }}/libvulkan1_{{ strix_vulkan_loader.version }}_{{ strix_vulkan_loader.architecture }}.deb"
+      - "{{ strix_paths.release }}/loader"
   args:
-    creates: "{{ deepseek_paths.release }}/loader/usr/lib/x86_64-linux-gnu/libvulkan.so.1"
+    creates: "{{ strix_paths.release }}/loader/usr/lib/x86_64-linux-gnu/libvulkan.so.1"
 
 - name: Read pinned Vulkan runtime identities
   ansible.builtin.stat:
@@ -96,16 +96,16 @@
     get_checksum: true
     follow: true
   loop:
-    - {name: launcher, path: "{{ deepseek_paths.release }}/vulkan/_run", sha256: "{{ deepseek_runtime.launcher_sha256 }}"}
-    - {name: runtime-manifest, path: "{{ deepseek_paths.downloads }}/{{ deepseek_runtime.manifest_name }}", sha256: "{{ deepseek_runtime.manifest_sha256 }}"}
-    - {name: server-wrapper, path: "{{ deepseek_paths.release }}/vulkan/llama-server", sha256: "{{ deepseek_runtime.launcher_sha256 }}"}
-    - {name: server, path: "{{ deepseek_paths.release }}/vulkan/bin/llama-server", sha256: "{{ deepseek_runtime.server_sha256 }}"}
+    - {name: launcher, path: "{{ strix_paths.release }}/vulkan/_run", sha256: "{{ strix_runtime.launcher_sha256 }}"}
+    - {name: runtime-manifest, path: "{{ strix_paths.downloads }}/{{ strix_runtime.manifest_name }}", sha256: "{{ strix_runtime.manifest_sha256 }}"}
+    - {name: server-wrapper, path: "{{ strix_paths.release }}/vulkan/llama-server", sha256: "{{ strix_runtime.launcher_sha256 }}"}
+    - {name: server, path: "{{ strix_paths.release }}/vulkan/bin/llama-server", sha256: "{{ strix_runtime.server_sha256 }}"}
     - name: vulkan-backend
-      path: "{{ deepseek_paths.release }}/vulkan/bin/libggml-vulkan.so.0.20.1"
-      sha256: "{{ deepseek_runtime.vulkan_backend_sha256 }}"
+      path: "{{ strix_paths.release }}/vulkan/bin/libggml-vulkan.so.0.20.1"
+      sha256: "{{ strix_runtime.vulkan_backend_sha256 }}"
     - name: vulkan-loader
-      path: "{{ deepseek_paths.release }}/loader/usr/lib/x86_64-linux-gnu/libvulkan.so.1"
-      sha256: "{{ deepseek_vulkan_loader.library_sha256 }}"
+      path: "{{ strix_paths.release }}/loader/usr/lib/x86_64-linux-gnu/libvulkan.so.1"
+      sha256: "{{ strix_vulkan_loader.library_sha256 }}"
   loop_control:
     label: "{{ item.name }}"
   register: artifacts_runtime_identities

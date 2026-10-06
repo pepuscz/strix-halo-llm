@@ -4,17 +4,17 @@
     path: "{{ item }}"
     state: directory
     owner: root
-    group: "{{ deepseek_service.group }}"
+    group: "{{ strix_service.group }}"
     mode: "0755"
   loop:
-    - "{{ deepseek_paths.downloads }}"
-    - "{{ deepseek_paths.release }}"
-    - "{{ deepseek_paths.models }}"
+    - "{{ strix_paths.downloads }}"
+    - "{{ strix_paths.release }}"
+    - "{{ strix_paths.models }}"
 
 - name: Install resumable verified artifact fetcher
   ansible.builtin.template:
     src: fetch-verified-artifact.j2
-    dest: "{{ deepseek_paths.bin }}/fetch-verified-artifact"
+    dest: "{{ strix_paths.bin }}/fetch-verified-artifact"
     owner: root
     group: root
     mode: "0755"
@@ -23,24 +23,24 @@
   ansible.builtin.set_fact:
     artifacts_model_artifacts: >-
       {{
-        deepseek_target.files | map('combine', {
+        strix_target.files | map('combine', {
           'kind': 'target',
-          'repository': deepseek_target.repository,
-          'revision': deepseek_target.revision,
-          'subdirectory': deepseek_target.subdirectory
+          'repository': strix_target.repository,
+          'revision': strix_target.revision,
+          'subdirectory': strix_target.subdirectory
         }) | list
-        + [deepseek_draft | combine({'kind': 'draft'})]
+        + ([] if strix_system.engine == 'strata' else [strix_draft | combine({'kind': 'draft'})])
       }}
 
 - name: Fetch or adopt every pinned model artifact
   ansible.builtin.command:
     argv:
-      - "{{ deepseek_paths.bin }}/fetch-verified-artifact"
+      - "{{ strix_paths.bin }}/fetch-verified-artifact"
       - "{{ artifacts_url }}"
-      - "{{ deepseek_paths.models }}/{{ item.name }}"
+      - "{{ strix_paths.models }}/{{ item.name }}"
       - "{{ item.size }}"
       - "{{ item.sha256 }}"
-      - "{{ (deepseek_artifact_seed_paths | default({}))[item.name] | default('') }}"
+      - "{{ (strix_artifact_seed_paths | default({}))[item.name] | default('') }}"
   loop: "{{ artifacts_model_artifacts }}"
   loop_control:
     label: "{{ item.name }}"
@@ -56,7 +56,7 @@
 
 - name: Read model artifact sizes
   ansible.builtin.stat:
-    path: "{{ deepseek_paths.models }}/{{ item.name }}"
+    path: "{{ strix_paths.models }}/{{ item.name }}"
     get_checksum: false
   loop: "{{ artifacts_model_artifacts }}"
   loop_control:
@@ -75,14 +75,14 @@
 
 - name: Verify complete model hashes when requested
   ansible.builtin.stat:
-    path: "{{ deepseek_paths.models }}/{{ item.name }}"
+    path: "{{ strix_paths.models }}/{{ item.name }}"
     checksum_algorithm: sha256
     get_checksum: true
   loop: "{{ artifacts_model_artifacts }}"
   loop_control:
     label: "{{ item.name }}"
   register: artifacts_model_hashes
-  when: deepseek_verify_full_model_hashes | bool
+  when: strix_verify_full_model_hashes | bool
 
 - name: Assert requested complete model hashes
   ansible.builtin.assert:
@@ -92,17 +92,17 @@
   loop_control:
     label: "{{ item.item.name | default('skipped') }}"
   when:
-    - deepseek_verify_full_model_hashes | bool
+    - strix_verify_full_model_hashes | bool
     - not item.skipped | default(false)
 
 - name: Install the Vulkan runtime
   ansible.builtin.include_tasks: vulkan.yml
-  when: deepseek_system.engine == 'vulkan'
+  when: strix_system.engine == 'vulkan'
 
 - name: Record release artifact provenance
   ansible.builtin.template:
     src: artifacts.yml.j2
-    dest: "{{ deepseek_paths.release }}/ARTIFACTS.yml"
+    dest: "{{ strix_paths.release }}/ARTIFACTS.yml"
     owner: root
-    group: "{{ deepseek_service.group }}"
+    group: "{{ strix_service.group }}"
     mode: "0444"

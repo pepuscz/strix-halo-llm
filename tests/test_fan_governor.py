@@ -8,8 +8,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-GOVERNOR_PATH = ROOT / "ansible/roles/fan/files/deepseek-fan-governor"
-LOADER = importlib.machinery.SourceFileLoader("deepseek_fan_governor", str(GOVERNOR_PATH))
+GOVERNOR_PATH = ROOT / "ansible/roles/fan/files/strix-fan-governor"
+LOADER = importlib.machinery.SourceFileLoader("strix_fan_governor", str(GOVERNOR_PATH))
 SPEC = importlib.util.spec_from_loader(LOADER.name, LOADER)
 assert SPEC is not None
 GOVERNOR = importlib.util.module_from_spec(SPEC)

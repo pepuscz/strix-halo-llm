@@ -2,21 +2,23 @@
 - name: Validate release manifest schema
   ansible.builtin.assert:
     that:
-      - deepseek_release_schema | int == 1
-      - deepseek_release_id | length > 0
-      - deepseek_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx']
-      - deepseek_system.name in ['Strix Halo llama.cpp Vulkan IQ3_XXS', 'Lucebox ROCm ROCmFPX']
-      - deepseek_system.engine in ['vulkan', 'rocm']
+      - strix_release_schema | int == 1
+      - strix_release_id | length > 0
+      - strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl']
+      - strix_system.name in ['Strix Halo llama.cpp Vulkan IQ3_XXS', 'Lucebox ROCm ROCmFPX', 'Strata HIP UD-Q4_K_XL']
+      - strix_system.engine in ['vulkan', 'rocm', 'strata']
       - >-
-        (deepseek_system.engine == 'vulkan' and deepseek_service.context | int == 524288) or
-        (deepseek_system.engine == 'rocm' and deepseek_service.context | int == 131072)
-      - deepseek_service.memory_high == '118G'
-      - deepseek_service.memory_max == '120G'
-      - deepseek_service.memory_swap_max | int == 0
-      - deepseek_service.minimum_effective_non_cma_kib | int >= 2097152
-      - deepseek_target.files | length > 0
-      - deepseek_target.files | map(attribute='size') | map('int') | sum == deepseek_target.total_size | int
-      - deepseek_service.conflicts | difference(deepseek_service.retire_units) | length == 0
+        (strix_system.engine == 'vulkan' and strix_service.context | int == 524288) or
+        (strix_system.engine == 'rocm' and strix_service.context | int == 131072) or
+        (strix_system.engine == 'strata' and strix_service.context | int == 262144 and
+         strix_service.parallel_slots | int == 4)
+      - strix_service.memory_high == ('123G' if strix_system.engine == 'strata' else '118G')
+      - strix_service.memory_max == ('125G' if strix_system.engine == 'strata' else '120G')
+      - strix_service.memory_swap_max | int == 0
+      - strix_service.minimum_effective_non_cma_kib | int >= 2097152
+      - strix_target.files | length > 0
+      - strix_target.files | map(attribute='size') | map('int') | sum == strix_target.total_size | int
+      - strix_service.conflicts | difference(strix_service.retire_units) | length == 0
     fail_msg: The selected release manifest is incomplete or violates its safety envelope.
 
 - name: Read board identity
@@ -45,15 +47,15 @@
 - name: Validate immutable host requirements
   ansible.builtin.assert:
     that:
-      - ansible_facts.distribution | lower == deepseek_platform.os_id
-      - ansible_facts.distribution_version == deepseek_platform.os_version
-      - ansible_facts.architecture == deepseek_platform.architecture
-      - ansible_facts.memtotal_mb | int * 1024 >= deepseek_platform.minimum_memory_kib | int
-      - (preflight_board_name_raw.content | b64decode | trim) == deepseek_platform.board_name
-      - deepseek_platform.gpu_pci_id in preflight_gpu_pci_ids.stdout_lines
+      - ansible_facts.distribution | lower == strix_platform.os_id
+      - ansible_facts.distribution_version == strix_platform.os_version
+      - ansible_facts.architecture == strix_platform.architecture
+      - ansible_facts.memtotal_mb | int * 1024 >= strix_platform.minimum_memory_kib | int
+      - (preflight_board_name_raw.content | b64decode | trim) == strix_platform.board_name
+      - strix_platform.gpu_pci_id in preflight_gpu_pci_ids.stdout_lines
       - ansible_facts.swaptotal_mb | int == 0
-      - preflight_root_mount.size_available | int >= 120000000000
-      - not deepseek_platform.strict_kernel | bool or ansible_facts.kernel == deepseek_platform.kernel
+      - preflight_root_mount.size_available | int >= strix_platform.minimum_free_bytes | int
+      - not strix_platform.strict_kernel | bool or ansible_facts.kernel == strix_platform.kernel
     fail_msg: >-
       Host identity, kernel, RAM, GPU, swap, or free-space requirements do not match
       the frozen release. Do not weaken the manifest to force an unqualified host.
@@ -72,20 +74,20 @@
       - "'SecureBoot disabled' in preflight_secure_boot.stdout"
     fail_msg: Secure Boot must be disabled before installing the tested AXB35 DKMS module.
   when:
-    - deepseek_platform.secure_boot == 'disabled'
+    - strix_platform.secure_boot == 'disabled'
     - preflight_secure_boot.rc == 0
 
 - name: Explain deferred Secure Boot validation
   ansible.builtin.debug:
     msg: mokutil is not installed yet; the platform role will install it and validate Secure Boot.
   when:
-    - deepseek_platform.secure_boot == 'disabled'
+    - strix_platform.secure_boot == 'disabled'
     - preflight_secure_boot.rc != 0
 
 - name: Report validated target
   ansible.builtin.debug:
     msg:
-      release: "{{ deepseek_release_id }}"
+      release: "{{ strix_release_id }}"
       host: "{{ inventory_hostname }}"
       board: "{{ preflight_board_name_raw.content | b64decode | trim }}"
       gpu: "{{ preflight_gpu_pci_ids.stdout_lines }}"

@@ -1,6 +1,6 @@
 ---
-- name: Verify the live pinned production release
-  hosts: deepseek_hosts
+- name: Verify the live pinned qualified release
+  hosts: strix_hosts
   become: true
   gather_facts: true
   roles:

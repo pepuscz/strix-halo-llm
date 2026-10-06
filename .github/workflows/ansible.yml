@@ -33,15 +33,16 @@ jobs:
         run: python scripts/render_benchmark.py --check
       - name: Test demand-based fan governor
         run: python -m unittest tests/test_fan_governor.py
-      - name: Assert the two-system release set
+      - name: Assert the qualified release set
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'DEEPSEEK_SYSTEM:-vulkan-iq3xxs' bin/deepseekctl
+          grep -Fq 'STRIX_SYSTEM:-strata-qwen-q4xl' bin/strixctl
           test -f ansible/releases/vulkan-iq3xxs-512k.yml
           test -f ansible/releases/rocm-rocmfpx-128k.yml
-          test "$(find ansible/releases -maxdepth 1 -type f -name '*.yml' | wc -l)" -eq 2
-      - name: Render and inspect both service contracts
+          test -f ansible/releases/strata-qwen-q4xl-4x256k.yml
+          test "$(find ansible/releases -maxdepth 1 -type f -name '*.yml' | wc -l)" -eq 3
+      - name: Render and inspect every service contract
         shell: bash
         run: |
           set -euo pipefail

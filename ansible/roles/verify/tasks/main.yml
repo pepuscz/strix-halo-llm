@@ -1,37 +1,38 @@
 ---
 - name: Wait for the model server health endpoint
   ansible.builtin.uri:
-    url: "http://{{ deepseek_service.host }}:{{ deepseek_service.port }}/health"
+    url: "http://{{ strix_service.host }}:{{ strix_service.port }}/health"
     return_content: true
     status_code: 200
   register: verify_health
   until: verify_health.status == 200
-  retries: "{{ deepseek_service.health_retries }}"
-  delay: "{{ deepseek_service.health_delay_seconds }}"
+  retries: "{{ strix_service.health_retries }}"
+  delay: "{{ strix_service.health_delay_seconds }}"
 
 - name: Read live server properties
   ansible.builtin.uri:
-    url: "http://{{ deepseek_service.host }}:{{ deepseek_service.port }}/props"
+    url: "http://{{ strix_service.host }}:{{ strix_service.port }}/props"
     return_content: true
     status_code: 200
   register: verify_props
+  when: strix_system.engine != 'strata'
 
 - name: Verify engine-specific API and runtime identity
-  ansible.builtin.include_tasks: "{{ deepseek_system.engine }}.yml"
+  ansible.builtin.include_tasks: "{{ strix_system.engine }}.yml"
 
 - name: Read service runtime contract
   ansible.builtin.command:
     argv:
       - systemctl
       - show
-      - "{{ deepseek_service.name }}"
+      - "{{ strix_service.name }}"
       - --property=ActiveState,SubState,MainPID,ControlGroup,MemoryCurrent,MemoryPeak,MemoryHigh,MemoryMax,MemorySwapMax,ExecMainStartTimestamp
   register: verify_systemd_contract
   changed_when: false
 
 - name: Read service cgroup path
   ansible.builtin.command:
-    argv: [systemctl, show, "{{ deepseek_service.name }}", --property=ControlGroup, --value]
+    argv: [systemctl, show, "{{ strix_service.name }}", --property=ControlGroup, --value]
   register: verify_control_group
   changed_when: false
 
@@ -65,25 +66,25 @@
 
 - name: Verify the selected host power and clock policy
   ansible.builtin.command:
-    argv: [/usr/local/sbin/deepseek-host-policy, verify]
+    argv: [/usr/local/sbin/strix-host-policy, verify]
   register: verify_policy
   changed_when: false
 
 - name: Read live fan state
   ansible.builtin.command:
-    argv: [/usr/local/sbin/deepseek-axb35-fan, status]
+    argv: [/usr/local/sbin/strix-axb35-fan, status]
   register: verify_live_fans
   changed_when: false
-  when: deepseek_fan.manage | bool
+  when: strix_fan.manage | bool
 
 - name: Read demand-based fan governor state
   ansible.builtin.command:
-    argv: [systemctl, is-active, deepseek-fan-governor.service]
+    argv: [systemctl, is-active, strix-fan-governor.service]
   register: verify_fan_governor
   changed_when: false
   when:
-    - deepseek_fan.manage | bool
-    - deepseek_fan.governor.enabled | default(false) | bool
+    - strix_fan.manage | bool
+    - strix_fan.governor.enabled | default(false) | bool
 
 - name: Read maximum current CPU or GPU temperature
   ansible.builtin.shell: |
@@ -98,7 +99,7 @@
 
 - name: Read service kernel interval start
   ansible.builtin.command:
-    argv: [systemctl, show, "{{ deepseek_service.name }}", --property=ExecMainStartTimestamp, --value]
+    argv: [systemctl, show, "{{ strix_service.name }}", --property=ExecMainStartTimestamp, --value]
   register: verify_service_started
   changed_when: false
 
@@ -116,11 +117,11 @@
 
 - name: Send a bounded non-thinking API smoke request
   ansible.builtin.uri:
-    url: "http://{{ deepseek_service.host }}:{{ deepseek_service.port }}/v1/chat/completions"
+    url: "http://{{ strix_service.host }}:{{ strix_service.port }}/v1/chat/completions"
     method: POST
     body_format: json
     body:
-      model: "{{ deepseek_service.alias }}"
+      model: "{{ strix_service.alias }}"
       messages:
         - role: user
           content: Reply with exactly OK.
@@ -128,11 +129,12 @@
       max_tokens: 16
       chat_template_kwargs:
         thinking: false
+        enable_thinking: false
     return_content: true
     status_code: 200
     timeout: 300
   register: verify_api_smoke
-  when: deepseek_verify_api_smoke | bool
+  when: strix_verify_api_smoke | bool
 
 - name: Assert safety, allocator, cooling, and API gates
   ansible.builtin.assert:
@@ -141,39 +143,39 @@
       - "'SubState=running' in verify_systemd_contract.stdout"
       - "'oom 0' in (verify_cgroup_memory.results[0].content | b64decode)"
       - "'oom_kill 0' in (verify_cgroup_memory.results[0].content | b64decode)"
-      - verify_effective_memory.stdout.split()[2] | int >= deepseek_service.minimum_effective_non_cma_kib | int
-      - verify_max_temperature.stdout | int < deepseek_service.thermal_limit_millic | int
+      - verify_effective_memory.stdout.split()[2] | int >= strix_service.minimum_effective_non_cma_kib | int
+      - verify_max_temperature.stdout | int < strix_service.thermal_limit_millic | int
       - >-
-        not deepseek_fan.manage | bool or
+        not strix_fan.manage | bool or
         (
-          (deepseek_fan.governor.enabled | default(false) | bool and
+          (strix_fan.governor.enabled | default(false) | bool and
            (verify_live_fans.stdout.count('mode=auto') == 3 or
             (verify_live_fans.stdout.count('mode=fixed') == 3 and
              verify_live_fans.stdout.count('level=5') == 3))) or
-          (not deepseek_fan.governor.enabled | default(false) | bool and
+          (not strix_fan.governor.enabled | default(false) | bool and
            verify_live_fans.stdout.count('mode=fixed') == 3 and
            verify_live_fans.stdout.count('level=5') == 3)
         )
       - >-
-        not deepseek_fan.manage | bool or
-        not deepseek_fan.governor.enabled | default(false) | bool or
+        not strix_fan.manage | bool or
+        not strix_fan.governor.enabled | default(false) | bool or
         verify_fan_governor.stdout | trim == 'active'
       - >-
-        not deepseek_verify_api_smoke | bool or
+        not strix_verify_api_smoke | bool or
         (verify_api_smoke.json.choices | length == 1 and
          verify_api_smoke.json.choices[0].message.content | length > 0)
       - verify_kernel_failures | length == 0
-    fail_msg: The selected service is live but failed at least one production safety gate.
+    fail_msg: The selected service is live but failed at least one model service safety gate.
 
-- name: Report verified production state
+- name: Report verified model service state
   ansible.builtin.debug:
     msg:
-      release: "{{ deepseek_release_id }}"
+      release: "{{ strix_release_id }}"
       health: "{{ verify_health.json | default(verify_health.content) }}"
       properties:
         build: "{{ verify_props.json.build_info }}"
         context: "{{ verify_props.json.default_generation_settings.n_ctx }}"
-        quantization: "{{ deepseek_target.quantization }}"
+        quantization: "{{ strix_target.quantization }}"
       memory_kib:
         mem_available: "{{ verify_effective_memory.stdout.split()[0] }}"
         cma_free: "{{ verify_effective_memory.stdout.split()[1] }}"

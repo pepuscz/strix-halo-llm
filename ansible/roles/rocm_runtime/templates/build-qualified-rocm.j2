@@ -3,19 +3,19 @@ set -euo pipefail
 export LC_ALL=C
 export GIT_LFS_SKIP_SMUDGE=1
 
-readonly RELEASE={{ deepseek_paths.release | quote }}
-readonly SOURCE={{ deepseek_rocm.qualified_source_path | quote }}
-readonly BUILD={{ deepseek_rocm.qualified_build_path | quote }}
+readonly RELEASE={{ strix_paths.release | quote }}
+readonly SOURCE={{ strix_rocm.qualified_source_path | quote }}
+readonly BUILD={{ strix_rocm.qualified_build_path | quote }}
 readonly SERVER="$BUILD/dflash_server"
-readonly ROCWMMA={{ deepseek_rocm.qualified_rocwmma_path | quote }}
+readonly ROCWMMA={{ strix_rocm.qualified_rocwmma_path | quote }}
 readonly ROCWMMA_INCLUDE="$ROCWMMA/library/include"
 readonly PATCH_ROOT="$RELEASE/patches"
-readonly SOURCE_COMMIT={{ deepseek_runtime.source_commit | quote }}
-readonly SUBMODULE_COMMIT={{ deepseek_runtime.submodule_commit | quote }}
-readonly ROCWMMA_COMMIT={{ deepseek_rocm.rocwmma_commit | quote }}
-readonly SOURCE_DIFF_SHA={{ deepseek_runtime.source_diff_sha256 | quote }}
-readonly SERVER_SHA={{ deepseek_runtime.server_sha256 | quote }}
-readonly SERVER_SIZE={{ deepseek_runtime.server_size }}
+readonly SOURCE_COMMIT={{ strix_runtime.source_commit | quote }}
+readonly SUBMODULE_COMMIT={{ strix_runtime.submodule_commit | quote }}
+readonly ROCWMMA_COMMIT={{ strix_rocm.rocwmma_commit | quote }}
+readonly SOURCE_DIFF_SHA={{ strix_runtime.source_diff_sha256 | quote }}
+readonly SERVER_SHA={{ strix_runtime.server_sha256 | quote }}
+readonly SERVER_SIZE={{ strix_runtime.server_size }}
 readonly EMPTY_DIFF_SHA=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
@@ -30,7 +30,7 @@ clone_pinned() {
 }
 
 if [ ! -d "$SOURCE/.git" ]; then
-    clone_pinned "$SOURCE" {{ deepseek_runtime.repository | quote }} "$SOURCE_COMMIT"
+    clone_pinned "$SOURCE" {{ strix_runtime.repository | quote }} "$SOURCE_COMMIT"
     git -C "$SOURCE" submodule update --init --recursive
 fi
 [ "$(git -C "$SOURCE" rev-parse HEAD)" = "$SOURCE_COMMIT" ] || fail 'Source commit mismatch.'
@@ -38,13 +38,13 @@ fi
 [ -z "$(git -C "$SOURCE/server/deps/Block-Sparse-Attention" status --short)" ] || fail 'Submodule worktree is modified.'
 
 if [ ! -d "$ROCWMMA/.git" ]; then
-    clone_pinned "$ROCWMMA" {{ deepseek_rocm.rocwmma_repository | quote }} "$ROCWMMA_COMMIT"
+    clone_pinned "$ROCWMMA" {{ strix_rocm.rocwmma_repository | quote }} "$ROCWMMA_COMMIT"
 fi
 [ "$(git -C "$ROCWMMA" rev-parse HEAD)" = "$ROCWMMA_COMMIT" ] || fail 'rocWMMA commit mismatch.'
 [ -z "$(git -C "$ROCWMMA" status --short)" ] || fail 'rocWMMA worktree is modified.'
 [ -f "$ROCWMMA_INCLUDE/rocwmma/rocwmma.hpp" ] || fail 'Pinned rocWMMA headers are incomplete.'
 
-{% for patch in deepseek_rocm.patches %}
+{% for patch in strix_rocm.patches %}
 readonly PATCH_{{ loop.index }}={{ patch.name | quote }}
 [ "$(sha256 "$PATCH_ROOT/$PATCH_{{ loop.index }}")" = {{ patch.sha256 | quote }} ] || fail 'Patch hash mismatch: {{ patch.name }}'
 {% endfor %}
@@ -52,7 +52,7 @@ readonly PATCH_{{ loop.index }}={{ patch.name | quote }}
 current_diff_sha=$(git -C "$SOURCE" diff --binary | sha256sum | cut -d' ' -f1)
 if [ "$current_diff_sha" = "$EMPTY_DIFF_SHA" ]; then
     :
-{% for patch in deepseek_rocm.patches %}
+{% for patch in strix_rocm.patches %}
     git -C "$SOURCE" apply "$PATCH_ROOT/$PATCH_{{ loop.index }}" || \
         fail 'Patch application failed: {{ patch.name }}'
 {% endfor %}
@@ -75,7 +75,7 @@ if [ ! -x "$SERVER" ] || [ "$(sha256 "$SERVER")" != "$SERVER_SHA" ]; then
         -DGGML_NATIVE=ON
     cmake --build "$BUILD" --target \
         test_server_unit \
-{% for test_binary in deepseek_rocm.test_binaries %}        {{ test_binary }} \
+{% for test_binary in strix_rocm.test_binaries %}        {{ test_binary }} \
 {% endfor %}        dflash_server -j "$(nproc)"
     built=1
 fi
@@ -85,10 +85,10 @@ fi
 [ "$(sha256 "$SERVER")" = "$SERVER_SHA" ] || fail 'ROCm server hash mismatch.'
 if ldd "$SERVER" | grep -q 'not found'; then fail 'ROCm server has an unresolved shared library.'; fi
 
-{% for test_name in deepseek_rocm.unit_tests %}
+{% for test_name in strix_rocm.unit_tests %}
 "$BUILD/test_server_unit" --exact {{ test_name | quote }}
 {% endfor %}
-{% for test_binary in deepseek_rocm.test_binaries %}
+{% for test_binary in strix_rocm.test_binaries %}
 (cd "$BUILD" && HIP_VISIBLE_DEVICES=0 ./{{ test_binary }})
 {% endfor %}
 

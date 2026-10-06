@@ -1,6 +1,6 @@
 ---
 - name: Validate the target before any mutation
-  hosts: deepseek_hosts
+  hosts: strix_hosts
   become: true
   gather_facts: true
   roles:

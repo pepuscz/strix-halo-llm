@@ -1,7 +1,7 @@
 ---
-- name: Restart selected production
+- name: Restart selected model service
   ansible.builtin.systemd_service:
-    name: "{{ deepseek_service.name }}"
+    name: "{{ strix_service.name }}"
     daemon_reload: true
     state: restarted
-  when: deepseek_service.auto_start | bool
+  when: strix_service.auto_start | bool

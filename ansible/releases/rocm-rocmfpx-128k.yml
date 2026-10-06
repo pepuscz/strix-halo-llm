@@ -1,19 +1,18 @@
 ---
-deepseek_release_id: rocm-rocmfpx-128k-v4
-deepseek_release_schema: 1
-
-deepseek_system:
+strix_release_id: rocm-rocmfpx-128k-v5
+strix_release_schema: 1
+strix_system:
   id: rocm-rocmfpx
   name: Lucebox ROCm ROCmFPX
   engine: rocm
   selected_default: false
-
-deepseek_platform:
+  model: DeepSeek-V4-Flash-0731
+strix_platform:
   os_id: ubuntu
-  os_version: "26.04"
+  os_version: '26.04'
   kernel: 7.0.0-29-generic
   architecture: x86_64
-  gpu_pci_id: "1002:1586"
+  gpu_pci_id: 1002:1586
   board_name: AXB35-02
   minimum_memory_kib: 125000000
   strict_kernel: true
@@ -24,17 +23,16 @@ deepseek_platform:
     - amdgpu.gttsize=126976
     - ttm.pages_limit=32505856
     - ttm.page_pool_size=32505856
-
-deepseek_paths:
+  minimum_free_bytes: 120000000000
+strix_paths:
   root: /opt/m5
   source: /opt/m5/src
   bin: /opt/m5/bin
-  downloads: /opt/m5/downloads/rocm-rocmfpx-128k-v4
-  release: /opt/m5/releases/rocm-rocmfpx-128k-v4
-  models: /opt/m5/models/rocm-rocmfpx-128k-v4
-  state: /var/lib/deepseek-v4-flash
-
-deepseek_runtime:
+  downloads: /opt/m5/downloads/rocm-rocmfpx-128k-v5
+  release: /opt/m5/releases/rocm-rocmfpx-128k-v5
+  models: /opt/m5/models/rocm-rocmfpx-128k-v5
+  state: /var/lib/strix-halo-inference
+strix_runtime:
   repository: https://github.com/Luce-Org/lucebox.git
   source_commit: 5eb4fbe95e13944ad964bd7e42980bca518e3d5c
   submodule_commit: 49d6c39e4dc0303442cda3bb758b3925d4399c49
@@ -42,8 +40,7 @@ deepseek_runtime:
   server_sha256: 5f68b0b8945119ffa9484caf36fbe46759fc2fd75a8a5cb47f8f1d11de5ecc60
   server_size: 6404128
   build_info: luce-dflash v0.0.0+cpp props_schema=2
-
-deepseek_rocm:
+strix_rocm:
   qualified_source_path: /opt/m5/src/lucebox-050-pr667-5eb4fbe
   qualified_build_path: /opt/m5/src/lucebox-050-pr667-5eb4fbe/server/build-qualified
   qualified_rocwmma_path: /opt/m5/src/rocWMMA-rocm-7.1.1-public-v2
@@ -68,8 +65,8 @@ deepseek_rocm:
     - librocwmma-dev=7.1.0-0ubuntu1
   patches: []
   unit_tests:
-    - ServerUnitFixture::test_parse_deepseek_function_parameters_json
-    - ServerUnitFixture::test_parse_deepseek_function_stringified_parameters_json
+    - ServerUnitFixture::test_parse_strix_function_parameters_json
+    - ServerUnitFixture::test_parse_strix_function_stringified_parameters_json
     - ServerUnitFixture::test_emitter_named_json_with_multiple_tools
     - ServerUnitFixture::test_deepseek4_render_reasoning_effort_prefixes
     - ServerUnitFixture::test_props_deepseek4_reasoning_capability
@@ -83,45 +80,40 @@ deepseek_rocm:
     - test_rocmfp_mix_slice_matvec
     - test_deepseek4_mmid_grouped_cuda
     - bench_ds4_topk
-
-deepseek_target:
+strix_target:
   repository: Lucebox/DeepSeek-V4-Flash-0731-ROCmFP3
   revision: 39745d3f6f4b92ff1d764ada79a73616bc8903a5
   quantization: ROCmFPX MIX
-  subdirectory: ""
+  subdirectory: ''
   total_size: 98294917184
   files:
     - name: DeepSeek-V4-Flash-0731-ROCMFPX-MIX-STRIX.gguf
       size: 98294917184
       sha256: 7c0789d190fdd2acad93255825822ca276f29d13f9410f2ac65f5f7a542b0a38
-
-deepseek_draft:
+strix_draft:
   repository: Lucebox/DeepSeek-V4-Flash-0731-DSpark-GGUF
   revision: 8e8bbf5bdb384b6e867d01ad3215be70b1d920c5
-  subdirectory: ""
+  subdirectory: ''
   name: DeepSeek-V4-Flash-0731-DSpark-draft-Q4RMFP4-denseF16.gguf
   size: 10648656160
   sha256: 58e7337597a917fdd033aca30a38263740dc53999dac187a676a36b8daf9e63d
-
-deepseek_ryzenadj:
+strix_ryzenadj:
   repository: https://github.com/FlyGoat/RyzenAdj.git
   commit: 5775fc3e6dbb25c7030ee2d100a1bdd6e8bf2d0a
   version: 5775fc3
   tested_binary_sha256: 2755abdb70fbe9a20245590fcf6af6e3d424d924cc54f30d172d5b6af5bbb1e2
   enforce_tested_binary_sha256: true
-
-deepseek_fan:
+strix_fan:
   manage: true
   repository: https://github.com/cmetz/ec-su_axb35-linux.git
   commit: 7a9f372edcaa99e562dece70204c4f609692a778
   dkms_version: 0.1.0_git7a9f372
   sysfs: /sys/class/ec_su_axb35
   minimum_max_rpm: 2000
-
-deepseek_service:
-  name: deepseek-v4-flash.service
-  user: deepseek
-  group: deepseek
+strix_service:
+  name: strix-halo-inference.service
+  user: inference
+  group: inference
   host: 127.0.0.1
   port: 18109
   alias: dflash
@@ -132,7 +124,7 @@ deepseek_service:
   cache_type_v: q4_0
   prefix_cache_slots: 1
   prefill_cache_slots: 0
-  disk_prefix_cache: "off"
+  disk_prefix_cache: 'off'
   expert_top_k: 6
   prefill: sparse
   chunk: 3072
@@ -146,29 +138,29 @@ deepseek_service:
   auto_start: true
   conflicts:
     - m5-deepseek.service
+    - deepseek-v4-flash.service
   retire_units:
     - m5-deepseek.service
     - m5-deepseek-smoke.service
     - m5-ds4-imatrix-download.service
     - m5-model-download.service
     - m5-performance.service
-
-deepseek_rocm_environment:
-  HIP_VISIBLE_DEVICES: "0"
-  DFLASH_DS4_TIMING: "1"
-  DFLASH_DS4_MIX_MMQ_PREFILL: "1"
-  DFLASH_DS4_SPARSE_DECODE_FLASH: "1"
-  DFLASH_DS4_SPEC: "1"
-  DFLASH_DS4_SPEC_Q: "4"
-  DFLASH_DS4_FUSED_VERIFY: "1"
-  DFLASH_DS4_DRAFT: /opt/m5/models/rocm-rocmfpx-128k-v4/DeepSeek-V4-Flash-0731-DSpark-draft-Q4RMFP4-denseF16.gguf
-  DFLASH_DS4_DRAFT_GPU: "0"
-  DFLASH_DS4_DRAFT_CONTEXT_KV_CACHE: "1"
-  DFLASH_DS4_ADAPTIVE_PREFILL_CHUNKS: "1"
-  DFLASH_DS4_DECODE_ATTN_CACHE_SLOTS: "1"
-  GGML_DS4_TOPK_BLOCK_RADIX: "1"
-
-deepseek_policy:
+    - deepseek-v4-flash.service
+strix_rocm_environment:
+  HIP_VISIBLE_DEVICES: '0'
+  DFLASH_DS4_TIMING: '1'
+  DFLASH_DS4_MIX_MMQ_PREFILL: '1'
+  DFLASH_DS4_SPARSE_DECODE_FLASH: '1'
+  DFLASH_DS4_SPEC: '1'
+  DFLASH_DS4_SPEC_Q: '4'
+  DFLASH_DS4_FUSED_VERIFY: '1'
+  DFLASH_DS4_DRAFT: /opt/m5/models/rocm-rocmfpx-128k-v5/DeepSeek-V4-Flash-0731-DSpark-draft-Q4RMFP4-denseF16.gguf
+  DFLASH_DS4_DRAFT_GPU: '0'
+  DFLASH_DS4_DRAFT_CONTEXT_KV_CACHE: '1'
+  DFLASH_DS4_ADAPTIVE_PREFILL_CHUNKS: '1'
+  DFLASH_DS4_DECODE_ATTN_CACHE_SLOTS: '1'
+  GGML_DS4_TOPK_BLOCK_RADIX: '1'
+strix_policy:
   cpu_governor: performance
   cpu_min_khz: 2000000
   cpu_boost: 1
@@ -176,8 +168,7 @@ deepseek_policy:
   stapm_mw: 120000
   fast_mw: 120000
   slow_mw: 120000
-  expected_watts: "120.000"
-
-deepseek_allow_reboot: false
-deepseek_verify_full_model_hashes: false
-deepseek_verify_api_smoke: true
+  expected_watts: '120.000'
+strix_allow_reboot: false
+strix_verify_full_model_hashes: false
+strix_verify_api_smoke: true

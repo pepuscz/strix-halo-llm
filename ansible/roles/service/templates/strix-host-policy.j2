@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly STATE=/run/deepseek-v4-flash-policy
-readonly LOCK=/run/lock/deepseek-v4-flash-policy.lock
-readonly RYZENADJ={{ (deepseek_paths.bin + '/ryzenadj-' + deepseek_ryzenadj.version) | quote }}
-readonly CPU_GOVERNOR={{ deepseek_policy.cpu_governor | quote }}
-readonly CPU_MIN={{ deepseek_policy.cpu_min_khz }}
-readonly CPU_BOOST={{ deepseek_policy.cpu_boost }}
-readonly GPU_DPM={{ deepseek_policy.gpu_dpm | quote }}
-readonly STAPM={{ deepseek_policy.stapm_mw }}
-readonly FAST={{ deepseek_policy.fast_mw }}
-readonly SLOW={{ deepseek_policy.slow_mw }}
-readonly EXPECTED_W={{ deepseek_policy.expected_watts | quote }}
+readonly STATE=/run/strix-halo-inference-policy
+readonly LOCK=/run/lock/strix-halo-inference-policy.lock
+readonly RYZENADJ={{ (strix_paths.bin + '/ryzenadj-' + strix_ryzenadj.version) | quote }}
+readonly CPU_GOVERNOR={{ strix_policy.cpu_governor | quote }}
+readonly CPU_MIN={{ strix_policy.cpu_min_khz }}
+readonly CPU_BOOST={{ strix_policy.cpu_boost }}
+readonly GPU_DPM={{ strix_policy.gpu_dpm | quote }}
+readonly STAPM={{ strix_policy.stapm_mw }}
+readonly FAST={{ strix_policy.fast_mw }}
+readonly SLOW={{ strix_policy.slow_mw }}
+readonly EXPECTED_W={{ strix_policy.expected_watts | quote }}
 
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 read_limit() {
@@ -82,7 +82,7 @@ verify() {
         found_gpu=1
     done
     [ "$found_gpu" -eq 1 ] || fail 'No writable GPU performance control found.'
-    info=$(mktemp /run/deepseek-power.XXXXXX)
+    info=$(mktemp /run/strix-power.XXXXXX)
     trap 'rm -f -- "$info"' RETURN
     "$RYZENADJ" --info > "$info"
     [ "$(read_limit "$info" 'STAPM LIMIT')" = "$EXPECTED_W" ] || fail 'STAPM readback mismatch.'
@@ -122,5 +122,5 @@ case "${1:-status}" in
     apply) apply ;;
     restore) restore_state ;;
     verify|status) verify ;;
-    *) fail 'Usage: deepseek-host-policy {apply|restore|verify|status}' ;;
+    *) fail 'Usage: strix-host-policy {apply|restore|verify|status}' ;;
 esac

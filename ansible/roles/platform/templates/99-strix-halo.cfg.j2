@@ -1,0 +1,4 @@
+# Managed exclusively by pepuscz/strix-halo-llm.
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT {{ strix_platform.kernel_arguments | join(' ') }}"
+GRUB_TIMEOUT_STYLE=menu
+GRUB_TIMEOUT=3

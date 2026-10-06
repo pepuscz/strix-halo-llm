@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+readonly root={{ strix_paths.release | quote }}
+cd "$root"
+sha256sum --check runtime.sha256
+sha256sum --check server.sha256
+[[ "$(git -c safe.directory="$root/source" -C source rev-parse HEAD)" == {{ strix_runtime.source_commit | quote }} ]]
+[[ "$(git -c safe.directory="$root/source" -C source rev-parse 'HEAD^{tree}')" == {{ strix_runtime.source_tree | quote }} ]]
+export ROCM_PATH="$root/sdk" HIP_PATH="$root/sdk" HIP_PLATFORM=amd
+export LD_LIBRARY_PATH="$root/sdk/lib:$root/sdk/lib/rocm_sysdeps/lib:$root/sdk/lib/llvm/lib"
+cd "$root/source"
+exec "$root/venv/bin/python" -m serve.server --engine strata \
+    --config "$root/server.json" --host {{ strix_service.host | quote }} --port {{ strix_service.port }}

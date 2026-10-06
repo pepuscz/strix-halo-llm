@@ -1,0 +1,36 @@
+---
+- name: Read Strata engine and session allocation
+  ansible.builtin.uri:
+    url: "http://{{ strix_service.host }}:{{ strix_service.port }}/v1/status"
+    return_content: true
+  register: verify_strata_status
+
+- name: Verify the qualified Strata serving contract
+  ansible.builtin.assert:
+    that:
+      - verify_strata_status.json.service == 'strata'
+      - verify_strata_status.json.engine == '0.1.40'
+      - verify_strata_status.json.loaded | bool
+      - verify_strata_status.json.model == strix_service.alias
+      - verify_strata_status.json.context.native | int == strix_service.context | int
+      - verify_strata_status.json.concurrency.serving | int == strix_service.parallel_slots | int
+
+- name: Verify sealed Strata runtime artifacts
+  ansible.builtin.command:
+    argv: [sha256sum, --check, runtime.sha256]
+    chdir: "{{ strix_paths.release }}"
+  changed_when: false
+
+- name: Verify sealed Strata server configuration
+  ansible.builtin.command:
+    argv: [sha256sum, --check, server.sha256]
+    chdir: "{{ strix_paths.release }}"
+  changed_when: false
+
+- name: Define common Strata verification properties
+  ansible.builtin.set_fact:
+    verify_props:
+      json:
+        build_info: "Strata {{ verify_strata_status.json.engine }}"
+        default_generation_settings:
+          n_ctx: "{{ verify_strata_status.json.context.native }}"

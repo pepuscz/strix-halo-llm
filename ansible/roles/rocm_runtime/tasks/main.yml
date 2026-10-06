@@ -1,7 +1,7 @@
 ---
 - name: Install the pinned ROCm build dependency set
   ansible.builtin.apt:
-    name: "{{ deepseek_rocm.packages }}"
+    name: "{{ strix_rocm.packages }}"
     state: present
     update_cache: true
     cache_valid_time: 3600
@@ -11,28 +11,28 @@
     path: "{{ item }}"
     state: directory
     owner: root
-    group: "{{ deepseek_service.group }}"
+    group: "{{ strix_service.group }}"
     mode: "0755"
   loop:
-    - "{{ deepseek_paths.release }}"
-    - "{{ deepseek_paths.release }}/patches"
+    - "{{ strix_paths.release }}"
+    - "{{ strix_paths.release }}/patches"
 
 - name: Install the qualified ROCm patch chain when present
   ansible.builtin.copy:
     src: "{{ role_path }}/../../../patches/{{ item.name }}"
-    dest: "{{ deepseek_paths.release }}/patches/{{ item.name }}"
+    dest: "{{ strix_paths.release }}/patches/{{ item.name }}"
     owner: root
     group: root
     mode: "0444"
-  loop: "{{ deepseek_rocm.patches }}"
+  loop: "{{ strix_rocm.patches }}"
   loop_control:
     label: "{{ item.name }}"
-  when: deepseek_rocm.patches | length > 0
+  when: strix_rocm.patches | length > 0
 
 - name: Install the reproducible ROCm build program
   ansible.builtin.template:
     src: build-qualified-rocm.j2
-    dest: "{{ deepseek_paths.bin }}/build-qualified-rocm-{{ deepseek_release_id }}"
+    dest: "{{ strix_paths.bin }}/build-qualified-rocm-{{ strix_release_id }}"
     owner: root
     group: root
     mode: "0755"
@@ -40,7 +40,7 @@
 - name: Build and test the pinned ROCm runtime
   ansible.builtin.command:
     argv:
-      - "{{ deepseek_paths.bin }}/build-qualified-rocm-{{ deepseek_release_id }}"
+      - "{{ strix_paths.bin }}/build-qualified-rocm-{{ strix_release_id }}"
   register: rocm_runtime_build
   changed_when: "'ROCM_RUNTIME_BUILT=1' in rocm_runtime_build.stdout"
   async: 14400

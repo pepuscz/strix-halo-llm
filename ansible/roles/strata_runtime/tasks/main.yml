@@ -1,0 +1,32 @@
+---
+- name: Install the pinned Strata host build packages
+  ansible.builtin.apt:
+    name: "{{ strix_strata.packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install verified Strata build inputs
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ strix_paths.release }}/{{ item }}"
+    owner: root
+    group: "{{ strix_service.group }}"
+    mode: "0444"
+  loop: [requirements.lock, mtp-tensors.json]
+
+- name: Install the pinned Strata build program
+  ansible.builtin.template:
+    src: build-strata.j2
+    dest: "{{ strix_paths.bin }}/build-strata-{{ strix_release_id }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Build and seal the qualified Strata source and native pack
+  ansible.builtin.command:
+    argv: ["{{ strix_paths.bin }}/build-strata-{{ strix_release_id }}"]
+  register: strata_runtime_build
+  changed_when: "'STRATA_RUNTIME_BUILT=1' in strata_runtime_build.stdout"
+  async: 14400
+  poll: 30

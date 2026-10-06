@@ -29,11 +29,11 @@
     that:
       - "'SecureBoot disabled' in platform_secure_boot_after_install.stdout"
     fail_msg: Disable Secure Boot in firmware, boot Ubuntu, and rerun the playbook.
-  when: deepseek_platform.secure_boot == 'disabled'
+  when: strix_platform.secure_boot == 'disabled'
 
 - name: Install the tested GRUB command-line drop-in
   ansible.builtin.template:
-    src: 99-deepseek-v4-strix-halo.cfg.j2
+    src: 99-strix-halo.cfg.j2
     # This deliberately adopts the filename used by the qualified incumbent.
     # Keeping one managed drop-in avoids duplicated kernel arguments on upgrade.
     dest: /etc/default/grub.d/99-m5-performance.cfg
@@ -52,33 +52,33 @@
 - name: Calculate missing live kernel arguments
   ansible.builtin.set_fact:
     platform_missing_kernel_arguments: "{{ platform_missing_kernel_arguments + [item] }}"
-  loop: "{{ deepseek_platform.kernel_arguments }}"
+  loop: "{{ strix_platform.kernel_arguments }}"
   when: >-
     item.split('=', 1)[0] not in ansible_facts.cmdline or
     ansible_facts.cmdline[item.split('=', 1)[0]] | string != item.split('=', 1)[1]
 
 - name: Reboot once to activate tested kernel arguments
   ansible.builtin.reboot:
-    msg: Rebooting once to activate the frozen DeepSeek Strix Halo kernel arguments
+    msg: Rebooting once to activate the qualified Strix Halo kernel arguments
     reboot_timeout: 900
   when:
     - platform_missing_kernel_arguments | length > 0
-    - deepseek_allow_reboot | bool
+    - strix_allow_reboot | bool
 
 - name: Refuse to continue when a reboot is required but not authorized
   ansible.builtin.fail:
     msg: >-
       The live kernel is missing {{ platform_missing_kernel_arguments }}. Rerun
-      `bin/deepseekctl install --allow-reboot`; no model or production service was changed.
+      `bin/strixctl install --allow-reboot`; no model or model service was changed.
   when:
     - platform_missing_kernel_arguments | length > 0
-    - not deepseek_allow_reboot | bool
+    - not strix_allow_reboot | bool
 
 - name: Refresh facts after an authorized reboot
   ansible.builtin.setup:
   when:
     - platform_missing_kernel_arguments | length > 0
-    - deepseek_allow_reboot | bool
+    - strix_allow_reboot | bool
 
 - name: Assert all tested kernel arguments are live
   ansible.builtin.assert:
@@ -86,22 +86,22 @@
       - item.split('=', 1)[0] in ansible_facts.cmdline
       - ansible_facts.cmdline[item.split('=', 1)[0]] | string == item.split('=', 1)[1]
     fail_msg: "Kernel argument {{ item }} is not live after the platform stage."
-  loop: "{{ deepseek_platform.kernel_arguments }}"
+  loop: "{{ strix_platform.kernel_arguments }}"
 
-- name: Create the production system group
+- name: Create the model service system group
   ansible.builtin.group:
-    name: "{{ deepseek_service.group }}"
+    name: "{{ strix_service.group }}"
     system: true
 
-- name: Create the production system user
+- name: Create the model service system user
   ansible.builtin.user:
-    name: "{{ deepseek_service.user }}"
-    group: "{{ deepseek_service.group }}"
+    name: "{{ strix_service.user }}"
+    group: "{{ strix_service.group }}"
     groups: video,render
     append: true
     system: true
     create_home: false
-    home: "{{ deepseek_paths.state }}"
+    home: "{{ strix_paths.state }}"
     shell: /usr/sbin/nologin
 
 - name: Create managed base directories
@@ -112,7 +112,7 @@
     group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
-    - {path: "{{ deepseek_paths.root }}", owner: root, group: root, mode: "0755"}
-    - {path: "{{ deepseek_paths.source }}", owner: root, group: root, mode: "0755"}
-    - {path: "{{ deepseek_paths.bin }}", owner: root, group: root, mode: "0755"}
-    - {path: "{{ deepseek_paths.state }}", owner: "{{ deepseek_service.user }}", group: "{{ deepseek_service.group }}", mode: "0750"}
+    - {path: "{{ strix_paths.root }}", owner: root, group: root, mode: "0755"}
+    - {path: "{{ strix_paths.source }}", owner: root, group: root, mode: "0755"}
+    - {path: "{{ strix_paths.bin }}", owner: root, group: root, mode: "0755"}
+    - {path: "{{ strix_paths.state }}", owner: "{{ strix_service.user }}", group: "{{ strix_service.group }}", mode: "0750"}

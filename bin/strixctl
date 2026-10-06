@@ -5,15 +5,16 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 export ANSIBLE_CONFIG="$repo_root/ansible.cfg"
 ansible_playbook=${ANSIBLE_PLAYBOOK:-"$repo_root/.venv/bin/ansible-playbook"}
 ansible_lint=${ANSIBLE_LINT:-"$repo_root/.venv/bin/ansible-lint"}
-inventory=${DEEPSEEK_INVENTORY:-"$repo_root/ansible/inventory/hosts.yml"}
+inventory=${STRIX_INVENTORY:-"$repo_root/ansible/inventory/hosts.yml"}
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
-system=${DEEPSEEK_SYSTEM:-vulkan-iq3xxs}
+system=${STRIX_SYSTEM:-strata-qwen-q4xl}
 case "$system" in
+    strata-qwen-q4xl) default_release="$repo_root/ansible/releases/strata-qwen-q4xl-4x256k.yml" ;;
     vulkan-iq3xxs) default_release="$repo_root/ansible/releases/vulkan-iq3xxs-512k.yml" ;;
     rocm-rocmfpx) default_release="$repo_root/ansible/releases/rocm-rocmfpx-128k.yml" ;;
     *) fail "Unknown system: $system" ;;
 esac
-release=${DEEPSEEK_RELEASE:-$default_release}
+release=${STRIX_RELEASE:-$default_release}
 need_inventory() { [[ -f "$inventory" ]] || fail "Create $inventory from hosts.example.yml"; }
 run_playbook() {
     need_inventory
@@ -37,7 +38,7 @@ case "$command" in
             shift
         fi
         run_playbook "$repo_root/ansible/playbooks/install.yml" \
-            -e "deepseek_allow_reboot=$allow_reboot" "$@"
+            -e "strix_allow_reboot=$allow_reboot" "$@"
         ;;
     verify|status)
         run_playbook "$repo_root/ansible/playbooks/verify.yml" "$@"

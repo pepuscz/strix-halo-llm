@@ -1,0 +1,84 @@
+[Unit]
+Description={{ strix_system.model }} — {{ strix_system.name }} {{ (strix_service.context | int // 1024) }}K
+Wants=network-online.target
+{% if strix_fan.manage | bool %}
+After=network-online.target strix-axb35-max-fan.service
+Requires=strix-axb35-max-fan.service
+{% else %}
+After=network-online.target
+{% endif %}
+{% for conflict in strix_service.conflicts %}Conflicts={{ conflict }}
+{% endfor %}{% if strix_system.engine == 'vulkan' %}
+ConditionPathExists={{ strix_paths.release }}/vulkan/llama-server
+{% elif strix_system.engine == 'strata' %}
+ConditionPathExists={{ strix_paths.release }}/build/strata
+{% else %}
+ConditionPathExists={{ strix_rocm.qualified_build_path }}/dflash_server
+{% endif %}ConditionPathExists={{ strix_paths.models }}/{{ strix_target.files[0].name }}
+{% if strix_system.engine == 'strata' %}ConditionPathExists={{ strix_paths.release }}/mtp/rt/experts.bin
+{% else %}ConditionPathExists={{ strix_paths.models }}/{{ strix_draft.name }}
+{% endif %}
+
+[Service]
+Type=simple
+User={{ strix_service.user }}
+Group={{ strix_service.group }}
+SupplementaryGroups=video render
+{% if strix_system.engine == 'vulkan' %}RuntimeDirectory=strix-halo-inference-slots
+RuntimeDirectoryMode=0755
+{% endif %}
+{% if strix_system.engine == 'vulkan' %}
+WorkingDirectory={{ strix_paths.release }}/vulkan
+{% elif strix_system.engine == 'strata' %}
+WorkingDirectory={{ strix_paths.release }}/source
+{% else %}
+WorkingDirectory={{ strix_rocm.qualified_source_path }}/server
+{% endif %}ExecStartPre=+/usr/local/sbin/strix-host-policy apply
+{% if strix_system.engine == 'vulkan' %}
+ExecStart={{ strix_paths.release }}/vulkan/llama-server \
+  -m {{ strix_paths.models }}/{{ strix_target.files[0].name }} \
+  -md {{ strix_paths.models }}/{{ strix_draft.name }} \
+  -a {{ strix_service.alias }} \
+  -ngl 999 -ngld 999 -fa on \
+  -ctk {{ strix_service.cache_type_k }} -ctv {{ strix_service.cache_type_v }} \
+  -c {{ strix_service.context }} -np {{ strix_service.parallel_slots }} \
+  -b {{ strix_service.batch }} -ub {{ strix_service.microbatch }} \
+  --temp {{ strix_service.sampling.temperature }} --top-p {{ strix_service.sampling.top_p }} \
+  --top-k {{ strix_service.sampling.top_k }} --min-p {{ strix_service.sampling.min_p }} \
+  -fit off --spec-type draft-dspark --spec-draft-n-max {{ strix_service.draft_max }} \
+  --jinja --slots --slot-save-path /run/strix-halo-inference-slots \
+  --host {{ strix_service.host }} --port {{ strix_service.port }}
+{% for key, value in strix_vulkan_environment.items() %}Environment="{{ key }}={{ value }}"
+{% endfor %}Environment="LD_LIBRARY_PATH={{ strix_paths.release }}/loader/usr/lib/x86_64-linux-gnu"
+{% elif strix_system.engine == 'strata' %}
+ExecStart={{ strix_paths.bin }}/run-strata
+{% else %}
+ExecStart={{ strix_rocm.qualified_build_path }}/dflash_server \
+  {{ strix_paths.models }}/{{ strix_target.files[0].name }} \
+  --host {{ strix_service.host }} --port {{ strix_service.port }} \
+  --target-device hip:0 --max-ctx {{ strix_service.context }} \
+  --default-max-tokens {{ strix_service.default_max_tokens }} \
+  --prefix-cache-slots {{ strix_service.prefix_cache_slots }} \
+  --prefill-cache-slots {{ strix_service.prefill_cache_slots }} \
+  --disk-prefix-cache {{ strix_service.disk_prefix_cache }} \
+  --cache-type-k {{ strix_service.cache_type_k }} \
+  --cache-type-v {{ strix_service.cache_type_v }} \
+  --ds4-fused-decode --ds4-fused-verify-f16-kv \
+  --ds4-expert-top-k {{ strix_service.expert_top_k }} \
+  --ds4-prefill {{ strix_service.prefill }} --chunk {{ strix_service.chunk }}
+{% for key, value in strix_rocm_environment.items() %}Environment="{{ key }}={{ value }}"
+{% endfor %}{% endif %}ExecStopPost=+/usr/local/sbin/strix-host-policy restore
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=infinity
+TimeoutStopSec=300
+LimitMEMLOCK=infinity
+LimitNOFILE=1048576
+Nice=-10
+OOMScoreAdjust=500
+MemoryHigh={{ strix_service.memory_high }}
+MemoryMax={{ strix_service.memory_max }}
+MemorySwapMax={{ strix_service.memory_swap_max }}
+
+[Install]
+WantedBy=multi-user.target

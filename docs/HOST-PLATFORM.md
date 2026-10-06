@@ -1,8 +1,12 @@
-# Host platform boundary
+# Host platform
 
-The frozen profile is intentionally strict: Ubuntu 26.04, kernel
-`7.0.0-29-generic`, AMD GPU PCI ID `1002:1586`, AXB35-02 board, at least 125,000,000
-KiB RAM, no swap, Secure Boot disabled, and at least 120 GB free on `/`.
+The recipes require Ubuntu 26.04, AMD GPU PCI ID `1002:1586`, AXB35-02 board, at least 125,000,000 KiB RAM, no swap, and Secure Boot disabled.
+
+| Model | Qualified kernel | Minimum free disk | Effective non-CMA floor |
+|---|---|---:|---:|
+| Qwen / Strata | `7.0.0-31-generic` | 220 GB | 8 GiB |
+| DeepSeek / Vulkan | `7.0.0-29-generic` | 120 GB | 2 GiB |
+| DeepSeek / Lucebox | `7.0.0-29-generic` | 120 GB | 4 GiB |
 
 The qualified machine used BIOS `3.10`. Set these options before installation;
 the labels and values below match the BOSGAME BIOS menus:

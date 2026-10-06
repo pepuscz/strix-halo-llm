@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly SYSFS={{ deepseek_fan.sysfs | quote }}
-readonly EXPECTED_BOARD={{ deepseek_platform.board_name | quote }}
-readonly MIN_MAX_RPM={{ deepseek_fan.minimum_max_rpm }}
+readonly SYSFS={{ strix_fan.sysfs | quote }}
+readonly EXPECTED_BOARD={{ strix_platform.board_name | quote }}
+readonly MIN_MAX_RPM={{ strix_fan.minimum_max_rpm }}
 
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 restore_auto() {
@@ -31,7 +31,7 @@ show_state() {
 
 [ "${EUID}" -eq 0 ] || fail 'Run as root.'
 [ "$(cat /sys/devices/virtual/dmi/id/board_name)" = "$EXPECTED_BOARD" ] || fail 'Unexpected board.'
-case "${1:-status}" in max|auto|status) ;; *) fail 'Usage: deepseek-axb35-fan {max|auto|status}' ;; esac
+case "${1:-status}" in max|auto|status) ;; *) fail 'Usage: strix-axb35-fan {max|auto|status}' ;; esac
 modprobe ec_su_axb35
 for fan in fan1 fan2 fan3; do
     for leaf in mode level rpm; do

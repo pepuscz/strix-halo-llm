@@ -1,103 +1,51 @@
-# DeepSeek V4 Flash on Strix Halo
+# Strix Halo LLM
 
-Reproducible Ansible deployment of two tested DeepSeek V4 Flash 0731
-systems on a 128 GiB AMD Ryzen AI Max+ 395 / Radeon 8060S host.
+Qualified local LLM setups, benchmarks, and pinned Ansible recipes for a **128 GiB AMD Ryzen AI Max+ 395 / Radeon 8060S** Strix Halo box (BOSGAME M5 / Sixunited AXB35-02).
 
-## Systems
+**Default: Qwen3.8-Flash-Next with Strata HIP UD-Q4_K_XL, four 256K slots, and 30/30 quality.** The matched 128K retrieval workload completes in **168.3 seconds versus 329.4 seconds** with llama.cpp Vulkan: **1.96× faster** in the four-slot configuration.
 
-### Default: Strix Halo llama.cpp Vulkan IQ3_XXS
+## Qualified setups
 
-The default uses the pinned
-[`Nathanw1014/strix-halo-llamacpp`](https://github.com/Nathanw1014/strix-halo-llamacpp)
-v0.7.0 portable release without local source patches, an Unsloth UD-IQ3_XXS
-target, a DSpark Q2_K/Q8_0 draft, q8_0 K/V, and one 524,288-token slot. Deploy
-[`vulkan-iq3xxs-512k.yml`](ansible/releases/vulkan-iq3xxs-512k.yml).
-
-### Alternative: Lucebox ROCm ROCmFPX
-
-The leading alternative builds unmodified
-[`Luce-Org/lucebox`](https://github.com/Luce-Org/lucebox) commit `5eb4fbe` from
-[PR 667](https://github.com/Luce-Org/lucebox/pull/667), with a ROCmFPX MIX
-target, a DSpark Q4RMFP4 draft, q4_0 K/V, and one 131,072-token slot. Deploy
-[`rocm-rocmfpx-128k.yml`](ansible/releases/rocm-rocmfpx-128k.yml); the enabled
-runtime paths are listed in [ARCHITECTURE.md](docs/ARCHITECTURE.md#lucebox-runtime).
+| Model | Stack | Qualified context | Quality | Ansible recipe |
+|---|---|---:|---:|---|
+| **Qwen3.8-Flash-Next** | **Strata HIP UD-Q4_K_XL · default** | **4 × 262,144** | **30/30** | [strata-qwen-q4xl-4x256k.yml](ansible/releases/strata-qwen-q4xl-4x256k.yml) |
+| DeepSeek-V4-Flash-0731 | Strix Halo llama.cpp Vulkan IQ3_XXS | 1 × 524,288 | 30/30 | [vulkan-iq3xxs-512k.yml](ansible/releases/vulkan-iq3xxs-512k.yml) |
+| DeepSeek-V4-Flash-0731 | Lucebox ROCm ROCmFPX | 1 × 131,072 | 29/30 | [rocm-rocmfpx-128k.yml](ansible/releases/rocm-rocmfpx-128k.yml) |
 
 ## Benchmarks
 
-The default provides the strongest 122,879-token throughput and a 30/30 quality
-result. The leading alternative provides a smaller ROCmFPX target and a
-different ROCm execution path.
+![Matched Qwen and DeepSeek cold-retrieval input-processing and generation throughput on Strix Halo, including the four-slot Strata measurement](docs/benchmark.svg)
 
-| System | 122,879-token input processing | Generation | Quality |
-|---|---:|---:|---:|
-| **Strix Halo llama.cpp Vulkan IQ3_XXS** | 226.82 tok/s | 35.73 tok/s | 30/30 |
-| **Lucebox ROCm ROCmFPX** | 142.82 tok/s | 29.60 tok/s | 29/30 |
-
-Every published retrieval point recovered all five keys byte-for-byte. The
-quality difference is one MATH-style answer mismatch (`998` instead of `997`).
-
-![Cold-retrieval input-processing and generation throughput for Strix Halo llama.cpp Vulkan IQ3_XXS and Lucebox ROCm ROCmFPX on a linear prompt-length axis through 256K, with the 491,520-token Vulkan measurement isolated after an explicit axis break](docs/benchmark.svg)
-
-See [BENCHMARKS.md](docs/BENCHMARKS.md) for the complete results, protocols,
-and reproducibility data.
+All retrieval points recover five of five values exactly. The chart includes the matched Qwen Vulkan baseline, the Strata context curve, and the four-slot result. [BENCHMARKS.md](docs/BENCHMARKS.md) contains every measurement, quality budgets, and the protocol; [results.json](benchmarks/results.json) contains the pinned identities and aggregates.
 
 ## Install
 
-Prepare the controller once:
-
 ```bash
-git clone https://github.com/pepuscz/strix-halo-deepseek-v4-flash.git
-cd strix-halo-deepseek-v4-flash
+git clone https://github.com/pepuscz/strix-halo-llm.git
+cd strix-halo-llm
 cp ansible/inventory/hosts.example.yml ansible/inventory/hosts.yml
 $EDITOR ansible/inventory/hosts.yml
-
 python3 -m venv .venv
 .venv/bin/pip install --require-hashes -r requirements.lock
+
+# Qwen / Strata is the default.
+bin/strixctl validate
+bin/strixctl install --allow-reboot
+bin/strixctl verify
 ```
 
-Select one system:
+For DeepSeek, set `STRIX_SYSTEM=vulkan-iq3xxs` or `STRIX_SYSTEM=rocm-rocmfpx` before running the same commands. Keep that selection for subsequent service controls.
 
-```bash
-export DEEPSEEK_SYSTEM=vulkan-iq3xxs  # default
-# or: export DEEPSEEK_SYSTEM=rocm-rocmfpx  # alternative
-```
+The installer verifies the hardware and kernel, downloads publisher artifacts with pinned hashes, prepares the runtime and model, and installs boot-enabled `strix-halo-inference.service`. The API listens on `127.0.0.1:18109`. Strata exposes OpenAI chat completions and responses, plus Anthropic messages.
 
-Run the same commands for either system:
+## Host requirements
 
-```bash
-bin/deepseekctl validate
-bin/deepseekctl install --allow-reboot
-bin/deepseekctl verify
-```
+Ubuntu 26.04 LTS, 128 GiB RAM, swap and Secure Boot disabled, and the BIOS/large-GTT settings in [HOST-PLATFORM.md](docs/HOST-PLATFORM.md). Qwen uses kernel `7.0.0-31-generic` and requires 220 GB free on `/`; DeepSeek uses `7.0.0-29-generic` and requires 120 GB free.
 
-## Host and service
+Every recipe applies 120 W package limits and model-scoped cooling. Qwen uses CPU boost off, GPU DPM auto, and systemd memory limits of 123G/125G. Its four-slot qualification retained **14.23 GiB effective non-CMA headroom**, recovered all four long prompts, and passed all four continued conversations.
 
-Both systems require:
-
-- BOSGAME M5 / Sixunited AXB35-02 with AMD Ryzen AI Max+ 395 and 128 GiB RAM;
-- Ubuntu 26.04 LTS with kernel `7.0.0-29-generic`;
-- swap and Secure Boot disabled, plus at least 120 GB free on `/`;
-- the documented BIOS settings and large-GTT kernel parameters;
-- 120/120/120 W package limits, `MemoryHigh=118G`, `MemoryMax=120G`, and
-  fail-safe model-scoped cooling.
-
-The default uses CPU boost off and GPU DPM auto; the alternative uses CPU
-boost on and GPU DPM high. The default fan governor selects maximum cooling
-while the GPU is active and firmware-auto after five idle minutes, with maximum
-cooling as its failure state. Both systems install the boot-enabled
-`deepseek-v4-flash.service`, bind the API to `127.0.0.1:18109`, and restore the
-previous hardware policy and automatic fan control when stopped.
-
-The default API uses the qualified DeepSeek agentic profile (`temperature=1`,
-`top_p=0.95`, `top_k=0`, `min_p=0`). Clients remain free to override it per
-request.
-
-Read [HOST-PLATFORM.md](docs/HOST-PLATFORM.md) before authorizing the required
-reboot. Operational procedures are in [OPERATIONS.md](docs/OPERATIONS.md), and
-component provenance is in [SOURCES.md](docs/SOURCES.md).
+[OPERATIONS.md](docs/OPERATIONS.md) covers service controls and updates. [ARCHITECTURE.md](docs/ARCHITECTURE.md) describes the runtime settings and current limits. [SOURCES.md](docs/SOURCES.md) records upstream provenance.
 
 ## License
 
-The orchestration, scripts, and documentation are MIT licensed. Models,
-runtimes, libraries, drivers, and build dependencies retain their upstream
-licenses and terms. See [NOTICE.md](NOTICE.md).
+The orchestration, scripts, and documentation are MIT licensed. Models, runtimes, libraries, drivers, and build dependencies retain their upstream licenses and terms. See [NOTICE.md](NOTICE.md).

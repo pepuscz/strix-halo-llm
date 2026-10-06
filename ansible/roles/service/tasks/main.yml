@@ -1,26 +1,59 @@
 ---
-- name: Install reversible host policy controller
+- name: Install the qualified Strata serving configuration
   ansible.builtin.template:
-    src: deepseek-host-policy.j2
-    dest: /usr/local/sbin/deepseek-host-policy
+    src: strata-server.json.j2
+    dest: "{{ strix_paths.release }}/server.json"
+    owner: root
+    group: "{{ strix_service.group }}"
+    mode: "0444"
+  when: strix_system.engine == 'strata'
+  register: service_strata_config
+  notify: Restart selected model service
+
+- name: Seal the installed Strata serving configuration
+  ansible.builtin.shell: |
+    set -o pipefail
+    sha256sum server.json > server.sha256
+  args:
+    chdir: "{{ strix_paths.release }}"
+    executable: /bin/bash
+  when:
+    - strix_system.engine == 'strata'
+    - service_strata_config.changed
+  changed_when: true
+
+- name: Install the Strata runtime entry point
+  ansible.builtin.template:
+    src: run-strata.j2
+    dest: "{{ strix_paths.bin }}/run-strata"
     owner: root
     group: root
     mode: "0755"
-  notify: Restart selected production
+  when: strix_system.engine == 'strata'
+  notify: Restart selected model service
 
-- name: Install selected production service
+- name: Install reversible host policy controller
   ansible.builtin.template:
-    src: deepseek-v4-flash.service.j2
-    dest: "/etc/systemd/system/{{ deepseek_service.name }}"
+    src: strix-host-policy.j2
+    dest: /usr/local/sbin/strix-host-policy
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart selected model service
+
+- name: Install selected model service service
+  ansible.builtin.template:
+    src: strix-halo-inference.service.j2
+    dest: "/etc/systemd/system/{{ strix_service.name }}"
     owner: root
     group: root
     mode: "0644"
-  notify: Restart selected production
+  notify: Restart selected model service
 
-- name: Record Ansible-owned production release
+- name: Record Ansible-owned qualified release
   ansible.builtin.template:
     src: release.yml.j2
-    dest: /etc/deepseek-v4-flash-release.yml
+    dest: /etc/strix-halo-inference-release.yml
     owner: root
     group: root
     mode: "0644"
@@ -30,25 +63,25 @@
     name: "{{ item }}"
     state: stopped
     enabled: false
-  loop: "{{ deepseek_service.retire_units }}"
+  loop: "{{ strix_service.retire_units }}"
   failed_when: false
 
 - name: Reload unit files before service activation
   ansible.builtin.systemd_service:
     daemon_reload: true
 
-- name: Apply pending production changes
+- name: Apply pending model service changes
   ansible.builtin.meta: flush_handlers
 
-- name: Enable and start selected production
+- name: Enable and start selected model service
   ansible.builtin.systemd_service:
-    name: "{{ deepseek_service.name }}"
-    enabled: "{{ deepseek_service.auto_start }}"
+    name: "{{ strix_service.name }}"
+    enabled: "{{ strix_service.auto_start }}"
     state: started
 
 - name: Enable and start demand-based fan governor
   ansible.builtin.systemd_service:
-    name: deepseek-fan-governor.service
+    name: strix-fan-governor.service
     enabled: true
     state: >-
       {{ 'restarted'
@@ -56,5 +89,5 @@
              fan_governor_unit.changed | default(false))
          else 'started' }}
   when:
-    - deepseek_fan.manage | bool
-    - deepseek_fan.governor.enabled | default(false) | bool
+    - strix_fan.manage | bool
+    - strix_fan.governor.enabled | default(false) | bool

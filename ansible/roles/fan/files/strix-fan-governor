@@ -173,7 +173,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--lock-file",
         type=Path,
-        default=Path("/run/lock/deepseek-fan-governor.lock"),
+        default=Path("/run/lock/strix-fan-governor.lock"),
     )
     return parser.parse_args()
 

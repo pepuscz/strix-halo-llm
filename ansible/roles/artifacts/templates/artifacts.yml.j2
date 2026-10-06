@@ -1,31 +1,33 @@
-release_id: {{ deepseek_release_id }}
-system: {{ deepseek_system.name }}
-engine: {{ deepseek_system.engine }}
+release_id: {{ strix_release_id }}
+system: {{ strix_system.name }}
+engine: {{ strix_system.engine }}
 runtime:
-  repository: {{ deepseek_runtime.repository }}
-  source_commit: {{ deepseek_runtime.source_commit }}
-{% if deepseek_system.engine == 'vulkan' %}
-  release_tag: {{ deepseek_runtime.release_tag }}
-  archive_sha256: {{ deepseek_runtime.archive_sha256 }}
-  vulkan_backend_sha256: {{ deepseek_runtime.vulkan_backend_sha256 }}
-  launcher_sha256: {{ deepseek_runtime.launcher_sha256 }}
-{% else %}
-  source_diff_sha256: {{ deepseek_runtime.source_diff_sha256 }}
+  repository: {{ strix_runtime.repository }}
+  source_commit: {{ strix_runtime.source_commit }}
+{% if strix_system.engine == 'vulkan' %}
+  release_tag: {{ strix_runtime.release_tag }}
+  archive_sha256: {{ strix_runtime.archive_sha256 }}
+  vulkan_backend_sha256: {{ strix_runtime.vulkan_backend_sha256 }}
+  launcher_sha256: {{ strix_runtime.launcher_sha256 }}
+{% elif strix_system.engine == 'rocm' %}
+  source_diff_sha256: {{ strix_runtime.source_diff_sha256 }}
 {% endif %}
-  server_sha256: {{ deepseek_runtime.server_sha256 }}
+  server_sha256: {{ strix_runtime.server_sha256 }}
 target:
-  repository: {{ deepseek_target.repository }}
-  revision: {{ deepseek_target.revision }}
-  quantization: {{ deepseek_target.quantization }}
+  repository: {{ strix_target.repository }}
+  revision: {{ strix_target.revision }}
+  quantization: {{ strix_target.quantization }}
   files:
-{% for file in deepseek_target.files %}
+{% for file in strix_target.files %}
     - name: {{ file.name }}
       size: {{ file.size }}
       sha256: {{ file.sha256 }}
 {% endfor %}
 draft:
-  repository: {{ deepseek_draft.repository }}
-  revision: {{ deepseek_draft.revision }}
-  name: {{ deepseek_draft.name }}
-  size: {{ deepseek_draft.size }}
-  sha256: {{ deepseek_draft.sha256 }}
+  repository: {{ strix_draft.repository }}
+  revision: {{ strix_draft.revision }}
+{% if strix_system.engine == 'strata' %}  tensor_manifest_sha256: {{ strix_draft.tensor_manifest_sha256 }}
+{% else %}  name: {{ strix_draft.name }}
+  size: {{ strix_draft.size }}
+  sha256: {{ strix_draft.sha256 }}
+{% endif %}

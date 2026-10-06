@@ -1,8 +1,8 @@
 ---
 - name: Define pinned RyzenAdj paths
   ansible.builtin.set_fact:
-    ryzenadj_source: "{{ deepseek_paths.source }}/RyzenAdj-{{ deepseek_ryzenadj.commit }}"
-    ryzenadj_binary: "{{ deepseek_paths.bin }}/ryzenadj-{{ deepseek_ryzenadj.version }}"
+    ryzenadj_source: "{{ strix_paths.source }}/RyzenAdj-{{ strix_ryzenadj.commit }}"
+    ryzenadj_binary: "{{ strix_paths.bin }}/ryzenadj-{{ strix_ryzenadj.version }}"
 
 - name: Inspect existing pinned RyzenAdj binary
   ansible.builtin.stat:
@@ -13,14 +13,14 @@
 
 - name: Fetch exact RyzenAdj source commit
   ansible.builtin.git:
-    repo: "{{ deepseek_ryzenadj.repository }}"
+    repo: "{{ strix_ryzenadj.repository }}"
     dest: "{{ ryzenadj_source }}"
-    version: "{{ deepseek_ryzenadj.commit }}"
+    version: "{{ strix_ryzenadj.commit }}"
     single_branch: true
     force: false
   when: >-
     not ryzenadj_existing.stat.exists or
-    ryzenadj_existing.stat.checksum != deepseek_ryzenadj.tested_binary_sha256
+    ryzenadj_existing.stat.checksum != strix_ryzenadj.tested_binary_sha256
 
 - name: Configure the pinned RyzenAdj build
   ansible.builtin.command:
@@ -34,7 +34,7 @@
   changed_when: true
   when: >-
     not ryzenadj_existing.stat.exists or
-    ryzenadj_existing.stat.checksum != deepseek_ryzenadj.tested_binary_sha256
+    ryzenadj_existing.stat.checksum != strix_ryzenadj.tested_binary_sha256
 
 - name: Build the pinned RyzenAdj executable
   ansible.builtin.command:
@@ -48,7 +48,7 @@
   changed_when: true
   when: >-
     not ryzenadj_existing.stat.exists or
-    ryzenadj_existing.stat.checksum != deepseek_ryzenadj.tested_binary_sha256
+    ryzenadj_existing.stat.checksum != strix_ryzenadj.tested_binary_sha256
 
 - name: Install the pinned RyzenAdj executable
   ansible.builtin.copy:
@@ -60,7 +60,7 @@
     mode: "0755"
   when: >-
     not ryzenadj_existing.stat.exists or
-    ryzenadj_existing.stat.checksum != deepseek_ryzenadj.tested_binary_sha256
+    ryzenadj_existing.stat.checksum != strix_ryzenadj.tested_binary_sha256
 
 - name: Verify installed RyzenAdj identity
   ansible.builtin.stat:
@@ -73,7 +73,7 @@
   ansible.builtin.assert:
     that:
       - ryzenadj_installed.stat.exists
-      - not deepseek_ryzenadj.enforce_tested_binary_sha256 | bool or ryzenadj_installed.stat.checksum == deepseek_ryzenadj.tested_binary_sha256
+      - not strix_ryzenadj.enforce_tested_binary_sha256 | bool or ryzenadj_installed.stat.checksum == strix_ryzenadj.tested_binary_sha256
     fail_msg: >-
       The local toolchain did not reproduce the tested RyzenAdj binary. Refusing
       to apply an unqualified power-control executable.
@@ -86,12 +86,12 @@
 
 - name: Record RyzenAdj provenance
   ansible.builtin.copy:
-    dest: /etc/deepseek-ryzenadj-release
+    dest: /etc/strix-ryzenadj-release
     owner: root
     group: root
     mode: "0644"
     content: |
-      repository={{ deepseek_ryzenadj.repository }}
-      commit={{ deepseek_ryzenadj.commit }}
+      repository={{ strix_ryzenadj.repository }}
+      commit={{ strix_ryzenadj.commit }}
       kernel={{ ansible_facts.kernel }}
       binary_sha256={{ ryzenadj_installed.stat.checksum }}

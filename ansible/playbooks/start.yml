@@ -1,14 +1,14 @@
 ---
-- name: Start and verify DeepSeek V4 Flash
-  hosts: deepseek_hosts
+- name: Start and verify Strix Halo inference
+  hosts: strix_hosts
   become: true
   gather_facts: true
   tasks:
-    - name: Start production
+    - name: Start model service
       ansible.builtin.systemd_service:
-        name: "{{ deepseek_service.name }}"
+        name: "{{ strix_service.name }}"
         state: started
-        enabled: "{{ deepseek_service.auto_start }}"
-    - name: Verify production
+        enabled: "{{ strix_service.auto_start }}"
+    - name: Verify model service
       ansible.builtin.include_role:
         name: verify

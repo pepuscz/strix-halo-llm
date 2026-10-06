@@ -1,6 +1,6 @@
 ---
-- name: Install the pinned DeepSeek V4 Flash production release
-  hosts: deepseek_hosts
+- name: Install the selected Strix Halo inference release
+  hosts: strix_hosts
   become: true
   gather_facts: true
   serial: 1
@@ -10,7 +10,9 @@
     - ryzenadj
     - fan
     - role: rocm_runtime
-      when: deepseek_system.engine == 'rocm'
+      when: strix_system.engine == 'rocm'
     - artifacts
+    - role: strata_runtime
+      when: strix_system.engine == 'strata'
     - service
     - verify

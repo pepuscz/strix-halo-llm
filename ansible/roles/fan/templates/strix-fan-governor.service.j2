@@ -1,0 +1,39 @@
+[Unit]
+Description=Demand-based cooling for the Strix Halo inference workload
+Requisite={{ strix_service.name }} strix-axb35-max-fan.service
+After={{ strix_service.name }} strix-axb35-max-fan.service
+PartOf={{ strix_service.name }}
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/sbin/strix-fan-governor --mode control --interval-seconds {{ strix_fan.governor.interval_seconds }} --idle-seconds {{ strix_fan.governor.idle_seconds }} --busy-threshold {{ strix_fan.governor.busy_threshold_pct }} --lock-file /run/lock/strix-fan-governor.lock
+ExecStopPost=/usr/local/sbin/strix-fan-governor --set-state max
+Restart=on-failure
+RestartSec=1
+TimeoutStopSec=60
+Nice=19
+CPUWeight=1
+CPUQuota=1%
+IOSchedulingClass=idle
+OOMScoreAdjust=500
+MemoryMax=64M
+TasksMax=16
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/lock {{ strix_fan.sysfs }}
+ProtectClock=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictRealtime=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy={{ strix_service.name }}

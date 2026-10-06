@@ -1,47 +1,47 @@
 ---
-- name: Stop DeepSeek V4 Flash and verify idle cooling
-  hosts: deepseek_hosts
+- name: Stop Strix Halo inference and verify idle cooling
+  hosts: strix_hosts
   become: true
   gather_facts: false
   tasks:
-    - name: Stop production
+    - name: Stop model service
       ansible.builtin.systemd_service:
-        name: "{{ deepseek_service.name }}"
+        name: "{{ strix_service.name }}"
         state: stopped
     - name: Wait for demand-based governor to stop
       ansible.builtin.command:
-        argv: [systemctl, is-active, deepseek-fan-governor.service]
-      register: deepseek_fan_governor_idle
-      until: deepseek_fan_governor_idle.stdout | trim in ['inactive', 'failed', 'unknown']
+        argv: [systemctl, is-active, strix-fan-governor.service]
+      register: strix_fan_governor_idle
+      until: strix_fan_governor_idle.stdout | trim in ['inactive', 'failed', 'unknown']
       retries: 10
       delay: 2
       changed_when: false
       failed_when: false
       when:
-        - deepseek_fan.manage | bool
-        - deepseek_fan.governor.enabled | default(false) | bool
+        - strix_fan.manage | bool
+        - strix_fan.governor.enabled | default(false) | bool
     - name: Wait for fan dependency to stop
       ansible.builtin.command:
-        argv: [systemctl, is-active, deepseek-axb35-max-fan.service]
-      register: deepseek_fan_idle
-      until: deepseek_fan_idle.stdout | trim in ['inactive', 'failed', 'unknown']
+        argv: [systemctl, is-active, strix-axb35-max-fan.service]
+      register: strix_fan_idle
+      until: strix_fan_idle.stdout | trim in ['inactive', 'failed', 'unknown']
       retries: 10
       delay: 2
       changed_when: false
       failed_when: false
-      when: deepseek_fan.manage | bool
+      when: strix_fan.manage | bool
     - name: Read fan state
       ansible.builtin.command:
-        argv: [/usr/local/sbin/deepseek-axb35-fan, status]
-      register: deepseek_idle_fans
+        argv: [/usr/local/sbin/strix-axb35-fan, status]
+      register: strix_idle_fans
       changed_when: false
-      when: deepseek_fan.manage | bool
+      when: strix_fan.manage | bool
     - name: Assert all fans returned to firmware-auto
       ansible.builtin.assert:
         that:
-          - deepseek_idle_fans.stdout.count('mode=auto') == 3
+          - strix_idle_fans.stdout.count('mode=auto') == 3
         fail_msg: Fan dependency stopped without returning all fans to firmware-auto.
-      when: deepseek_fan.manage | bool
+      when: strix_fan.manage | bool
     - name: Report stopped state
       ansible.builtin.debug:
-        msg: "{{ deepseek_idle_fans.stdout_lines | default(['production stopped; external fan backend']) }}"
+        msg: "{{ strix_idle_fans.stdout_lines | default(['model service stopped; external fan backend']) }}"

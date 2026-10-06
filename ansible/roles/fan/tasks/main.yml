@@ -1,24 +1,24 @@
 ---
 - name: Install the optional BOSGAME AXB35 cooling backend
-  when: deepseek_fan.manage | bool
+  when: strix_fan.manage | bool
   block:
     - name: Define pinned fan-driver paths
       ansible.builtin.set_fact:
-        fan_source: "{{ deepseek_paths.source }}/ec-su_axb35-linux-{{ deepseek_fan.commit }}"
-        fan_dkms_source: "/usr/src/ec-su-axb35-{{ deepseek_fan.dkms_version }}"
+        fan_source: "{{ strix_paths.source }}/ec-su_axb35-linux-{{ strix_fan.commit }}"
+        fan_dkms_source: "/usr/src/ec-su-axb35-{{ strix_fan.dkms_version }}"
 
     - name: Check installed fan driver for the running kernel
       ansible.builtin.command:
-        argv: [dkms, status, -m, ec-su-axb35, -v, "{{ deepseek_fan.dkms_version }}", -k, "{{ ansible_facts.kernel }}"]
+        argv: [dkms, status, -m, ec-su-axb35, -v, "{{ strix_fan.dkms_version }}", -k, "{{ ansible_facts.kernel }}"]
       register: fan_dkms_status
       changed_when: false
       failed_when: false
 
     - name: Fetch exact AXB35 driver source commit
       ansible.builtin.git:
-        repo: "{{ deepseek_fan.repository }}"
+        repo: "{{ strix_fan.repository }}"
         dest: "{{ fan_source }}"
-        version: "{{ deepseek_fan.commit }}"
+        version: "{{ strix_fan.commit }}"
         single_branch: true
         force: false
       when: "'installed' not in fan_dkms_status.stdout"
@@ -44,13 +44,13 @@
 
     - name: Register fan driver with DKMS
       ansible.builtin.command:
-        argv: [dkms, add, -m, ec-su-axb35, -v, "{{ deepseek_fan.dkms_version }}"]
+        argv: [dkms, add, -m, ec-su-axb35, -v, "{{ strix_fan.dkms_version }}"]
       changed_when: true
       when: fan_dkms_status.rc != 0 or fan_dkms_status.stdout | trim == ''
 
     - name: Build fan driver for the qualified kernel
       ansible.builtin.command:
-        argv: [dkms, build, -m, ec-su-axb35, -v, "{{ deepseek_fan.dkms_version }}", -k, "{{ ansible_facts.kernel }}"]
+        argv: [dkms, build, -m, ec-su-axb35, -v, "{{ strix_fan.dkms_version }}", -k, "{{ ansible_facts.kernel }}"]
       changed_when: true
       when:
         - "'installed' not in fan_dkms_status.stdout"
@@ -58,7 +58,7 @@
 
     - name: Install fan driver for the qualified kernel
       ansible.builtin.command:
-        argv: [dkms, install, -m, ec-su-axb35, -v, "{{ deepseek_fan.dkms_version }}", -k, "{{ ansible_facts.kernel }}"]
+        argv: [dkms, install, -m, ec-su-axb35, -v, "{{ strix_fan.dkms_version }}", -k, "{{ ansible_facts.kernel }}"]
       changed_when: true
       when: "'installed' not in fan_dkms_status.stdout"
 
@@ -69,16 +69,16 @@
 
     - name: Install guarded fan controller
       ansible.builtin.template:
-        src: deepseek-axb35-fan.j2
-        dest: /usr/local/sbin/deepseek-axb35-fan
+        src: strix-axb35-fan.j2
+        dest: /usr/local/sbin/strix-axb35-fan
         owner: root
         group: root
         mode: "0755"
 
     - name: Install model-scoped maximum-fan service
       ansible.builtin.template:
-        src: deepseek-axb35-max-fan.service.j2
-        dest: /etc/systemd/system/deepseek-axb35-max-fan.service
+        src: strix-axb35-max-fan.service.j2
+        dest: /etc/systemd/system/strix-axb35-max-fan.service
         owner: root
         group: root
         mode: "0644"
@@ -86,41 +86,41 @@
 
     - name: Install demand-based fan governor
       ansible.builtin.copy:
-        src: deepseek-fan-governor
-        dest: /usr/local/sbin/deepseek-fan-governor
+        src: strix-fan-governor
+        dest: /usr/local/sbin/strix-fan-governor
         owner: root
         group: root
         mode: "0755"
       register: fan_governor_program
-      when: deepseek_fan.governor.enabled | default(false) | bool
+      when: strix_fan.governor.enabled | default(false) | bool
 
     - name: Install model-scoped demand-based fan governor service
       ansible.builtin.template:
-        src: deepseek-fan-governor.service.j2
-        dest: /etc/systemd/system/deepseek-fan-governor.service
+        src: strix-fan-governor.service.j2
+        dest: /etc/systemd/system/strix-fan-governor.service
         owner: root
         group: root
         mode: "0644"
       register: fan_governor_unit
-      when: deepseek_fan.governor.enabled | default(false) | bool
+      when: strix_fan.governor.enabled | default(false) | bool
       notify: Reload systemd
 
     - name: Verify the driver exported every expected interface
       ansible.builtin.command:
-        argv: [/usr/local/sbin/deepseek-axb35-fan, status]
+        argv: [/usr/local/sbin/strix-axb35-fan, status]
       register: fan_initial_state
       changed_when: false
 
     - name: Record fan-driver provenance
       ansible.builtin.copy:
-        dest: /etc/deepseek-axb35-driver-release
+        dest: /etc/strix-axb35-driver-release
         owner: root
         group: root
         mode: "0644"
         content: |
-          repository={{ deepseek_fan.repository }}
-          commit={{ deepseek_fan.commit }}
-          dkms_version={{ deepseek_fan.dkms_version }}
+          repository={{ strix_fan.repository }}
+          commit={{ strix_fan.commit }}
+          dkms_version={{ strix_fan.dkms_version }}
           kernel={{ ansible_facts.kernel }}
 
     - name: Apply fan-systemd changes

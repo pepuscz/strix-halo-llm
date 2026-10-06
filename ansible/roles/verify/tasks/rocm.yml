@@ -2,20 +2,20 @@
 - name: Assert ROCm API identity and allocation
   ansible.builtin.assert:
     that:
-      - verify_props.json.default_generation_settings.n_ctx | int == deepseek_service.context | int
-      - verify_props.json.model_alias == deepseek_service.alias
-      - verify_props.json.build_info == deepseek_runtime.build_info
+      - verify_props.json.default_generation_settings.n_ctx | int == strix_service.context | int
+      - verify_props.json.model_alias == strix_service.alias
+      - verify_props.json.build_info == strix_runtime.build_info
       - verify_props.json.runtime.backend == 'hip'
-      - verify_props.json.runtime.kv_cache_k == deepseek_service.cache_type_k
-      - verify_props.json.runtime.kv_cache_v == deepseek_service.cache_type_v
-      - verify_props.json.prefix_cache.capacity | int == deepseek_service.prefix_cache_slots | int
+      - verify_props.json.runtime.kv_cache_k == strix_service.cache_type_k
+      - verify_props.json.runtime.kv_cache_v == strix_service.cache_type_v
+      - verify_props.json.prefix_cache.capacity | int == strix_service.prefix_cache_slots | int
       - verify_props.json.capabilities.reasoning_supported | bool
       - "'max' in verify_props.json.reasoning.supported_efforts"
     fail_msg: The live API does not match Lucebox ROCm ROCmFPX.
 
 - name: Read ROCm server identity
   ansible.builtin.stat:
-    path: "{{ deepseek_rocm.qualified_build_path }}/dflash_server"
+    path: "{{ strix_rocm.qualified_build_path }}/dflash_server"
     checksum_algorithm: sha256
     get_checksum: true
   register: verify_rocm_server
@@ -24,5 +24,5 @@
   ansible.builtin.assert:
     that:
       - verify_rocm_server.stat.exists
-      - verify_rocm_server.stat.size | int == deepseek_runtime.server_size | int
-      - verify_rocm_server.stat.checksum == deepseek_runtime.server_sha256
+      - verify_rocm_server.stat.size | int == strix_runtime.server_size | int
+      - verify_rocm_server.stat.checksum == strix_runtime.server_sha256

@@ -1,19 +1,18 @@
 ---
-deepseek_release_id: vulkan-iq3xxs-512k-v3
-deepseek_release_schema: 1
-
-deepseek_system:
+strix_release_id: vulkan-iq3xxs-512k-v4
+strix_release_schema: 1
+strix_system:
   id: vulkan-iq3xxs
   name: Strix Halo llama.cpp Vulkan IQ3_XXS
   engine: vulkan
-  selected_default: true
-
-deepseek_platform:
+  selected_default: false
+  model: DeepSeek-V4-Flash-0731
+strix_platform:
   os_id: ubuntu
-  os_version: "26.04"
+  os_version: '26.04'
   kernel: 7.0.0-29-generic
   architecture: x86_64
-  gpu_pci_id: "1002:1586"
+  gpu_pci_id: 1002:1586
   board_name: AXB35-02
   minimum_memory_kib: 125000000
   strict_kernel: true
@@ -24,17 +23,16 @@ deepseek_platform:
     - amdgpu.gttsize=126976
     - ttm.pages_limit=32505856
     - ttm.page_pool_size=32505856
-
-deepseek_paths:
+  minimum_free_bytes: 120000000000
+strix_paths:
   root: /opt/m5
   source: /opt/m5/src
   bin: /opt/m5/bin
-  downloads: /opt/m5/downloads/vulkan-iq3xxs-512k-v3
-  release: /opt/m5/releases/vulkan-iq3xxs-512k-v3
+  downloads: /opt/m5/downloads/vulkan-iq3xxs-512k-v4
+  release: /opt/m5/releases/vulkan-iq3xxs-512k-v4
   models: /opt/m5/models/vulkan-iq3xxs-512k-v2
-  state: /var/lib/deepseek-v4-flash
-
-deepseek_runtime:
+  state: /var/lib/strix-halo-inference
+strix_runtime:
   repository: https://github.com/Nathanw1014/strix-halo-llamacpp
   release_tag: v0.7.0
   source_commit: 95c828eeb315a7ba6f50fcf632c29f8de2ec1a6e
@@ -50,8 +48,7 @@ deepseek_runtime:
   server_sha256: ad03c1f52a9d2edb33dd372bf56d9643d11d3487c0885716f45ca6467967ea44
   build_info: b10608-95c828ee
   vulkan_backend_sha256: 859bbffa0caa9a3e9909ba4ca440bec8a66d8a8d4f42f50a730106f8086a4103
-
-deepseek_target:
+strix_target:
   repository: unsloth/DeepSeek-V4-Flash-0731-GGUF
   revision: fbbb5b93fb787c21338159b0af3318bb3f4d9768
   quantization: UD-IQ3_XXS
@@ -70,23 +67,20 @@ deepseek_target:
     - name: DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00004-of-00004.gguf
       size: 5034198464
       sha256: 4ca79d8e5107dd1b9bb57b176a7c09948837425dee49f0f1dfd6547a3769fea7
-
-deepseek_draft:
+strix_draft:
   repository: alessandrobologna/DeepSeek-V4-Flash-DSpark-Drafter-GGUF
   revision: 824190cb58c1469a603d9686107dd85ef11a5d51
-  subdirectory: ""
+  subdirectory: ''
   name: DeepSeek-V4-Flash-DSpark-Drafter-Q2_K-Q8_0-dflash.gguf
   size: 6976490112
   sha256: 96f442f7972a6d3e9b05912f511479f4c2f1334870128cc3bb317f8d812faf58
-
-deepseek_ryzenadj:
+strix_ryzenadj:
   repository: https://github.com/FlyGoat/RyzenAdj.git
   commit: 5775fc3e6dbb25c7030ee2d100a1bdd6e8bf2d0a
   version: 5775fc3
   tested_binary_sha256: 2755abdb70fbe9a20245590fcf6af6e3d424d924cc54f30d172d5b6af5bbb1e2
   enforce_tested_binary_sha256: true
-
-deepseek_fan:
+strix_fan:
   manage: true
   repository: https://github.com/cmetz/ec-su_axb35-linux.git
   commit: 7a9f372edcaa99e562dece70204c4f609692a778
@@ -95,19 +89,18 @@ deepseek_fan:
   minimum_max_rpm: 2000
   governor:
     enabled: true
-    implementation_sha256: 609198a59fe3a73d25447be1db2d315bc457836112ffcceff1fe95d63247f388
+    implementation_sha256: 3747bd714c1614c937bc10b0b8694a59f5e44674e7f73283781b1ca4e36ae4ef
     interval_seconds: 1
     idle_seconds: 300
     busy_threshold_pct: 5
     fail_safe_state: max
-
-deepseek_service:
-  name: deepseek-v4-flash.service
-  user: deepseek
-  group: deepseek
+strix_service:
+  name: strix-halo-inference.service
+  user: inference
+  group: inference
   host: 127.0.0.1
   port: 18109
-  alias: deepseek-v4-flash-0731
+  alias: strix-halo-inference-0731
   context: 524288
   parallel_slots: 1
   batch: 2048
@@ -130,14 +123,15 @@ deepseek_service:
   auto_start: true
   conflicts:
     - m5-deepseek.service
+    - deepseek-v4-flash.service
   retire_units:
     - m5-deepseek.service
     - m5-deepseek-smoke.service
     - m5-ds4-imatrix-download.service
     - m5-model-download.service
     - m5-performance.service
-
-deepseek_policy:
+    - deepseek-v4-flash.service
+strix_policy:
   cpu_governor: performance
   cpu_min_khz: 2000000
   cpu_boost: 0
@@ -145,18 +139,16 @@ deepseek_policy:
   stapm_mw: 120000
   fast_mw: 120000
   slow_mw: 120000
-  expected_watts: "120.000"
-
-deepseek_vulkan_environment:
-  GGML_VK_MMID_ROWLISTS: "1"
-  GGML_VK_MMID_SMALLN: "1"
-  GGML_VK_MMID_BM64: "1"
-  GGML_VK_MMID_WAVE32: "1"
-  GGML_VK_MMID_F16B: "1"
-  GGML_VK_MMID_M128: "1"
-  GGML_VK_FA_WAVE32: "1"
-
-deepseek_vulkan_loader:
+  expected_watts: '120.000'
+strix_vulkan_environment:
+  GGML_VK_MMID_ROWLISTS: '1'
+  GGML_VK_MMID_SMALLN: '1'
+  GGML_VK_MMID_BM64: '1'
+  GGML_VK_MMID_WAVE32: '1'
+  GGML_VK_MMID_F16B: '1'
+  GGML_VK_MMID_M128: '1'
+  GGML_VK_FA_WAVE32: '1'
+strix_vulkan_loader:
   package: libvulkan1
   version: 1.4.341.0-1
   architecture: amd64
@@ -164,7 +156,6 @@ deepseek_vulkan_loader:
   size: 157194
   sha256: b4aca7a519d6318347f15a0e485c636603005e2553dae1a986272ac8c96176b0
   library_sha256: def4af45e9e5784cf65eaaaa289530a5c73546b01015da4c0920ef0a144fe189
-
-deepseek_allow_reboot: false
-deepseek_verify_full_model_hashes: false
-deepseek_verify_api_smoke: true
+strix_allow_reboot: false
+strix_verify_full_model_hashes: false
+strix_verify_api_smoke: true

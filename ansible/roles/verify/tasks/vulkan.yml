@@ -2,15 +2,15 @@
 - name: Assert Vulkan API identity and allocation
   ansible.builtin.assert:
     that:
-      - verify_props.json.default_generation_settings.n_ctx | int == deepseek_service.context | int
-      - verify_props.json.total_slots | int == deepseek_service.parallel_slots | int
-      - verify_props.json.model_alias == deepseek_service.alias
+      - verify_props.json.default_generation_settings.n_ctx | int == strix_service.context | int
+      - verify_props.json.total_slots | int == strix_service.parallel_slots | int
+      - verify_props.json.model_alias == strix_service.alias
       - verify_props.json.model_ftype == 'IQ3_XXS - 3.0625 bpw'
-      - verify_props.json.build_info == deepseek_runtime.build_info
-      - verify_props.json.default_generation_settings.params.temperature | float == deepseek_service.sampling.temperature | float
-      - verify_props.json.default_generation_settings.params.top_p | float == deepseek_service.sampling.top_p | float
-      - verify_props.json.default_generation_settings.params.top_k | int == deepseek_service.sampling.top_k | int
-      - verify_props.json.default_generation_settings.params.min_p | float == deepseek_service.sampling.min_p | float
+      - verify_props.json.build_info == strix_runtime.build_info
+      - verify_props.json.default_generation_settings.params.temperature | float == strix_service.sampling.temperature | float
+      - verify_props.json.default_generation_settings.params.top_p | float == strix_service.sampling.top_p | float
+      - verify_props.json.default_generation_settings.params.top_k | int == strix_service.sampling.top_k | int
+      - verify_props.json.default_generation_settings.params.min_p | float == strix_service.sampling.min_p | float
     fail_msg: The live API does not match Strix Halo llama.cpp Vulkan IQ3_XXS.
 
 - name: Read Vulkan runtime identities
@@ -20,10 +20,10 @@
     get_checksum: true
     follow: true
   loop:
-    - {path: "{{ deepseek_paths.release }}/vulkan/llama-server", sha256: "{{ deepseek_runtime.launcher_sha256 }}"}
-    - {path: "{{ deepseek_paths.release }}/vulkan/bin/llama-server", sha256: "{{ deepseek_runtime.server_sha256 }}"}
-    - {path: "{{ deepseek_paths.release }}/vulkan/bin/libggml-vulkan.so.0.20.1", sha256: "{{ deepseek_runtime.vulkan_backend_sha256 }}"}
-    - {path: "{{ deepseek_paths.release }}/loader/usr/lib/x86_64-linux-gnu/libvulkan.so.1", sha256: "{{ deepseek_vulkan_loader.library_sha256 }}"}
+    - {path: "{{ strix_paths.release }}/vulkan/llama-server", sha256: "{{ strix_runtime.launcher_sha256 }}"}
+    - {path: "{{ strix_paths.release }}/vulkan/bin/llama-server", sha256: "{{ strix_runtime.server_sha256 }}"}
+    - {path: "{{ strix_paths.release }}/vulkan/bin/libggml-vulkan.so.0.20.1", sha256: "{{ strix_runtime.vulkan_backend_sha256 }}"}
+    - {path: "{{ strix_paths.release }}/loader/usr/lib/x86_64-linux-gnu/libvulkan.so.1", sha256: "{{ strix_vulkan_loader.library_sha256 }}"}
   register: verify_live_runtime_hashes
 
 - name: Assert Vulkan runtime identities

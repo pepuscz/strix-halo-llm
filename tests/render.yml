@@ -4,7 +4,7 @@
   connection: local
   gather_facts: false
   vars:
-    render_root: "/tmp/deepseek-{{ deepseek_system.id }}"
+    render_root: "/tmp/strix-{{ strix_system.id }}"
   tasks:
     - name: Create disposable render directory
       ansible.builtin.file:
@@ -20,11 +20,11 @@
       loop:
         - {src: ansible/roles/artifacts/templates/fetch-verified-artifact.j2, dest: fetch-verified-artifact, mode: "0755"}
         - {src: ansible/roles/artifacts/templates/artifacts.yml.j2, dest: ARTIFACTS.yml, mode: "0644"}
-        - {src: ansible/roles/fan/templates/deepseek-axb35-fan.j2, dest: deepseek-axb35-fan, mode: "0755"}
-        - {src: ansible/roles/fan/templates/deepseek-axb35-max-fan.service.j2, dest: deepseek-axb35-max-fan.service, mode: "0644"}
-        - {src: ansible/roles/platform/templates/99-deepseek-v4-strix-halo.cfg.j2, dest: 99-deepseek-v4-strix-halo.cfg, mode: "0644"}
-        - {src: ansible/roles/service/templates/deepseek-host-policy.j2, dest: deepseek-host-policy, mode: "0755"}
-        - {src: ansible/roles/service/templates/deepseek-v4-flash.service.j2, dest: deepseek-v4-flash.service, mode: "0644"}
+        - {src: ansible/roles/fan/templates/strix-axb35-fan.j2, dest: strix-axb35-fan, mode: "0755"}
+        - {src: ansible/roles/fan/templates/strix-axb35-max-fan.service.j2, dest: strix-axb35-max-fan.service, mode: "0644"}
+        - {src: ansible/roles/platform/templates/99-strix-halo.cfg.j2, dest: 99-strix-halo.cfg, mode: "0644"}
+        - {src: ansible/roles/service/templates/strix-host-policy.j2, dest: strix-host-policy, mode: "0755"}
+        - {src: ansible/roles/service/templates/strix-halo-inference.service.j2, dest: strix-halo-inference.service, mode: "0644"}
         - {src: ansible/roles/service/templates/release.yml.j2, dest: release.yml, mode: "0644"}
       loop_control:
         label: "{{ item.dest }}"
@@ -34,42 +34,54 @@
         src: ../ansible/roles/rocm_runtime/templates/build-qualified-rocm.j2
         dest: "{{ render_root }}/build-qualified-rocm"
         mode: "0755"
-      when: deepseek_system.engine == 'rocm'
+      when: strix_system.engine == 'rocm'
+
+    - name: Render Strata build and serving programs
+      ansible.builtin.template:
+        src: "../{{ item.src }}"
+        dest: "{{ render_root }}/{{ item.dest }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - {src: ansible/roles/strata_runtime/templates/build-strata.j2, dest: build-strata, mode: "0755"}
+        - {src: ansible/roles/service/templates/run-strata.j2, dest: run-strata, mode: "0755"}
+        - {src: ansible/roles/service/templates/strata-server.json.j2, dest: server.json, mode: "0444"}
+      when: strix_system.engine == 'strata'
 
     - name: Render the demand-based fan governor service
       ansible.builtin.template:
-        src: ../ansible/roles/fan/templates/deepseek-fan-governor.service.j2
-        dest: "{{ render_root }}/deepseek-fan-governor.service"
+        src: ../ansible/roles/fan/templates/strix-fan-governor.service.j2
+        dest: "{{ render_root }}/strix-fan-governor.service"
         mode: "0644"
-      when: deepseek_fan.governor.enabled | default(false) | bool
+      when: strix_fan.governor.enabled | default(false) | bool
 
     - name: Syntax-check rendered shell programs
       ansible.builtin.command:
         argv: [bash, -n, "{{ render_root }}/{{ item }}"]
       loop: >-
         {{
-          ['fetch-verified-artifact', 'deepseek-axb35-fan', 'deepseek-host-policy']
-          + (['build-qualified-rocm'] if deepseek_system.engine == 'rocm' else [])
+          ['fetch-verified-artifact', 'strix-axb35-fan', 'strix-host-policy']
+          + (['build-qualified-rocm'] if strix_system.engine == 'rocm' else [])
+          + (['build-strata', 'run-strata'] if strix_system.engine == 'strata' else [])
         }}
       changed_when: false
 
-    - name: Read rendered production unit
+    - name: Read rendered model service unit
       ansible.builtin.slurp:
-        src: "{{ render_root }}/deepseek-v4-flash.service"
+        src: "{{ render_root }}/strix-halo-inference.service"
       register: rendered_unit
 
-    - name: Define rendered production unit text
+    - name: Define rendered model service unit text
       ansible.builtin.set_fact:
         rendered_unit_text: "{{ rendered_unit.content | b64decode }}"
 
     - name: Assert shared safety contract
       ansible.builtin.assert:
         that:
-          - "'MemoryHigh=118G' in rendered_unit_text"
-          - "'MemoryMax=120G' in rendered_unit_text"
+          - "('MemoryHigh=' + strix_service.memory_high) in rendered_unit_text"
+          - "('MemoryMax=' + strix_service.memory_max) in rendered_unit_text"
           - "'MemorySwapMax=0' in rendered_unit_text"
-          - "'deepseek-host-policy apply' in rendered_unit_text"
-          - "'deepseek-host-policy restore' in rendered_unit_text"
+          - "'strix-host-policy apply' in rendered_unit_text"
+          - "'strix-host-policy restore' in rendered_unit_text"
           - "'serviceRequires' not in rendered_unit_text"
 
     - name: Assert Strix Halo llama.cpp Vulkan IQ3_XXS service contract
@@ -81,17 +93,17 @@
           - "'--top-k 0 --min-p 0.0' in rendered_unit_text"
           - "'--spec-type draft-dspark' in rendered_unit_text"
           - "'--spec-draft-n-max 4' in rendered_unit_text"
-          - "'--slot-save-path /run/deepseek-v4-flash-slots' in rendered_unit_text"
+          - "'--slot-save-path /run/strix-halo-inference-slots' in rendered_unit_text"
           - "'GGML_VK_FA_WAVE32=1' in rendered_unit_text"
           - "'GGML_VK_MMID_M128=1' in rendered_unit_text"
           - "'GGML_VK_LIGHTNING_INDEXER_SMALL_CM=' not in rendered_unit_text"
-      when: deepseek_system.engine == 'vulkan'
+      when: strix_system.engine == 'vulkan'
 
     - name: Read rendered demand-based fan governor service
       ansible.builtin.slurp:
-        src: "{{ render_root }}/deepseek-fan-governor.service"
+        src: "{{ render_root }}/strix-fan-governor.service"
       register: rendered_fan_governor
-      when: deepseek_fan.governor.enabled | default(false) | bool
+      when: strix_fan.governor.enabled | default(false) | bool
 
     - name: Assert demand-based fan governor contract
       ansible.builtin.assert:
@@ -101,8 +113,8 @@
           - "'--busy-threshold 5' in (rendered_fan_governor.content | b64decode)"
           - "'CPUQuota=1%' in (rendered_fan_governor.content | b64decode)"
           - "'MemoryMax=64M' in (rendered_fan_governor.content | b64decode)"
-          - "'ExecStopPost=/usr/local/sbin/deepseek-fan-governor --set-state max' in (rendered_fan_governor.content | b64decode)"
-      when: deepseek_fan.governor.enabled | default(false) | bool
+          - "'ExecStopPost=/usr/local/sbin/strix-fan-governor --set-state max' in (rendered_fan_governor.content | b64decode)"
+      when: strix_fan.governor.enabled | default(false) | bool
 
     - name: Assert Lucebox ROCm ROCmFPX service contract
       ansible.builtin.assert:
@@ -116,4 +128,21 @@
           - "'DFLASH_DS4_SPEC_Q=4' in rendered_unit_text"
           - "'DFLASH_DS4_ADAPTIVE_PREFILL_CHUNKS=1' in rendered_unit_text"
           - "'GGML_DS4_TOPK_BLOCK_RADIX=1' in rendered_unit_text"
-      when: deepseek_system.engine == 'rocm'
+      when: strix_system.engine == 'rocm'
+
+    - name: Read rendered Strata server configuration
+      ansible.builtin.slurp:
+        src: "{{ render_root }}/server.json"
+      register: rendered_strata_config
+      when: strix_system.engine == 'strata'
+
+    - name: Assert Strata serving contract
+      ansible.builtin.assert:
+        that:
+          - (rendered_strata_config.content | b64decode | from_json) == strix_strata.server
+          - strix_strata.server.parallel == 4
+          - strix_strata.server.env.STRATA_QFUSE == '0'
+          - "'--no-prefill-borrow' in strix_strata.server.args"
+          - "'--batch-mtp' not in strix_strata.server.args"
+          - "'run-strata' in rendered_unit_text"
+      when: strix_system.engine == 'strata'
