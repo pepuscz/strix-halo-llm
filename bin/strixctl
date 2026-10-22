@@ -5,6 +5,7 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 export ANSIBLE_CONFIG="$repo_root/ansible.cfg"
 ansible_playbook=${ANSIBLE_PLAYBOOK:-"$repo_root/.venv/bin/ansible-playbook"}
 ansible_lint=${ANSIBLE_LINT:-"$repo_root/.venv/bin/ansible-lint"}
+python=${STRIX_PYTHON:-"$repo_root/.venv/bin/python"}
 inventory=${STRIX_INVENTORY:-"$repo_root/ansible/inventory/hosts.yml"}
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 system=${STRIX_SYSTEM:-strata-qwen-q4xl}
@@ -28,7 +29,8 @@ command=${1:-}
 shift || true
 case "$command" in
     validate)
-        python3 "$repo_root/scripts/validate_release.py" "$release"
+        [[ -x "$python" ]] || fail "Missing $python; install requirements.lock first."
+        "$python" "$repo_root/scripts/validate_release.py" "$release"
         run_playbook --syntax-check "$repo_root/ansible/playbooks/install.yml"
         run_playbook --check "$repo_root/ansible/playbooks/preflight.yml" "$@"
         ;;
