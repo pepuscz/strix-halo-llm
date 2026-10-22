@@ -1,6 +1,6 @@
 {
   "schema": 10,
-  "published_at": "2026-10-06",
+  "published_at": "2026-10-22",
   "default_system": "strata-qwen-q4xl",
   "hardware": {
     "system": "BOSGAME M5 / Sixunited AXB35-02",
@@ -908,8 +908,8 @@
       },
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-fd-dspark-128k-20261022",
-        "source_commit": "62e4b2afda2d17d777967a46bfff131d32f51b16",
+        "release_tag": "maya-ds4-draftdev-dspark-256k-20261022",
+        "source_commit": "ac95fc974d4bcc745e7fda15ee9081a1566ed27f",
         "upstream": "https://github.com/mw00/project-maya v1.1.21"
       },
       "power_watts": {
@@ -930,7 +930,8 @@
       },
       "draft": {
         "type": "DSpark",
-        "bytes": 7967713733
+        "bytes": 7967713733,
+        "placement": "blocks split across the two cards: block 0 on the second card, blocks 1 and 2 on the lead (DS4_DRAFT_DEV=1,0,0)"
       },
       "quality": {
         "coding": 10,
@@ -943,19 +944,19 @@
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 153.6,
-        "decode_tokens_per_second": 33.0,
-        "request_seconds": 870.1,
+        "prefill_tokens_per_second": 155.4,
+        "decode_tokens_per_second": 37.1,
+        "request_seconds": 857.4,
         "reused_prompt": {
           "cached_tokens": 130047,
-          "decode_tokens_per_second": 38.7,
-          "request_seconds": 19.9
+          "decode_tokens_per_second": 42.8,
+          "request_seconds": 18.0
         },
         "allocation_tokens": 131072
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "manifest_sha256": "db12092889afcdffd6a9df6daf39bf0a7afd6d56e4d4e43045536e9f1079ca5f",
-      "release_id": "maya-ds4-dual-xtx-256k-v2",
+      "manifest_sha256": "ee2036d6df5a35b892168c2fa1ccaff38cf163793afbc342f977dba460a5667c",
+      "release_id": "maya-ds4-dual-xtx-256k-v3",
       "selection": "added_hardware",
       "context_scaling": [
         {

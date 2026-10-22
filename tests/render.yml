@@ -175,6 +175,7 @@
           - strix_maya.server.gpu == [0, 1, 2]
           - strix_maya.server.env.DS4_HELPER == '2'
           - strix_maya.server.env.DS4_DRAFT_VRAM == '96,48,32'
+          - strix_maya.server.env.DS4_DRAFT_DEV == '1,0,0'
           - strix_maya.server.lib_dirs[0] == strix_paths.release + '/rocblas/install/lib'
           - "'run-maya' in rendered_unit_text"
           - "'strix-drain-ttm-pool' in rendered_unit_text"

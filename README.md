@@ -55,7 +55,7 @@ The installer verifies the hardware and kernel, downloads publisher artifacts wi
 
 A separate setup for the same box with two **AMD Radeon RX 7900 XTX** cards added, each on its own PCIe 4.0 x4 link (M.2 to OCuLink). It is not part of the single-box comparison above.
 
-**DeepSeek-V4.1-Flash-1017 with Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, one conversation with **256K tokens of context**. The two cards split the model in tensor parallel, the Radeon 8060S serves routed experts beside them, and a DSpark drafter speculates. It passes all **30 quality tests** (measured at 128K) and found all five phrases at every length of the speed test up to 245,760 tokens (50/50).
+**DeepSeek-V4.1-Flash-1017 with Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, one conversation with **256K tokens of context**. The two cards split the model in tensor parallel, the Radeon 8060S serves routed experts beside them, and a DSpark drafter speculates with its blocks split across the two cards. It passes all **30 quality tests** (measured at 128K) and found all five phrases at every length of the speed test up to 245,760 tokens (50/50).
 
 The chart uses the same five-phrase retrieval test as above, with a fresh model load and no cached input at each point. The top panel shows input-reading speed; the bottom shows answer-writing speed.
 
@@ -70,7 +70,7 @@ bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The recipe is [maya-ds4-dual-xtx-256k.yml](ansible/releases/maya-ds4-dual-xtx-256k.yml). It builds the pinned engine tag, AMD's ROCm 7.2.4 userspace (isolated, nothing installed system-wide), and rocBLAS with the [per-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781) that mixed gfx1100/gfx1151 processes need. It needs kernel `7.0.0-38-generic` and about 470 GB free. The from-scratch install ran end to end at 128K; the 256K setting differs only in the context size.
+The recipe is [maya-ds4-dual-xtx-256k.yml](ansible/releases/maya-ds4-dual-xtx-256k.yml). It builds the pinned engine tag, AMD's ROCm 7.2.4 userspace (isolated, nothing installed system-wide), and rocBLAS with the [per-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781) that mixed gfx1100/gfx1151 processes need. It needs kernel `7.0.0-38-generic` and about 470 GB free. The from-scratch install ran end to end at 128K on the previous engine tag; this tag adds one engine commit (the drafter placement) and one environment variable, and the 256K setting differs only in the context size.
 
 ## Host requirements
 

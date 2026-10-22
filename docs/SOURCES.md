@@ -49,7 +49,7 @@ flags, output binary identity, and model identities are in
 
 | Component | Pinned source |
 |---|---|
-| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya/tree/maya-ds4-fd-dspark-128k-20261022), tag `maya-ds4-fd-dspark-128k-20261022`, commit `62e4b2afda2d17d777967a46bfff131d32f51b16`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.21` plus the dual-card tensor-parallel, expert-helper, and DSpark memory-cap changes |
+| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya/tree/maya-ds4-draftdev-dspark-256k-20261022), tag `maya-ds4-draftdev-dspark-256k-20261022`, commit `ac95fc974d4bcc745e7fda15ee9081a1566ed27f`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.21` plus the dual-card tensor-parallel, expert-helper, DSpark memory-cap and drafter-placement changes |
 | Pack tool | `pepuscz/project-maya` commit `1b8f5ec2bc4d1e4ba18c3d538fa5d44470c7296c` (`tools/ds4/pack_gguf.py`, the tool the qualified pack came from) |
 | GGML | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d), commit `3cf03257f219afbe7334045ff7c6a06ac68c627d`, archive SHA-256 and tree fingerprint pinned |
 | ROCm | AMD ROCm 7.2.4 runfile installer for Ubuntu 24.04 (`repo.radeon.com`), byte size and SHA-256 pinned; 97 userspace components copied into the release; Ubuntu 24.04 `libicu74` and `libxml2` extracted for its linker |

@@ -268,7 +268,8 @@ def validate_maya(data: dict, root: Path) -> None:
             fail("qualified Maya option drifted: " + flag)
     qualified_env = {"DS4_HELPER": "2", "DS4_HELPER_GB": "95", "DS4_WARM_CAP_GB": "14.9", "DS4_COMMIT_CAP_GB": "145",
                      "DS4_HELPER_RECENT": "8", "DS4_Q8_BATCH": "1", "DS4_TP_GGUF_UNEVEN": "1", "DS4_FLOW_TP": "1",
-                     "DS4_HC_FUSE": "1", "DS4_ROUTE_FUSE": "1", "DS4_DRAFT_VRAM": "96,48,32", "ROCBLAS_USE_HIPBLASLT": "0"}
+                     "DS4_HC_FUSE": "1", "DS4_ROUTE_FUSE": "1", "DS4_DRAFT_VRAM": "96,48,32", "DS4_DRAFT_DEV": "1,0,0",
+                     "ROCBLAS_USE_HIPBLASLT": "0"}
     for key, value in qualified_env.items():
         if env.get(key) != value:
             fail("qualified Maya environment drifted: " + key)
