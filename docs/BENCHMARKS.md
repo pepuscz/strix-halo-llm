@@ -94,6 +94,8 @@ Qwen uses kernel `7.0.0-31-generic`; DeepSeek uses `7.0.0-29-generic`. Strata an
 
 ## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017
 
+![DeepSeek-V4.1-Flash-1017 dual RX 7900 XTX context scaling](benchmark-dual-xtx.svg)
+
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, allocation 262,144 tokens, the same five-phrase prompts as the DeepSeek rows above (identical bytes, pinned by SHA-256). Each point is a fresh load from the frozen expert profile; thinking off, a 256-token cap (every answer used 64 tokens), zero cached input. This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |

@@ -18,7 +18,7 @@ SERIES = [
 
 
 def render(data, dual=False):
-    series = SERIES if not dual else [('maya', '#0969da', data['system'])]
+    series = SERIES if not dual else [('maya-ds4-dual-xtx', '#0969da', data['systems']['maya-ds4-dual-xtx']['name'])]
     lines = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 775" role="img" aria-labelledby="title desc">',
              '<title id="title">Strix Halo LLM throughput: Qwen and DeepSeek</title>',
              '<desc id="desc">Reading and answer-writing speeds on a 128 GiB Ryzen AI Max+ 395. The test asks each model to find five labelled phrases placed in a long text. Every run found all five correctly. The winning setup for Qwen and the winning setup for DeepSeek are shown with their respective comparison baselines. Each point measures one request at the input length shown. Each horizontal tick doubles the input length.</desc>',
@@ -60,7 +60,7 @@ def render(data, dual=False):
             lines.extend([f'<line class="grid" x1="{xx:.2f}" y1="{top}" x2="{xx:.2f}" y2="{bottom}"/>',
                           f'<text class="tick" x="{xx:.2f}" y="{bottom+22}" text-anchor="middle">{2**exp}K</text>'])
         for sid,color,_ in series:
-            rows = data['points'] if dual else data['systems'][sid]['context_scaling']
+            rows = data['systems'][sid]['context_scaling']
             points=[p for p in rows if key in p]
             if not points:
                 continue
@@ -83,7 +83,7 @@ def main():
     parser.add_argument('--check',action='store_true')
     args=parser.parse_args()
     for source, output, dual in ((DATA, OUTPUT, False),
-            (ROOT / 'benchmarks/maya-dual-xtx-context.json', ROOT / 'docs/benchmark-dual-xtx.svg', True)):
+            (DATA, ROOT / 'docs/benchmark-dual-xtx.svg', True)):
         expected=render(json.loads(source.read_text()), dual)
         if args.check:
             if not output.exists() or output.read_text()!=expected:

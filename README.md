@@ -57,12 +57,11 @@ A separate setup for the same box with two **AMD Radeon RX 7900 XTX** cards adde
 
 **DeepSeek-V4.1-Flash-1017 with Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, one conversation with **256K tokens of context**. The two cards split the model in tensor parallel, the Radeon 8060S serves routed experts beside them, and a DSpark drafter speculates. It passes all **30 quality tests** (measured at 128K) and found all five phrases at every length of the speed test up to 245,760 tokens (50/50).
 
-| Input tokens | 2,040 | 7,680 | 30,720 | 59,933 | 122,879 | 163,840 | 245,760 |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Reading the input (tok/s) | 58.0 | 159.9 | 192.8 | 201.7 | 221.8 | 222.8 | 220.2 |
-| Writing the answer (tok/s) | 30.9 | 31.5 | 31.1 | 30.4 | 27.7 | 29.9 | 29.3 |
+The chart uses the same five-phrase retrieval test as above, with a fresh model load and no cached input at each point. The top panel shows input-reading speed; the bottom shows answer-writing speed.
 
-The test text is repetitive, so it reads faster than real documents: a 130,048-token real-code prompt read at 153.6 tok/s and then wrote 768 tokens at **33.0 tok/s**, or **38.7 tok/s** when the input was already cached from the previous turn. [All ten points and the method](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
+![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with two RX 7900 XTX cards and a Radeon 8060S helper](docs/benchmark-dual-xtx.svg)
+
+[All ten measurements and test method](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017) · [Exact result data](benchmarks/results.json)
 
 ```bash
 export STRIX_SYSTEM=maya-ds4-dual-xtx
