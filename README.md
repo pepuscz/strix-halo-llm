@@ -55,9 +55,14 @@ The installer verifies the hardware and kernel, downloads publisher artifacts wi
 
 A separate setup for the same box with two **AMD Radeon RX 7900 XTX** cards added, each on its own PCIe 4.0 x4 link (M.2 to OCuLink). It is not part of the single-box comparison above.
 
-**DeepSeek-V4.1-Flash-1017 with Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, one conversation with **128K tokens of context**. The two cards split the model in tensor parallel, the Radeon 8060S serves routed experts beside them, and a DSpark drafter speculates. It passes all **30 quality tests**.
+**DeepSeek-V4.1-Flash-1017 with Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, one conversation with **256K tokens of context**. The two cards split the model in tensor parallel, the Radeon 8060S serves routed experts beside them, and a DSpark drafter speculates. It passes all **30 quality tests** (measured at 128K) and found all five phrases at every length of the speed test up to 245,760 tokens (50/50).
 
-On a 130,048-token input it writes the answer at **33.0 tokens/second**, or **38.7 tokens/second** when the input is already cached from the previous turn. Reading that input cold takes about 14 minutes (153.6 tokens/second). More measurements will follow.
+| Input tokens | 2,040 | 7,680 | 30,720 | 59,933 | 122,879 | 163,840 | 245,760 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Reading the input (tok/s) | 58.0 | 159.9 | 192.8 | 201.7 | 221.8 | 222.8 | 220.2 |
+| Writing the answer (tok/s) | 30.9 | 31.5 | 31.1 | 30.4 | 27.7 | 29.9 | 29.3 |
+
+The test text is repetitive, so it reads faster than real documents: a 130,048-token real-code prompt read at 153.6 tok/s and then wrote 768 tokens at **33.0 tok/s**, or **38.7 tok/s** when the input was already cached from the previous turn. [All ten points and the method](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
 
 ```bash
 export STRIX_SYSTEM=maya-ds4-dual-xtx
@@ -66,7 +71,7 @@ bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The recipe is [maya-ds4-dual-xtx-128k.yml](ansible/releases/maya-ds4-dual-xtx-128k.yml). It builds the pinned engine tag, AMD's ROCm 7.2.4 userspace (isolated, nothing installed system-wide), and rocBLAS with the [per-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781) that mixed gfx1100/gfx1151 processes need. It needs kernel `7.0.0-38-generic` and about 470 GB free. The settings are the measured ones; this from-scratch install path is pending its first end-to-end run.
+The recipe is [maya-ds4-dual-xtx-256k.yml](ansible/releases/maya-ds4-dual-xtx-256k.yml). It builds the pinned engine tag, AMD's ROCm 7.2.4 userspace (isolated, nothing installed system-wide), and rocBLAS with the [per-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781) that mixed gfx1100/gfx1151 processes need. It needs kernel `7.0.0-38-generic` and about 470 GB free. The from-scratch install ran end to end at 128K; the 256K setting differs only in the context size.
 
 ## Host requirements
 

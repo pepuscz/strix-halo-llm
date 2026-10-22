@@ -59,7 +59,7 @@ def validate_manifest(path: Path, root: Path) -> dict:
         fail("non-canonical strix_system identity")
 
     service = data["strix_service"]
-    required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 131072}[system["engine"]]
+    required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 262144}[system["engine"]]
     if service["context"] != required_context:
         fail(f"{system['engine']} release must allocate exactly {required_context} tokens")
     if service["minimum_effective_non_cma_kib"] < 2 * 1024 * 1024:
@@ -261,7 +261,7 @@ def validate_maya(data: dict, root: Path) -> None:
         require_sha(digest, "pack")
     cfg = maya["server"]
     args, env = cfg["args"], cfg["env"]
-    expected = {"--max-context": "131072", "--tp": "2", "--vision": "off", "--dspark": "on", "--threads": "on",
+    expected = {"--max-context": "262144", "--tp": "2", "--vision": "off", "--dspark": "on", "--threads": "on",
                 "--mmap-experts": "on", "--pack": maya["pack"]}
     for flag, value in expected.items():
         if flag not in args or args[args.index(flag) + 1] != value:

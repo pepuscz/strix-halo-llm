@@ -901,7 +901,7 @@
     },
     "maya-ds4-dual-xtx": {
       "name": "Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX",
-      "manifest": "ansible/releases/maya-ds4-dual-xtx-128k.yml",
+      "manifest": "ansible/releases/maya-ds4-dual-xtx-256k.yml",
       "hardware": {
         "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
         "helper_gpu": "AMD Radeon 8060S (1002:1586) serves routed experts beside the two cards"
@@ -923,7 +923,7 @@
         "boost": true
       },
       "gpu_dpm": "high",
-      "context_allocation": 131072,
+      "context_allocation": 262144,
       "target": {
         "quantization": "Maya-S IQ2_XXS + Unsloth UD-Q8_K_XL Engram",
         "bytes": 380951187664
@@ -950,12 +950,126 @@
           "cached_tokens": 130047,
           "decode_tokens_per_second": 38.7,
           "request_seconds": 19.9
-        }
+        },
+        "allocation_tokens": 131072
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "manifest_sha256": "385d081dfc7e1281349af03beab13e1fcf06f564124315d815fdbaf4600a65c5",
-      "release_id": "maya-ds4-dual-xtx-128k-v1",
-      "selection": "added_hardware"
+      "manifest_sha256": "db12092889afcdffd6a9df6daf39bf0a7afd6d56e4d4e43045536e9f1079ca5f",
+      "release_id": "maya-ds4-dual-xtx-256k-v2",
+      "selection": "added_hardware",
+      "context_scaling": [
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 2040,
+          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+          "prefill_tokens_per_second": 58.0,
+          "decode_tokens_per_second": 30.9,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 3840,
+          "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
+          "prefill_tokens_per_second": 97.0,
+          "decode_tokens_per_second": 32.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 7680,
+          "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
+          "prefill_tokens_per_second": 159.9,
+          "decode_tokens_per_second": 31.5,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 15359,
+          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
+          "prefill_tokens_per_second": 175.3,
+          "decode_tokens_per_second": 31.6,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 192.8,
+          "decode_tokens_per_second": 31.1,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 59933,
+          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
+          "prefill_tokens_per_second": 201.7,
+          "decode_tokens_per_second": 30.4,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 221.8,
+          "decode_tokens_per_second": 27.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 163840,
+          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
+          "prefill_tokens_per_second": 222.8,
+          "decode_tokens_per_second": 29.9,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 212992,
+          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
+          "prefill_tokens_per_second": 222.3,
+          "decode_tokens_per_second": 29.5,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 245760,
+          "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
+          "prefill_tokens_per_second": 220.2,
+          "decode_tokens_per_second": 29.3,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        }
+      ],
+      "context_scaling_note": "Each point: a fresh load from the frozen expert profile, thinking off, 256-token cap (every answer used 64 tokens), zero cached input. The retrieval filler routes to few experts, so its prefill is faster than real text: a 130,048-token real-code prompt read at 153.6 tok/s (long_context)."
     }
   },
   "winning_setups": {

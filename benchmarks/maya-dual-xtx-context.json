@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "measured_at": "2026-10-22",
+  "system": "Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX",
+  "model": "DeepSeek-V4.1-Flash-1017",
+  "source_commit": "62e4b2afda2d17d777967a46bfff131d32f51b16",
+  "source_tree": "ffa7638db24107e4cfd436b4e56cc2bf90ad3a6f",
+  "workload": "context_scaling",
+  "context_capacity_tokens": 262144,
+  "requested_output_tokens": 256,
+  "thinking": false,
+  "temperature": 0,
+  "top_k": 1,
+  "top_p": 1,
+  "runs_per_point": 1,
+  "fresh_model_load_per_point": true,
+  "expert_profile_sha256": "f384b25188569368d420fa12c072f2cef8152b3bbd66f90154e896a66bb70d7a",
+  "lt_store": "empty at each load",
+  "storage": "Samsung SSD 990 PRO 1TB via USB4",
+  "points": [
+    {
+      "label": "2K",
+      "actual_input_tokens": 2040,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 58,
+      "decode_tokens_per_second": 30.9,
+      "needle_passes": 5,
+      "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b"
+    },
+    {
+      "label": "4K",
+      "actual_input_tokens": 3840,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 97,
+      "decode_tokens_per_second": 32,
+      "needle_passes": 5,
+      "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0"
+    },
+    {
+      "label": "8K",
+      "actual_input_tokens": 7680,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 159.9,
+      "decode_tokens_per_second": 31.5,
+      "needle_passes": 5,
+      "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed"
+    },
+    {
+      "label": "16K",
+      "actual_input_tokens": 15359,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 175.3,
+      "decode_tokens_per_second": 31.6,
+      "needle_passes": 5,
+      "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386"
+    },
+    {
+      "label": "32K",
+      "actual_input_tokens": 30720,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 192.8,
+      "decode_tokens_per_second": 31.1,
+      "needle_passes": 5,
+      "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2"
+    },
+    {
+      "label": "64K",
+      "actual_input_tokens": 59933,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 201.7,
+      "decode_tokens_per_second": 30.4,
+      "needle_passes": 5,
+      "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1"
+    },
+    {
+      "label": "128K",
+      "actual_input_tokens": 122879,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 221.8,
+      "decode_tokens_per_second": 27.7,
+      "needle_passes": 5,
+      "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3"
+    },
+    {
+      "label": "160K",
+      "actual_input_tokens": 163840,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 222.8,
+      "decode_tokens_per_second": 29.9,
+      "needle_passes": 5,
+      "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b"
+    },
+    {
+      "label": "208K",
+      "actual_input_tokens": 212992,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 222.3,
+      "decode_tokens_per_second": 29.5,
+      "needle_passes": 5,
+      "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147"
+    },
+    {
+      "label": "240K",
+      "actual_input_tokens": 245760,
+      "completion_tokens": 64,
+      "cached_tokens": 0,
+      "prefill_tokens_per_second": 220.2,
+      "decode_tokens_per_second": 29.3,
+      "needle_passes": 5,
+      "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d"
+    }
+  ]
+}

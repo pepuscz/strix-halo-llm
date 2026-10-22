@@ -11,7 +11,8 @@
       - strix_system.engine in ['vulkan', 'rocm', 'strata', 'maya']
       - >-
         (strix_system.engine == 'vulkan' and strix_service.context | int == 524288) or
-        (strix_system.engine in ['rocm', 'maya'] and strix_service.context | int == 131072) or
+        (strix_system.engine == 'rocm' and strix_service.context | int == 131072) or
+        (strix_system.engine == 'maya' and strix_service.context | int == 262144) or
         (strix_system.engine == 'strata' and strix_service.context | int == 262144 and
          strix_service.parallel_slots | int == 4)
       - strix_service.memory_high == ('123G' if strix_system.engine == 'strata' else '118G')

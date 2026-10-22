@@ -59,7 +59,7 @@ flags, output binary identity, and model identities are in
 | Draft | `peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF`, revision `276e0badcfb4a6d8f6c2b9d4da1b468cd339c221`, DSpark |
 | Expert profile | Routing counts learned on the qualified host ([file](../ansible/roles/maya_runtime/files/expert-profile-maya-s.bin), SHA-256 pinned); the engine keeps updating its copy while serving |
 
-[`maya-ds4-dual-xtx-128k.yml`](../ansible/releases/maya-ds4-dual-xtx-128k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes.
+[`maya-ds4-dual-xtx-256k.yml`](../ansible/releases/maya-ds4-dual-xtx-256k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes.
 
 ## Shared host components
 
