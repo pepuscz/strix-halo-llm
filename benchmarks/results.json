@@ -898,6 +898,64 @@
       "manifest_sha256": "3bdb1d5044aadfcdf1bbc597772a348bc3ee9d7031ad97c2b9bf8b290d16d671",
       "release_id": "strata-qwen-q4xl-4x256k-v1",
       "selection": "winning_setup"
+    },
+    "maya-ds4-dual-xtx": {
+      "name": "Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX",
+      "manifest": "ansible/releases/maya-ds4-dual-xtx-128k.yml",
+      "hardware": {
+        "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
+        "helper_gpu": "AMD Radeon 8060S (1002:1586) serves routed experts beside the two cards"
+      },
+      "runtime": {
+        "repository": "https://github.com/pepuscz/project-maya",
+        "release_tag": "maya-ds4-fd-dspark-128k-20261022",
+        "source_commit": "62e4b2afda2d17d777967a46bfff131d32f51b16",
+        "upstream": "https://github.com/mw00/project-maya v1.1.21"
+      },
+      "power_watts": {
+        "stapm": 120,
+        "fast": 120,
+        "slow": 120
+      },
+      "cpu": {
+        "governor": "performance",
+        "minimum_khz": 2000000,
+        "boost": true
+      },
+      "gpu_dpm": "high",
+      "context_allocation": 131072,
+      "target": {
+        "quantization": "Maya-S IQ2_XXS + Unsloth UD-Q8_K_XL Engram",
+        "bytes": 380951187664
+      },
+      "draft": {
+        "type": "DSpark",
+        "bytes": 7967713733
+      },
+      "quality": {
+        "coding": 10,
+        "gsm8k": 10,
+        "math": 10,
+        "total": 30,
+        "thinking": false
+      },
+      "long_context": {
+        "input_tokens": 130048,
+        "output_tokens": 768,
+        "cached_tokens": 0,
+        "prefill_tokens_per_second": 153.6,
+        "decode_tokens_per_second": 33.0,
+        "request_seconds": 870.1,
+        "reused_prompt": {
+          "cached_tokens": 130047,
+          "decode_tokens_per_second": 38.7,
+          "request_seconds": 19.9
+        }
+      },
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "manifest_sha256": "385d081dfc7e1281349af03beab13e1fcf06f564124315d815fdbaf4600a65c5",
+      "release_id": "maya-ds4-dual-xtx-128k-v1",
+      "selection": "added_hardware"
     }
   },
   "winning_setups": {

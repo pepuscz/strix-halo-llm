@@ -27,7 +27,18 @@ draft:
   repository: {{ strix_draft.repository }}
   revision: {{ strix_draft.revision }}
 {% if strix_system.engine == 'strata' %}  tensor_manifest_sha256: {{ strix_draft.tensor_manifest_sha256 }}
+{% elif strix_system.engine == 'maya' %}  files: {{ strix_draft.files | map(attribute='name') | list | to_json }}
 {% else %}  name: {{ strix_draft.name }}
   size: {{ strix_draft.size }}
   sha256: {{ strix_draft.sha256 }}
+{% endif %}
+{% if strix_extra_artifacts is defined %}
+extra:
+{% for file in strix_extra_artifacts %}
+  - repository: {{ file.repository }}
+    revision: {{ file.revision }}
+    name: {{ file.name }}
+    size: {{ file.size }}
+    sha256: {{ file.sha256 }}
+{% endfor %}
 {% endif %}

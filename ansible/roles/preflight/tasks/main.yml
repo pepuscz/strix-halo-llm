@@ -4,12 +4,14 @@
     that:
       - strix_release_schema | int == 1
       - strix_release_id | length > 0
-      - strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl']
-      - strix_system.name in ['Strix Halo llama.cpp Vulkan IQ3_XXS', 'Lucebox ROCm ROCmFPX', 'Strata HIP UD-Q4_K_XL']
-      - strix_system.engine in ['vulkan', 'rocm', 'strata']
+      - strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl', 'maya-ds4-dual-xtx']
+      - >-
+        strix_system.name in ['Strix Halo llama.cpp Vulkan IQ3_XXS', 'Lucebox ROCm ROCmFPX', 'Strata HIP UD-Q4_K_XL',
+                              'Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX']
+      - strix_system.engine in ['vulkan', 'rocm', 'strata', 'maya']
       - >-
         (strix_system.engine == 'vulkan' and strix_service.context | int == 524288) or
-        (strix_system.engine == 'rocm' and strix_service.context | int == 131072) or
+        (strix_system.engine in ['rocm', 'maya'] and strix_service.context | int == 131072) or
         (strix_system.engine == 'strata' and strix_service.context | int == 262144 and
          strix_service.parallel_slots | int == 4)
       - strix_service.memory_high == ('123G' if strix_system.engine == 'strata' else '118G')
@@ -40,9 +42,42 @@
   changed_when: false
   check_mode: false
 
+- name: Count discrete GPUs the release requires
+  ansible.builtin.shell: |
+    set -o pipefail
+    for device in /sys/bus/pci/devices/*; do
+      [ -r "$device/vendor" ] || continue
+      printf '%s:%s\n' "$(sed 's/^0x//' "$device/vendor")" "$(sed 's/^0x//' "$device/device")"
+    done | grep -cx {{ item.pci_id | quote }} || true
+  args:
+    executable: /bin/bash
+  loop: "{{ strix_platform.discrete_gpus | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: preflight_discrete_gpus
+  changed_when: false
+  check_mode: false
+
+- name: Require every discrete GPU the release was qualified with
+  ansible.builtin.assert:
+    that:
+      - item.stdout | trim | int == item.item.count | int
+    fail_msg: "Expected {{ item.item.count }} x {{ item.item.name }} ({{ item.item.pci_id }}); found {{ item.stdout | trim }}."
+  loop: "{{ preflight_discrete_gpus.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
 - name: Resolve root filesystem free space
   ansible.builtin.set_fact:
     preflight_root_mount: "{{ (ansible_facts.mounts | selectattr('mount', 'equalto', '/') | list | first) }}"
+
+- name: Discount model files adopted from verified local seeds (hard links use no space)
+  ansible.builtin.set_fact:
+    preflight_required_free_bytes: >-
+      {{ strix_platform.minimum_free_bytes | int
+         - ((strix_target.files + (strix_extra_artifacts | default([])))
+            | selectattr('name', 'in', (strix_artifact_seed_paths | default({})).keys() | list)
+            | map(attribute='size') | map('int') | sum) }}
 
 - name: Validate immutable host requirements
   ansible.builtin.assert:
@@ -54,7 +89,7 @@
       - (preflight_board_name_raw.content | b64decode | trim) == strix_platform.board_name
       - strix_platform.gpu_pci_id in preflight_gpu_pci_ids.stdout_lines
       - ansible_facts.swaptotal_mb | int == 0
-      - preflight_root_mount.size_available | int >= strix_platform.minimum_free_bytes | int
+      - preflight_root_mount.size_available | int >= preflight_required_free_bytes | int
       - not strix_platform.strict_kernel | bool or ansible_facts.kernel == strix_platform.kernel
     fail_msg: >-
       Host identity, kernel, RAM, GPU, swap, or free-space requirements do not match

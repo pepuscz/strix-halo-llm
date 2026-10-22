@@ -15,12 +15,13 @@ import yaml
 
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
-ALLOWED_ARTIFACT_HOSTS = {"github.com", "huggingface.co", "archive.ubuntu.com", "repo.amd.com"}
+ALLOWED_ARTIFACT_HOSTS = {"github.com", "huggingface.co", "archive.ubuntu.com", "repo.amd.com", "repo.radeon.com", "launchpadlibrarian.net"}
 TEXT_SUFFIXES = {"", ".cfg", ".in", ".j2", ".json", ".md", ".patch", ".py", ".sh", ".txt", ".yml", ".yaml"}
 SYSTEMS = {
     "strata-qwen-q4xl": ("Strata HIP UD-Q4_K_XL", "strata"),
     "vulkan-iq3xxs": ("Strix Halo llama.cpp Vulkan IQ3_XXS", "vulkan"),
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
+    "maya-ds4-dual-xtx": ("Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX", "maya"),
 }
 FORBIDDEN_PUBLIC_PATTERNS = {
     "macOS home path": re.compile(r"/Users/[^/\s]+/"),
@@ -58,7 +59,7 @@ def validate_manifest(path: Path, root: Path) -> dict:
         fail("non-canonical strix_system identity")
 
     service = data["strix_service"]
-    required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144}[system["engine"]]
+    required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 131072}[system["engine"]]
     if service["context"] != required_context:
         fail(f"{system['engine']} release must allocate exactly {required_context} tokens")
     if service["minimum_effective_non_cma_kib"] < 2 * 1024 * 1024:
@@ -82,7 +83,7 @@ def validate_manifest(path: Path, root: Path) -> dict:
         fail("target file total does not match declared total_size")
     for index, artifact in enumerate(files, start=1):
         require_sha(artifact["sha256"], f"target file {index}")
-    if system["engine"] != "strata":
+    if system["engine"] not in ("strata", "maya"):
         require_sha(data["strix_draft"]["sha256"], "draft")
     require_sha(data["strix_ryzenadj"]["tested_binary_sha256"], "RyzenAdj binary")
     require_sha(data["strix_runtime"]["source_commit"], "runtime source commit", HEX40)
@@ -165,6 +166,8 @@ def validate_manifest(path: Path, root: Path) -> dict:
         quality = data["strix_qualification"]["answer_quality"]
         if quality["total"] != 30 or quality["quality_checkpoint_max_prompt_tokens"] >= 8192:
             fail("Strata short-quality cap compatibility is invalid")
+    elif system["engine"] == "maya":
+        validate_maya(data, root)
     else:
         if len(files) != 1:
             fail("Lucebox ROCm ROCmFPX requires one target file")
@@ -203,6 +206,78 @@ def validate_manifest(path: Path, root: Path) -> dict:
     if data.get("strix_vulkan_loader_seed_path"):
         fail("public manifest contains a machine-local Vulkan loader seed")
     return data
+
+
+def validate_maya(data: dict, root: Path) -> None:
+    """Maya DS4 HIP on two RX 7900 XTX cards with the Radeon 8060S as the expert helper."""
+    service, files = data["strix_service"], data["strix_target"]["files"]
+    runtime, rocm, rocblas, maya = data["strix_runtime"], data["strix_rocm724"], data["strix_rocblas"], data["strix_maya"]
+    if len(files) != 4 or service["parallel_slots"] != 1:
+        fail("Maya DS4 dual RX 7900 XTX requires four Maya-S shards and one session")
+    if data["strix_platform"].get("discrete_gpus") != [{"name": "AMD Radeon RX 7900 XTX", "pci_id": "1002:744c", "count": 2}]:
+        fail("Maya DS4 dual RX 7900 XTX requires exactly two RX 7900 XTX cards")
+    for extra in data["strix_extra_artifacts"]:
+        require_sha(extra["sha256"], extra["name"])
+        require_sha(extra["revision"], extra["name"] + " revision", HEX40)
+    require_sha(data["strix_target"]["revision"], "target revision", HEX40)
+    require_url(runtime["repository"], "Maya repository")
+    for key in ("tag_object", "source_tree", "upstream_commit", "ggml_commit"):
+        require_sha(runtime[key], "Maya " + key, HEX40)
+    require_url(runtime["ggml_archive_url"], "ggml archive")
+    require_sha(runtime["ggml_archive_sha256"], "ggml archive")
+    require_sha(runtime["ggml_tree_fingerprint"], "ggml tree")
+    require_url(rocm["runfile_url"], "ROCm runfile")
+    require_sha(rocm["runfile_sha256"], "ROCm runfile")
+    require_sha(rocm["installer_script_sha256"], "ROCm installer")
+    for deb in rocm["compat_debs"]:
+        require_url(deb["url"], deb["file"])
+        require_sha(deb["sha256"], deb["file"])
+    for digest in rocm["file_sha256"].values():
+        require_sha(digest, "ROCm runtime file")
+    require_url(rocblas["repository"], "rocBLAS repository")
+    for key in ("tag_object", "commit", "tree", "patched_tree"):
+        require_sha(rocblas[key], "rocBLAS " + key, HEX40)
+    for deb in rocblas["deps"]:
+        require_sha(deb["sha256"], deb["name"])
+    patch = root / "patches" / rocblas["patch"]["name"]
+    if hashlib.sha256(patch.read_bytes()).hexdigest() != rocblas["patch"]["sha256"]:
+        fail("rocBLAS backport patch hash drifted")
+    files_dir = root / "ansible/roles/maya_runtime/files"
+    pins = {
+        "requirements.lock": maya["requirements_sha256"],
+        "rocblas-stock-tensile.cmake": rocblas["initializer_sha256"],
+        maya["expert_profile"]["file"]: maya["expert_profile"]["sha256"],
+    }
+    for name, digest in pins.items():
+        if hashlib.sha256((files_dir / name).read_bytes()).hexdigest() != digest:
+            fail("Maya build input drifted: " + name)
+    if (files_dir / maya["expert_profile"]["file"]).stat().st_size != maya["expert_profile"]["size"]:
+        fail("expert profile size drifted")
+    tool = maya["pack_tool"]
+    require_url(tool["repository"], "pack tool repository")
+    require_sha(tool["commit"], "pack tool commit", HEX40)
+    for digest in (tool["pack_gguf_sha256"], tool["chat_template_sha256"], maya["pack_ds4_normalized_sha256"],
+                   *maya["pack_files"].values()):
+        require_sha(digest, "pack")
+    cfg = maya["server"]
+    args, env = cfg["args"], cfg["env"]
+    expected = {"--max-context": "131072", "--tp": "2", "--vision": "off", "--dspark": "on", "--threads": "on",
+                "--mmap-experts": "on", "--pack": maya["pack"]}
+    for flag, value in expected.items():
+        if flag not in args or args[args.index(flag) + 1] != value:
+            fail("qualified Maya option drifted: " + flag)
+    qualified_env = {"DS4_HELPER": "2", "DS4_HELPER_GB": "95", "DS4_WARM_CAP_GB": "14.9", "DS4_COMMIT_CAP_GB": "145",
+                     "DS4_HELPER_RECENT": "8", "DS4_Q8_BATCH": "1", "DS4_TP_GGUF_UNEVEN": "1", "DS4_FLOW_TP": "1",
+                     "DS4_HC_FUSE": "1", "DS4_ROUTE_FUSE": "1", "DS4_DRAFT_VRAM": "96,48,32", "ROCBLAS_USE_HIPBLASLT": "0"}
+    for key, value in qualified_env.items():
+        if env.get(key) != value:
+            fail("qualified Maya environment drifted: " + key)
+    if cfg["gpu"] != [0, 1, 2] or cfg["port"] != service["port"] or cfg["model_name"] != service["alias"]:
+        fail("Maya server identity differs from the service contract")
+    if cfg["lib_dirs"][0] != data["strix_paths"]["release"] + "/rocblas/install/lib":
+        fail("the per-architecture rocBLAS must lead the engine's library path")
+    if service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
+        fail("Maya requires the qualified 14 GiB non-CMA floor")
 
 
 def validate_benchmarks(root: Path) -> None:

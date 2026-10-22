@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Shrink the amdgpu TTM page pool before a large load until the release's
+# memory floor is available (bounded; the engine's own load decides).
+set -Eeuo pipefail
+readonly want_kib={{ strix_service.load_available_kib }}
+readonly shrink=/sys/kernel/debug/ttm/page_pool_shrink
+available() { awk '/^MemAvailable:/ {print $2}' /proc/meminfo; }
+reads=0
+deadline=$((SECONDS + 45))
+while [ "$(available)" -lt "$want_kib" ] && [ -r "$shrink" ] && [ "$SECONDS" -lt "$deadline" ]; do
+    cat "$shrink" > /dev/null || break
+    reads=$((reads + 1))
+done
+printf 'ttm page pool: %s shrink reads, MemAvailable %s KiB (want %s)\n' "$reads" "$(available)" "$want_kib"

@@ -32,6 +32,44 @@
   when: strix_system.engine == 'strata'
   notify: Restart selected model service
 
+- name: Install the qualified Maya serving configuration
+  ansible.builtin.template:
+    src: maya-server.json.j2
+    dest: "{{ strix_paths.release }}/server.json"
+    owner: root
+    group: "{{ strix_service.group }}"
+    mode: "0444"
+  when: strix_system.engine == 'maya'
+  register: service_maya_config
+  notify: Restart selected model service
+
+- name: Seal the installed Maya serving configuration
+  ansible.builtin.shell: |
+    set -o pipefail
+    sha256sum server.json > server.sha256
+  args:
+    chdir: "{{ strix_paths.release }}"
+    executable: /bin/bash
+  when:
+    - strix_system.engine == 'maya'
+    - service_maya_config.changed
+  changed_when: true
+
+- name: Install the Maya runtime entry point and load-time pool drain
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - {src: run-maya.j2, dest: "{{ strix_paths.bin }}/run-maya"}
+    - {src: strix-drain-ttm-pool.j2, dest: /usr/local/sbin/strix-drain-ttm-pool}
+  loop_control:
+    label: "{{ item.dest }}"
+  when: strix_system.engine == 'maya'
+  notify: Restart selected model service
+
 - name: Install reversible host policy controller
   ansible.builtin.template:
     src: strix-host-policy.j2

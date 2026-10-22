@@ -1,0 +1,322 @@
+---
+strix_release_id: maya-ds4-dual-xtx-128k-v1
+strix_release_schema: 1
+strix_system:
+  id: maya-ds4-dual-xtx
+  name: Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX
+  engine: maya
+  selected_default: false
+  model: DeepSeek-V4.1-Flash-1017
+strix_platform:
+  os_id: ubuntu
+  os_version: '26.04'
+  kernel: 7.0.0-38-generic
+  architecture: x86_64
+  gpu_pci_id: 1002:1586
+  board_name: AXB35-02
+  minimum_memory_kib: 125000000
+  strict_kernel: true
+  secure_boot: disabled
+  kernel_arguments:
+    - amd_pstate=active
+    - amd_iommu=off
+    - amdgpu.gttsize=126976
+    - ttm.pages_limit=32505856
+    - ttm.page_pool_size=32505856
+  discrete_gpus:
+    - name: AMD Radeon RX 7900 XTX
+      pci_id: 1002:744c
+      count: 2
+  minimum_free_bytes: 470000000000
+strix_paths:
+  root: /opt/strix-halo
+  source: /opt/strix-halo/src
+  bin: /opt/strix-halo/bin
+  downloads: /opt/strix-halo/releases/maya-ds4-dual-xtx-128k-v1/downloads
+  release: /opt/strix-halo/releases/maya-ds4-dual-xtx-128k-v1
+  models: /opt/strix-halo/models/deepseek-v41-flash-1017-maya
+  state: /var/lib/strix-halo-inference
+strix_runtime:
+  repository: https://github.com/pepuscz/project-maya
+  release_tag: maya-ds4-fd-dspark-128k-20261022
+  tag_object: ec0f80b42ff0b17180aad97e141e2e3c95de9fcc
+  tag_object_type: tag
+  source_commit: 62e4b2afda2d17d777967a46bfff131d32f51b16
+  source_tree: ffa7638db24107e4cfd436b4e56cc2bf90ad3a6f
+  upstream_repository: https://github.com/mw00/project-maya
+  upstream_tag: v1.1.21
+  upstream_commit: 451f9cb6a21ea65673bdde2e57b4a670ae2b8859
+  server_sha256: 4f55ead44a65b8e1f44f88c3b769ee25abbc60df335f04d04c180505b1462621
+  binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so a
+    portable install seals its own binary after the pinned source, toolchain and pack checks
+  ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
+  ggml_archive_url: https://github.com/ggml-org/llama.cpp/archive/3cf03257f219afbe7334045ff7c6a06ac68c627d.zip
+  ggml_archive_sha256: cbe23c594282ead2937abb3f008e51fcec4609d9256652fff42c7cc1c21ea47b
+  ggml_tree_fingerprint: 8053cd007a594545d97657e1d5db2e944277a8252fe7670ae0b1ecee407acc47
+  gcc_version: 15.2.0
+strix_rocm724:
+  version: 7.2.4
+  runfile_url: https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-7.2.4/ubuntu/24.04/rocm-installer_1.2.9.70204-62-93~24.04.run
+  runfile_name: rocm-installer_1.2.9.70204-62-93~24.04.run
+  runfile_size: 9389960949
+  runfile_sha256: 866779bfcdc24863c58fe7d8f8cfe21e9e20dc978ce77a153af64e1038f0ab5b
+  installer_script_sha256: 5fa797b77d29bef75b00103ad08451469bcea04ab9c9bad03c3c6131dd024928
+  components: 97
+  include_entries: 52
+  file_sha256:
+    bin/hipcc: 7e6614203ff9838f64581a4c9522dd4794834d7e91bad8074bb8c88d85618d09
+    lib/libamdhip64.so.7.2.70204: f1043337461c8e54ee135e95fa979a7d0e4344676ad5b0554652f844f8f098ac
+  compat_debs:
+    - file: libicu74_74.2-1ubuntu3.1_amd64.deb
+      url: https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu74_74.2-1ubuntu3.1_amd64.deb
+      size: 10860078
+      sha256: c9a70989678660eed9a1e904c74fa043da8bec8e2036856fc16e31ced79b04f8
+    - file: libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      url: https://launchpadlibrarian.net/865991952/libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      size: 763972
+      sha256: bfd07c01d6e5ab3e327f3ca5819409b1914bbfb3f1a016d53e4dabd5f96143bb
+strix_rocblas:
+  repository: https://github.com/ROCm/rocm-libraries.git
+  tag: rocm-7.2.4
+  tag_object: 3a2a9bc877edcf5decd36eeaf897a8c9b6017030
+  commit: dabb6df2b988f8eabed1e2fecefaaf4e818bc7ef
+  tree: 7c5998a2fc3b9da49b0ee1a218d0fe3a603a7eb6
+  upstream_fix: https://github.com/ROCm/rocm-libraries/pull/4781
+  upstream_fix_merge_commit: 51c8fc419dda452252d36545d04335424ca1a1bf
+  patch:
+    name: rocblas-rocm724-4781-per-gfx-backport.patch
+    sha256: 72f127645d241e3e515ae868d8e3bb80df211b04b095abbcddffe4f8ee447e17
+  patched_tree: d34d2f545bd3d281c671476b797b81948d77deec
+  initializer_sha256: d666c4e35b62abb63effbab8222b47c4b6cf30aacc7e64857bc3af7cf3cc60b3
+  gpu_targets: gfx1100;gfx1151
+  build_jobs: 2
+  deps:
+    - name: libmsgpack-cxx-dev
+      version: 7.0.0-2
+      sha256: 033efcbd18ea9eec440e2a4277366623834ec0553a136bfa7ece2a94dbfbcdb2
+    - name: libboost1.90-dev
+      version: 1.90.0-6ubuntu1
+      sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
+  reference_library_sha256: d89e9ada0fb0d0d679e8d427d1ece26db3f424cca8b6e189bce785bd33212ee0
+strix_target:
+  repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
+  revision: 26c6aeaf5ecce88fe47103f780279bcc6f1f0d9b
+  quantization: Maya-S IQ2_XXS
+  subdirectory: Maya-S
+  total_size: 178193155072
+  files:
+    - name: DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00004.gguf
+      local_subdirectory: Maya-S
+      size: 47887697280
+      sha256: b33d91333b463414fd91fbeb14a0939e3064a1abd820fa06310992da611eeb2e
+    - name: DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00004.gguf
+      local_subdirectory: Maya-S
+      size: 47669578400
+      sha256: 8198c1a5b9e2f964affacc1141627e2f0715711571c1fe04cb81702f232c5c39
+    - name: DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00004.gguf
+      local_subdirectory: Maya-S
+      size: 47103347360
+      sha256: 96b9b5e22ed60825794c377301cf2671a7a2ec463c7580b57e101f222c8ee516
+    - name: DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00004.gguf
+      local_subdirectory: Maya-S
+      size: 35532532032
+      sha256: 506dd95a2ea4f17c933534d730ec72b2ef1b82eec4847770f4f23c38344f96ca
+strix_extra_artifacts:
+  - name: DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00008-of-00009.gguf
+    repository: unsloth/DeepSeek-V4.1-Flash-1017-GGUF
+    revision: c991b28e7c109eed10a55075ddb46f830b5b3059
+    subdirectory: UD-Q8_K_XL
+    local_subdirectory: Engram
+    owned_by_service: true
+    size: 202758032592
+    sha256: 12df293355efbd104b088a77e13ee22410fb1ec3f7ab3863947f09896e64bec7
+  - name: dspark.bin
+    repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
+    revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
+    subdirectory: dspark
+    local_subdirectory: dspark
+    size: 7967616768
+    sha256: 42df65159f980a9189d80597e42b30012c7b10e0dd385a47051f3b2fd659bb7b
+  - name: dspark.json
+    repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
+    revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
+    subdirectory: dspark
+    local_subdirectory: dspark
+    size: 96965
+    sha256: 639c3144bca8cfe4db59057047dca40411f0cc732796e2a9321feb98fee2295f
+strix_draft:
+  repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
+  revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
+  files:
+    - name: dspark.bin
+    - name: dspark.json
+strix_ryzenadj:
+  repository: https://github.com/FlyGoat/RyzenAdj.git
+  commit: 5775fc3e6dbb25c7030ee2d100a1bdd6e8bf2d0a
+  version: 5775fc3
+  tested_binary_sha256: 2755abdb70fbe9a20245590fcf6af6e3d424d924cc54f30d172d5b6af5bbb1e2
+  enforce_tested_binary_sha256: true
+strix_fan:
+  manage: true
+  repository: https://github.com/cmetz/ec-su_axb35-linux.git
+  commit: 7a9f372edcaa99e562dece70204c4f609692a778
+  dkms_version: 0.1.0_git7a9f372
+  sysfs: /sys/class/ec_su_axb35
+  minimum_max_rpm: 2000
+strix_service:
+  name: strix-halo-inference.service
+  user: inference
+  group: inference
+  host: 127.0.0.1
+  port: 18109
+  alias: deepseek-v4.1-flash
+  context: 131072
+  parallel_slots: 1
+  memory_high: 118G
+  memory_max: 120G
+  memory_swap_max: 0
+  minimum_effective_non_cma_kib: 14680064
+  load_available_kib: 115343360
+  thermal_limit_millic: 95000
+  health_retries: 720
+  health_delay_seconds: 5
+  auto_start: true
+  conflicts:
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
+  retire_units:
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
+strix_policy:
+  cpu_governor: performance
+  cpu_min_khz: 2000000
+  cpu_boost: 1
+  gpu_dpm: high
+  stapm_mw: 120000
+  fast_mw: 120000
+  slow_mw: 120000
+  expected_watts: '120.000'
+strix_allow_reboot: false
+strix_verify_full_model_hashes: false
+strix_verify_api_smoke: true
+strix_maya:
+  python: '3.14'
+  build_jobs: 4
+  hip_architectures: gfx1100;gfx1151
+  packages:
+    - build-essential
+    - cmake
+    - curl
+    - git
+    - ninja-build
+    - python3
+    - python3-venv
+    - python3-yaml
+    - python3-rich
+    - libdrm-amdgpu1
+    - libelf1t64
+    - libnuma1
+  requirements_sha256: abac03058b7d45744e8e197323dbf897ae8b035487056131f0809c9782c8e0a2
+  pack: /opt/strix-halo/models/deepseek-v41-flash-1017-maya/Maya-S/maya-ds4-dspark
+  pack_tool:
+    repository: https://github.com/pepuscz/project-maya
+    commit: 1b8f5ec2bc4d1e4ba18c3d538fa5d44470c7296c
+    pack_gguf_sha256: 089f0f2498892c5c3c3bf1b84312b9c6e2ef308d1f02673dae69825a5724620a
+    chat_template_sha256: 2561a5200b62f7816c667ee6f7a3b9483beb62ce27b79acc70e39b60fad33bd0
+  pack_files:
+    engram.bin: 08d55d6433f389b14aa115f4ea4eb31d6a2d63df1ae40821f03facf4c2d49142
+    tensors.txt: a231c31491fa228c51aeadff6a18af4e944e34f2133ce14c21b70883da4875d7
+    tokenizer/chat_template.jinja: 2561a5200b62f7816c667ee6f7a3b9483beb62ce27b79acc70e39b60fad33bd0
+    tokenizer/merges.txt: 547bace837acea98652eef5669c9b01cee1c73ad1d2a44d6fdce9e6a81c22147
+    tokenizer/token_type.json: 0a61021438e5ce6041133495f18fc360a6587aea748b17d953f552d2119ba51e
+    tokenizer/tokenizer.json: 5a47981b685b75154e29bfb0299584c9b3a4a28679585e86d524c34c065d037f
+    tokenizer/vocab.json: 2f0bf5b31f4aa191d5d0d78291927a4f28c9ceb498a5e345b97e926c4cb99c1a
+  pack_ds4_normalized_sha256: 851f5d1f960c8d9123c2c4f31ffed2f810ace48d52bbdcab4abc0d9acc8ae952
+  expert_profile:
+    file: expert-profile-maya-s.bin
+    size: 66048
+    sha256: f384b25188569368d420fa12c072f2cef8152b3bbd66f90154e896a66bb70d7a
+  server:
+    exe: /opt/strix-halo/releases/maya-ds4-dual-xtx-128k-v1/source/build-hip/maya-ds4
+    args:
+      - --pack
+      - /opt/strix-halo/models/deepseek-v41-flash-1017-maya/Maya-S/maya-ds4-dspark
+      - --max-context
+      - '131072'
+      - --tp
+      - '2'
+      - --vision
+      - 'off'
+      - --dspark
+      - 'on'
+      - --threads
+      - 'on'
+      - --mmap-experts
+      - 'on'
+      - --expert-profile
+      - /var/lib/strix-halo-inference/expert-profile.bin
+    cwd: /opt/strix-halo/releases/maya-ds4-dual-xtx-128k-v1/source
+    tokenizer: /opt/strix-halo/models/deepseek-v41-flash-1017-maya/Maya-S/maya-ds4-dspark/tokenizer
+    backend: hip
+    model_name: deepseek-v4.1-flash
+    gpu: [0, 1, 2]
+    sampling:
+      temperature: 1.0
+      top_p: 1.0
+    reasoning_effort: high
+    lib_dirs:
+      - /opt/strix-halo/releases/maya-ds4-dual-xtx-128k-v1/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-ds4-dual-xtx-128k-v1/rocm/lib
+    port: 18109
+    log: /var/lib/strix-halo-inference/native.log
+    installer:
+      family: deepseek
+      models_dir: /opt/strix-halo/models
+      quant: DeepSeek-V4.1-Flash-1017
+      ds4_quant: maya-s
+      model_dir: /opt/strix-halo/models/deepseek-v41-flash-1017-maya/Maya-S
+      written: '2026-10-22 00:00'
+      speed_calibration:
+        skipped: true
+        reason: The qualified release fixes DSpark itself; no startup calibration
+    host: 127.0.0.1
+    env:
+      DS4_COMMIT_CAP_GB: '145'
+      ROCBLAS_USE_HIPBLASLT: '0'
+      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-dual-xtx-128k-v1/rocm/lib/rocblas/library
+      DS4_HELPER: '2'
+      DS4_HELPER_GB: '95'
+      DS4_WARM_CAP_GB: '14.9'
+      DS4_HELPER_CHECK: '1'
+      DS4_LANE_SPIN_US: '200'
+      DS4_HELPER_RECENT: '8'
+      DS4_Q8_BATCH: '1'
+      DS4_Q8_CHECK: '1'
+      DS4_TP_GGUF_UNEVEN: '1'
+      DS4_TP_CHECK: '1'
+      DS4_FLOW_TP: '1'
+      DS4_ATTN_WMMA: '0'
+      DS4_CHUNK_MIN: '512'
+      DS4_FLOW_STATS: '1'
+      DS4_HC_FUSE: '1'
+      DS4_ROUTE_FUSE: '1'
+      DS4_DRAFT_VRAM: 96,48,32
+      DS4_LT_STORE: /var/lib/strix-halo-inference/lt-picks.txt
+      DS4_LT_VERBOSE: '1'
+strix_qualification:
+  answer_quality:
+    coding: 10
+    gsm8k: 10
+    math: 10
+    total: 30
+    scoring: reviewed final answers; corrected math_08 reference is 20/3
+    thinking: false
+    math_10_output_cap: 4096
+  long_context:
+    input_tokens: 130048
+    output_tokens: 768
+    first_request_decode_tokens_per_second: 33.0
+    first_request_prefill_tokens_per_second: 153.6
+    reused_prompt_decode_tokens_per_second: 38.7
+  qualified_configuration: the same engine source, model, pack, expert profile and settings measured on the
+    dual RX 7900 XTX host; this from-scratch installer path is pending its first end-to-end run

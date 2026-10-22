@@ -11,3 +11,4 @@ ansible/inventory/hosts.yml
 *.bin
 __pycache__/
 .DS_Store
+!ansible/roles/maya_runtime/files/expert-profile-maya-s.bin

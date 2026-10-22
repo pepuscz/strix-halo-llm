@@ -15,7 +15,7 @@
     return_content: true
     status_code: 200
   register: verify_props
-  when: strix_system.engine != 'strata'
+  when: strix_system.engine not in ['strata', 'maya']
 
 - name: Verify engine-specific API and runtime identity
   ansible.builtin.include_tasks: "{{ strix_system.engine }}.yml"

@@ -1,0 +1,80 @@
+---
+- name: Install the Maya host build and runtime packages
+  ansible.builtin.apt:
+    name: "{{ strix_maya.packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create the Maya release directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: "{{ strix_service.group }}"
+    mode: "0755"
+  loop:
+    - "{{ strix_paths.release }}/patches"
+    - "{{ strix_paths.models }}/Maya-S"
+    - "{{ strix_paths.models }}/Engram"
+    - "{{ strix_paths.models }}/dspark"
+
+- name: Install verified Maya build inputs
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ strix_paths.release }}/{{ item.dest }}"
+    owner: root
+    group: "{{ strix_service.group }}"
+    mode: "0444"
+  loop:
+    - {src: requirements.lock, dest: requirements.lock}
+    - {src: rocblas-stock-tensile.cmake, dest: rocblas-stock-tensile.cmake}
+    - {src: "{{ strix_maya.expert_profile.file }}", dest: "{{ strix_maya.expert_profile.file }}"}
+    - {src: "{{ role_path }}/../../../patches/{{ strix_rocblas.patch.name }}", dest: "patches/{{ strix_rocblas.patch.name }}"}
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Install the pinned Maya build programs
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ strix_paths.bin }}/{{ item }}-{{ strix_release_id }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop: [build-maya-rocm, build-maya-engine]
+
+- name: Build the isolated ROCm 7.2.4 userspace and the per-architecture rocBLAS
+  ansible.builtin.command:
+    argv: ["{{ strix_paths.bin }}/build-maya-rocm-{{ strix_release_id }}"]
+  register: maya_runtime_rocm_build
+  changed_when: false
+  async: 21600
+  poll: 30
+
+- name: Build and seal the Maya engine and the DSpark pack
+  ansible.builtin.command:
+    argv: ["{{ strix_paths.bin }}/build-maya-engine-{{ strix_release_id }}"]
+  register: maya_runtime_build
+  changed_when: "'MAYA_RUNTIME_BUILT=1' in maya_runtime_build.stdout"
+  async: 14400
+  poll: 30
+
+- name: Hold the model files as the qualified runs did (service-owned, read-only - truthful page-cache residency)
+  ansible.builtin.file:
+    path: "{{ strix_paths.models }}/{{ item.local_subdirectory }}/{{ item.name }}"
+    owner: "{{ strix_service.user }}"
+    group: "{{ strix_service.group }}"
+    mode: "0444"
+  loop: "{{ strix_target.files + (strix_extra_artifacts | selectattr('owned_by_service', 'defined') | selectattr('owned_by_service') | list) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Seed the engine's expert profile from the qualified one (the engine updates it while serving)
+  ansible.builtin.copy:
+    src: "{{ strix_paths.release }}/{{ strix_maya.expert_profile.file }}"
+    dest: "{{ strix_paths.state }}/expert-profile.bin"
+    remote_src: true
+    force: false
+    owner: "{{ strix_service.user }}"
+    group: "{{ strix_service.group }}"
+    mode: "0644"

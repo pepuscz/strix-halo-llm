@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# The Maya DS4 engine from its pinned public tag, and the model's DSpark pack, for the dual RX 7900 XTX release.
+set -Eeuo pipefail
+readonly root={{ strix_paths.release | quote }}
+readonly models={{ strix_paths.models | quote }}
+readonly source_commit={{ strix_runtime.source_commit | quote }}
+readonly source_tree={{ strix_runtime.source_tree | quote }}
+readonly compat="$root/rocm-compat/usr/lib/x86_64-linux-gnu"
+readonly pack={{ strix_maya.pack | quote }}
+fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
+cd "$root"
+recipe_sha=$(cat "$0" {{ (strix_paths.bin + '/build-maya-rocm-' + strix_release_id) | quote }} | sha256sum | awk '{print $1}')
+if [[ -f build-recipe.sha256 ]]; then
+    [[ "$(cat build-recipe.sha256)" == "$recipe_sha" ]] || fail 'Immutable recipe changed; select a new release directory.'
+    sha256sum --check --quiet runtime.sha256
+    printf 'MAYA_RUNTIME_BUILT=0\n'
+    exit 0
+fi
+[[ "$(/usr/bin/g++ -dumpfullversion)" == {{ strix_runtime.gcc_version | quote }} ]] || fail 'unqualified host C++ compiler'
+[[ "$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')" == {{ strix_maya.python | quote }} ]]
+
+# 1. Engine source: the public tag, exact commit and tree, clean.
+if [[ ! -d source/.git ]]; then
+    git init source
+    git -C source remote add origin {{ strix_runtime.repository | quote }}
+    git -C source fetch --depth 1 origin refs/tags/{{ strix_runtime.release_tag }}:refs/tags/{{ strix_runtime.release_tag }}
+    git -C source checkout --detach "$source_commit"
+fi
+[[ "$(git -C source rev-parse refs/tags/{{ strix_runtime.release_tag }})" == {{ strix_runtime.tag_object | quote }} ]]
+[[ "$(git -C source rev-parse HEAD)" == "$source_commit" ]]
+[[ "$(git -C source rev-parse 'HEAD^{tree}')" == "$source_tree" ]]
+[[ -z "$(git -C source status --porcelain)" ]]
+
+# 2. llama.cpp (ggml) at the commit the engine's setup.py pins, checked by archive digest and tree fingerprint.
+readonly ggml_zip="$root/downloads/llama.cpp-{{ strix_runtime.ggml_commit }}.zip"
+if [[ ! -f "$ggml_zip" ]]; then
+    curl --fail --location --retry 3 --output "$ggml_zip.part" {{ strix_runtime.ggml_archive_url | quote }}
+    printf '%s  %s\n' {{ strix_runtime.ggml_archive_sha256 | quote }} "$ggml_zip.part" | sha256sum --check
+    mv "$ggml_zip.part" "$ggml_zip"
+fi
+printf '%s  %s\n' {{ strix_runtime.ggml_archive_sha256 | quote }} "$ggml_zip" | sha256sum --check
+if [[ ! -d source/third_party/llama.cpp ]]; then
+    python3 -I - "$root" {{ strix_runtime.ggml_commit | quote }} <<'PY'
+import pathlib, sys, zipfile
+root, commit = pathlib.Path(sys.argv[1]), sys.argv[2]
+with zipfile.ZipFile(root / f'downloads/llama.cpp-{commit}.zip') as archive:
+    prefix = archive.namelist()[0]
+    destination = root / 'source/third_party/llama.cpp'
+    for member in archive.infolist():
+        relative = pathlib.PurePosixPath(member.filename[len(prefix):])
+        if member.is_dir() or not relative.parts:
+            continue
+        if relative.is_absolute() or '..' in relative.parts:
+            raise RuntimeError('unsafe archive member')
+        output = destination / relative
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes(archive.read(member))
+        if member.external_attr >> 16 & 0o111:
+            output.chmod(0o755)
+PY
+fi
+fingerprint=$(cd source/third_party/llama.cpp && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
+[[ "$fingerprint" == {{ strix_runtime.ggml_tree_fingerprint | quote }} ]] || fail "llama.cpp tree fingerprint $fingerprint"
+[[ -z "$(git -C source status --porcelain)" ]]
+
+# 3. Python environment for the server and the build tools (hash-locked).
+[[ "$(sha256sum requirements.lock | awk '{print $1}')" == {{ strix_maya.requirements_sha256 | quote }} ]]
+if [[ ! -x source/.venv/bin/python ]]; then
+    python3 -m venv source/.venv
+fi
+source/.venv/bin/python -m pip install --require-hashes --no-deps -r "$root/requirements.lock"
+
+# 4. Build maya-ds4 for gfx1100 (the RX 7900 XTX cards) and gfx1151 (the Radeon 8060S helper).
+(
+    export ROCM_PATH="$root/rocm" HIP_PATH="$root/rocm" HIP_PLATFORM=amd HIP_COMPILER=clang HIP_RUNTIME=rocclr
+    export PATH="$root/rocm/bin:$root/rocm/lib/llvm/bin:$PATH"
+    export LD_LIBRARY_PATH="$compat:$root/rocm/lib:$root/rocm/lib64:$root/rocm/lib/llvm/lib"
+    export HIPFLAGS="-I$root/include-overlay" CXXFLAGS="-I$root/include-overlay"
+    cd "$root/source"
+    .venv/bin/cmake -S . -B build-hip \
+        -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF -DSTRATA_PREFILL_MMQ=ON \
+        -DSTRATA_NATIVE_EXPERTS=ON -DSTRATA_BUILD_TESTS=OFF '-DCMAKE_HIP_ARCHITECTURES={{ strix_maya.hip_architectures }}' \
+        -DCMAKE_HIP_COMPILER="$root/rocm/llvm/bin/clang++" -DCMAKE_PREFIX_PATH="$root/rocm" \
+        -DSTRATA_GGML_DIR="$root/source/third_party/llama.cpp"
+    .venv/bin/cmake --build build-hip --target maya-ds4 -j {{ strix_maya.build_jobs }}
+)
+[[ -x source/build-hip/maya-ds4 ]]
+[[ -z "$(git -C source status --porcelain)" ]]
+LD_LIBRARY_PATH="$root/rocblas/install/lib:$compat:$root/rocm/lib" ldd source/build-hip/maya-ds4 \
+    | grep -q "librocblas.so.5 => $root/rocblas/install/lib/" || fail 'the engine does not resolve the per-architecture rocBLAS'
+
+# 5. The DSpark pack: the engine's index of the model files plus the drafter. Built with the pack tool the
+# qualified pack came from (Maya ds4-v4.1 commit), never with vision weights present.
+if [[ ! -d packtool/.git ]]; then
+    git init packtool
+    git -C packtool remote add origin {{ strix_maya.pack_tool.repository | quote }}
+    git -C packtool fetch --depth 1 origin {{ strix_maya.pack_tool.commit | quote }}
+    git -C packtool checkout --detach FETCH_HEAD
+fi
+[[ "$(git -C packtool rev-parse HEAD)" == {{ strix_maya.pack_tool.commit | quote }} ]]
+[[ "$(sha256sum packtool/tools/ds4/pack_gguf.py | awk '{print $1}')" == {{ strix_maya.pack_tool.pack_gguf_sha256 | quote }} ]]
+[[ "$(sha256sum packtool/tools/ds4/chat_template.jinja | awk '{print $1}')" == {{ strix_maya.pack_tool.chat_template_sha256 | quote }} ]]
+[[ ! -e "$models/vision" ]] || fail "$models/vision must not exist while packing"
+if [[ ! -f "$pack/sources.json" ]]; then
+    rm -rf "$pack"
+    python3 -I packtool/tools/ds4/pack_gguf.py --model "$models/Maya-S" --out "$pack" --drafter "$models/dspark/dspark.json"
+    python3 -I - "$models" "$pack" <<'PY'
+import json, pathlib, sys
+models, pack = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+shards = sorted((models / 'Maya-S').glob('*.gguf')) + sorted((models / 'Engram').glob('*.gguf'))
+files = [{'name': s.name, 'size': s.stat().st_size, 'mtime_ns': s.stat().st_mtime_ns} for s in shards]
+(pack / 'sources.json').write_text(json.dumps({'files': files}, indent=1), encoding='utf-8')
+PY
+fi
+cat > pack.sha256 <<'HASHES'
+{% for name, digest in strix_maya.pack_files.items() %}{{ digest }}  {{ strix_maya.pack }}/{{ name }}
+{% endfor %}HASHES
+sha256sum --check --quiet pack.sha256
+# ds4.txt names the model folder; everything else in it is checked against the qualified pack.
+[[ "$(sed 's#^model_dir .*#model_dir MODEL_DIR#' "$pack/ds4.txt" | sha256sum | awk '{print $1}')" == {{ strix_maya.pack_ds4_normalized_sha256 | quote }} ]]
+grep -qx "model_dir $models/Maya-S" "$pack/ds4.txt"
+
+# 6. Seal.
+sha256sum source/build-hip/maya-ds4 rocblas/install/lib/librocblas.so.5.2 > runtime.sha256
+cat rocm-identity.sha256 pack.sha256 >> runtime.sha256
+sha256sum --check --quiet runtime.sha256
+printf '%s\n' "$source_commit" > source.commit
+printf '%s\n' "$source_tree" > source.tree
+printf '%s\n' "$recipe_sha" > build-recipe.sha256
+printf 'MAYA_RUNTIME_BUILT=1\n'

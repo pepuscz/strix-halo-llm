@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+# Isolated ROCm 7.2.4 userspace and the per-architecture rocBLAS for the Maya DS4 release.
+# Nothing is installed system-wide: no AMD APT repository, driver, /opt/rocm, ldconfig, or
+# dependency installation. Every input is pinned by size and SHA-256 or by Git object identity.
+set -Eeuo pipefail
+readonly root={{ strix_paths.release | quote }}
+readonly fetch={{ (strix_paths.bin + '/fetch-verified-artifact') | quote }}
+readonly real="$root/rocm-root/rocm-{{ strix_rocm724.version }}"
+readonly compat="$root/rocm-compat/usr/lib/x86_64-linux-gnu"
+fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
+cd "$root"
+
+# 1. AMD's ROCm runfile (Ubuntu 24.04 build): copy the userspace components only.
+if [[ ! -f "$real/.info/version" ]]; then
+    "$fetch" {{ strix_rocm724.runfile_url | quote }} "$root/downloads/{{ strix_rocm724.runfile_name }}" \
+        {{ strix_rocm724.runfile_size }} {{ strix_rocm724.runfile_sha256 }} {{ (strix_rocm724_runfile_seed_path | default('')) | quote }}
+    rm -rf rocm-payload rocm-root.partial
+    mkdir rocm-payload rocm-root.partial
+    (cd rocm-payload && TERM=dumb bash "$root/downloads/{{ strix_rocm724.runfile_name }}" noexec noexec-cleanup)
+    payload="$root/rocm-payload/rocm-installer"
+    [[ "$(sha256sum "$payload/rocm-installer.sh" | awk '{print $1}')" == {{ strix_rocm724.installer_script_sha256 | quote }} ]] \
+        || fail 'unexpected runfile installer payload'
+    count=0
+    while read -r component; do
+        [[ -n "$component" ]] || continue
+        content="$payload/component-rocm/$component/content"
+        [[ "$(ls -A "$content")" == "rocm-{{ strix_rocm724.version }}" ]] || fail "non-relocatable component: $component"
+        cp --archive "$content/." "$root/rocm-root.partial/"
+        count=$((count + 1))
+    done < "$payload/component-rocm/rocm-packages.config"
+    [[ "$count" -eq {{ strix_rocm724.components }} ]] || fail "copied $count ROCm components"
+    [[ "$(cat "$root/rocm-root.partial/rocm-{{ strix_rocm724.version }}/.info/version")" == {{ strix_rocm724.version | quote }} ]]
+    rm -rf rocm-root
+    mv rocm-root.partial rocm-root
+    rm -rf rocm-payload
+fi
+cat > "$root/rocm-identity.sha256" <<'HASHES'
+{% for path, digest in strix_rocm724.file_sha256.items() %}{{ digest }}  rocm-root/rocm-{{ strix_rocm724.version }}/{{ path }}
+{% endfor %}HASHES
+sha256sum --check --quiet "$root/rocm-identity.sha256"
+
+# The engine's ROCm root: one link per runtime entry plus llvm -> lib/llvm (the qualified layout).
+mkdir -p "$root/rocm"
+for entry in "$real"/* "$real"/.info; do
+    ln -sfn "$entry" "$root/rocm/$(basename "$entry")"
+done
+ln -sfn "$real/lib/llvm" "$root/rocm/llvm"
+
+# 2. Ubuntu 24.04 libraries the 24.04 ld.lld needs on Ubuntu 26.04 (build time; extracted, not installed).
+if [[ ! -e "$compat/libxml2.so.2" ]]; then
+    rm -rf rocm-compat
+{% for deb in strix_rocm724.compat_debs %}
+    "$fetch" {{ deb.url | quote }} "$root/downloads/{{ deb.file }}" {{ deb.size }} {{ deb.sha256 }}
+    dpkg-deb --extract "$root/downloads/{{ deb.file }}" "$root/rocm-compat"
+{% endfor %}
+fi
+[[ -e "$compat/libxml2.so.2" && -e "$compat/libicuuc.so.74" ]] || fail 'incomplete compat libraries'
+
+# Explicit include overlay: keeps a host /usr/include/rocwmma from shadowing the runtime's headers.
+if [[ ! -d include-overlay ]]; then
+    mkdir include-overlay.partial
+    while read -r entry; do
+        ln -s "../rocm-root/rocm-{{ strix_rocm724.version }}/include/$entry" "include-overlay.partial/$entry"
+    done < <(find "$real/include" -mindepth 1 -maxdepth 1 -printf '%f\n' | sort)
+    [[ -e include-overlay.partial/hip/hip_runtime.h && -e include-overlay.partial/rocwmma/internal/accessors.hpp ]]
+    mv include-overlay.partial include-overlay
+fi
+[[ "$(find include-overlay -mindepth 1 -maxdepth 1 | wc -l)" -eq {{ strix_rocm724.include_entries }} ]]
+
+# 3. rocBLAS rocm-7.2.4 with the per-architecture Tensile library (ROCm/rocm-libraries PR 4781, backported).
+# Stock 7.2.4 rocBLAS keeps one Tensile library per process, which fails when gfx1100 and gfx1151 share it.
+readonly rb="$root/rocblas"
+if [[ ! -f "$rb/install/lib/librocblas.so.5.2" ]]; then
+    rm -rf "$rb"
+    mkdir -p "$rb/packages" "$rb/deps"
+    git init "$rb/source"
+    git -C "$rb/source" remote add origin {{ strix_rocblas.repository | quote }}
+    git -C "$rb/source" sparse-checkout init --cone
+    git -C "$rb/source" sparse-checkout set projects/rocblas shared/tensile cmake
+    git -C "$rb/source" fetch --depth=1 --filter=blob:none origin \
+        refs/tags/{{ strix_rocblas.tag }}:refs/tags/{{ strix_rocblas.tag }}
+    git -C "$rb/source" checkout --detach {{ strix_rocblas.commit | quote }}
+    [[ "$(git -C "$rb/source" rev-parse refs/tags/{{ strix_rocblas.tag }})" == {{ strix_rocblas.tag_object | quote }} ]]
+    [[ "$(git -C "$rb/source" rev-parse HEAD)" == {{ strix_rocblas.commit | quote }} ]]
+    [[ "$(git -C "$rb/source" rev-parse 'HEAD^{tree}')" == {{ strix_rocblas.tree | quote }} ]]
+    patch="$root/patches/{{ strix_rocblas.patch.name }}"
+    [[ "$(sha256sum "$patch" | awk '{print $1}')" == {{ strix_rocblas.patch.sha256 | quote }} ]]
+    git -C "$rb/source" apply --check --recount "$patch"
+    git -C "$rb/source" apply --index --recount "$patch"
+    [[ "$(git -C "$rb/source" write-tree)" == {{ strix_rocblas.patched_tree | quote }} ]]
+    # Header-only build dependencies, extracted under the build root and never installed.
+{% for deb in strix_rocblas.deps %}
+    (cd "$rb/packages" && apt-get download {{ (deb.name + '=' + deb.version) | quote }})
+    deb="$rb/packages/{{ deb.name }}_{{ deb.version | replace(':', '%3a') }}_amd64.deb"
+    [[ "$(sha256sum "$deb" | awk '{print $1}')" == {{ deb.sha256 | quote }} ]] || fail 'build dependency digest mismatch: {{ deb.name }}'
+    dpkg-deb --extract "$deb" "$rb/deps"
+{% endfor %}
+    initializer="$root/rocblas-stock-tensile.cmake"
+    [[ "$(sha256sum "$initializer" | awk '{print $1}')" == {{ strix_rocblas.initializer_sha256 | quote }} ]]
+    (
+        export ROCM_PATH="$root/rocm" HIP_PATH="$root/rocm" HIP_PLATFORM=amd TENSILE_SKIP_LIBRARY=1
+        export PATH="$root/rocm/bin:$root/rocm/llvm/bin:$PATH"
+        export LD_LIBRARY_PATH="$compat:$root/rocm/lib:$root/rocm/lib64:$root/rocm/lib/llvm/lib"
+        cmake -S "$rb/source/projects/rocblas" -B "$rb/build" \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_CXX_COMPILER="$root/rocm/llvm/bin/clang++" \
+            -DCMAKE_INSTALL_PREFIX="$rb/install" \
+            "-DCMAKE_PREFIX_PATH=$rb/deps/usr;$root/rocm" \
+            -DCMAKE_PROJECT_INCLUDE="$initializer" \
+            -DROCM_PATH="$root/rocm" '-DGPU_TARGETS={{ strix_rocblas.gpu_targets }}' \
+            -DBUILD_CLIENTS_TESTS=OFF -DBUILD_CLIENTS_BENCHMARKS=OFF -DBUILD_CLIENTS_SAMPLES=OFF \
+            -DBUILD_WITH_TENSILE=ON -DBUILD_WITH_PIP=ON -DBUILD_WITH_HIPBLASLT=ON -Dhipblaslt_path="$root/rocm" \
+            -DTensile_LOGIC=asm_lite -DTensile_CPU_THREADS={{ strix_rocblas.build_jobs }} \
+            -DTensile_LAZY_LIBRARY_LOADING=ON -DTensile_SEPARATE_ARCHITECTURES=ON
+        mkdir -p "$rb/build/Tensile/library"
+        cmake --build "$rb/build" --target rocblas --parallel {{ strix_rocblas.build_jobs }}
+        cmake --install "$rb/build"
+    )
+fi
+[[ -f "$rb/install/lib/librocblas.so.5.2" ]] || fail 'rocBLAS did not install'
+printf 'MAYA_ROCM_READY=1\n'

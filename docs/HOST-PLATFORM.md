@@ -7,6 +7,7 @@ The recipes require Ubuntu 26.04, AMD GPU PCI ID `1002:1586`, AXB35-02 board, at
 | Qwen / Strata | `7.0.0-31-generic` | 220 GB | 8 GiB |
 | DeepSeek / Vulkan | `7.0.0-29-generic` | 120 GB | 2 GiB |
 | DeepSeek / Lucebox | `7.0.0-29-generic` | 120 GB | 4 GiB |
+| DeepSeek V4.1 / Maya dual RX 7900 XTX | `7.0.0-38-generic` | 470 GB | 14 GiB |
 
 The qualified machine used BIOS `3.10`. Set these options before installation;
 the labels and values below match the BOSGAME BIOS menus:
@@ -30,3 +31,8 @@ The installer manages this GRUB command line:
 ```text
 amd_pstate=active amd_iommu=off amdgpu.gttsize=126976 ttm.pages_limit=32505856 ttm.page_pool_size=32505856
 ```
+
+The dual RX 7900 XTX recipe also requires two `1002:744c` cards. The qualified
+machine attaches each through M.2 to OCuLink on its own PCIe root port; HIP
+must enumerate the two cards before the Radeon 8060S (devices 0 and 1, then 2).
+The cards ran at their default power limits.

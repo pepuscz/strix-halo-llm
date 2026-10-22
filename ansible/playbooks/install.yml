@@ -14,5 +14,7 @@
     - artifacts
     - role: strata_runtime
       when: strix_system.engine == 'strata'
+    - role: maya_runtime
+      when: strix_system.engine == 'maya'
     - service
     - verify

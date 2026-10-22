@@ -12,10 +12,13 @@ After=network-online.target
 ConditionPathExists={{ strix_paths.release }}/vulkan/llama-server
 {% elif strix_system.engine == 'strata' %}
 ConditionPathExists={{ strix_paths.release }}/build/strata
+{% elif strix_system.engine == 'maya' %}
+ConditionPathExists={{ strix_paths.release }}/source/build-hip/maya-ds4
 {% else %}
 ConditionPathExists={{ strix_rocm.qualified_build_path }}/dflash_server
-{% endif %}ConditionPathExists={{ strix_paths.models }}/{{ strix_target.files[0].name }}
+{% endif %}ConditionPathExists={{ strix_paths.models }}/{{ (strix_target.files[0].local_subdirectory + '/') if strix_target.files[0].local_subdirectory is defined else '' }}{{ strix_target.files[0].name }}
 {% if strix_system.engine == 'strata' %}ConditionPathExists={{ strix_paths.release }}/mtp/rt/experts.bin
+{% elif strix_system.engine == 'maya' %}ConditionPathExists={{ strix_maya.pack }}/ds4.txt
 {% else %}ConditionPathExists={{ strix_paths.models }}/{{ strix_draft.name }}
 {% endif %}
 
@@ -26,15 +29,18 @@ Group={{ strix_service.group }}
 SupplementaryGroups=video render
 {% if strix_system.engine == 'vulkan' %}RuntimeDirectory=strix-halo-inference-slots
 RuntimeDirectoryMode=0755
+{% elif strix_system.engine == 'maya' %}RuntimeDirectory=strix-halo-inference-maya
+RuntimeDirectoryMode=0700
 {% endif %}
 {% if strix_system.engine == 'vulkan' %}
 WorkingDirectory={{ strix_paths.release }}/vulkan
-{% elif strix_system.engine == 'strata' %}
+{% elif strix_system.engine in ['strata', 'maya'] %}
 WorkingDirectory={{ strix_paths.release }}/source
 {% else %}
 WorkingDirectory={{ strix_rocm.qualified_source_path }}/server
 {% endif %}ExecStartPre=+/usr/local/sbin/strix-host-policy apply
-{% if strix_system.engine == 'vulkan' %}
+{% if strix_system.engine == 'maya' %}ExecStartPre=+/usr/local/sbin/strix-drain-ttm-pool
+{% endif %}{% if strix_system.engine == 'vulkan' %}
 ExecStart={{ strix_paths.release }}/vulkan/llama-server \
   -m {{ strix_paths.models }}/{{ strix_target.files[0].name }} \
   -md {{ strix_paths.models }}/{{ strix_draft.name }} \
@@ -52,6 +58,8 @@ ExecStart={{ strix_paths.release }}/vulkan/llama-server \
 {% endfor %}Environment="LD_LIBRARY_PATH={{ strix_paths.release }}/loader/usr/lib/x86_64-linux-gnu"
 {% elif strix_system.engine == 'strata' %}
 ExecStart={{ strix_paths.bin }}/run-strata
+{% elif strix_system.engine == 'maya' %}
+ExecStart={{ strix_paths.bin }}/run-maya
 {% else %}
 ExecStart={{ strix_rocm.qualified_build_path }}/dflash_server \
   {{ strix_paths.models }}/{{ strix_target.files[0].name }} \

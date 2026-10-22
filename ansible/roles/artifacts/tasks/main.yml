@@ -29,7 +29,8 @@
           'revision': strix_target.revision,
           'subdirectory': strix_target.subdirectory
         }) | list
-        + ([] if strix_system.engine == 'strata' else [strix_draft | combine({'kind': 'draft'})])
+        + ([] if strix_system.engine in ['strata', 'maya'] else [strix_draft | combine({'kind': 'draft'})])
+        + (strix_extra_artifacts | default([]) | map('combine', {'kind': 'extra'}) | list)
       }}
 
 - name: Fetch or adopt every pinned model artifact
@@ -37,7 +38,7 @@
     argv:
       - "{{ strix_paths.bin }}/fetch-verified-artifact"
       - "{{ artifacts_url }}"
-      - "{{ strix_paths.models }}/{{ item.name }}"
+      - "{{ strix_paths.models }}/{{ (item.local_subdirectory + '/') if item.local_subdirectory is defined else '' }}{{ item.name }}"
       - "{{ item.size }}"
       - "{{ item.sha256 }}"
       - "{{ (strix_artifact_seed_paths | default({}))[item.name] | default('') }}"
@@ -56,7 +57,7 @@
 
 - name: Read model artifact sizes
   ansible.builtin.stat:
-    path: "{{ strix_paths.models }}/{{ item.name }}"
+    path: "{{ strix_paths.models }}/{{ (item.local_subdirectory + '/') if item.local_subdirectory is defined else '' }}{{ item.name }}"
     get_checksum: false
   loop: "{{ artifacts_model_artifacts }}"
   loop_control:
@@ -75,7 +76,7 @@
 
 - name: Verify complete model hashes when requested
   ansible.builtin.stat:
-    path: "{{ strix_paths.models }}/{{ item.name }}"
+    path: "{{ strix_paths.models }}/{{ (item.local_subdirectory + '/') if item.local_subdirectory is defined else '' }}{{ item.name }}"
     checksum_algorithm: sha256
     get_checksum: true
   loop: "{{ artifacts_model_artifacts }}"

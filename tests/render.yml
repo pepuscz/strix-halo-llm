@@ -47,6 +47,19 @@
         - {src: ansible/roles/service/templates/strata-server.json.j2, dest: server.json, mode: "0444"}
       when: strix_system.engine == 'strata'
 
+    - name: Render Maya build and serving programs
+      ansible.builtin.template:
+        src: "../{{ item.src }}"
+        dest: "{{ render_root }}/{{ item.dest }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - {src: ansible/roles/maya_runtime/templates/build-maya-rocm.j2, dest: build-maya-rocm, mode: "0755"}
+        - {src: ansible/roles/maya_runtime/templates/build-maya-engine.j2, dest: build-maya-engine, mode: "0755"}
+        - {src: ansible/roles/service/templates/run-maya.j2, dest: run-maya, mode: "0755"}
+        - {src: ansible/roles/service/templates/strix-drain-ttm-pool.j2, dest: strix-drain-ttm-pool, mode: "0755"}
+        - {src: ansible/roles/service/templates/maya-server.json.j2, dest: server.json, mode: "0444"}
+      when: strix_system.engine == 'maya'
+
     - name: Render the demand-based fan governor service
       ansible.builtin.template:
         src: ../ansible/roles/fan/templates/strix-fan-governor.service.j2
@@ -62,6 +75,8 @@
           ['fetch-verified-artifact', 'strix-axb35-fan', 'strix-host-policy']
           + (['build-qualified-rocm'] if strix_system.engine == 'rocm' else [])
           + (['build-strata', 'run-strata'] if strix_system.engine == 'strata' else [])
+          + (['build-maya-rocm', 'build-maya-engine', 'run-maya', 'strix-drain-ttm-pool']
+             if strix_system.engine == 'maya' else [])
         }}
       changed_when: false
 
@@ -146,3 +161,24 @@
           - "'--batch-mtp' not in strix_strata.server.args"
           - "'run-strata' in rendered_unit_text"
       when: strix_system.engine == 'strata'
+
+    - name: Read rendered Maya server configuration
+      ansible.builtin.slurp:
+        src: "{{ render_root }}/server.json"
+      register: rendered_maya_config
+      when: strix_system.engine == 'maya'
+
+    - name: Assert Maya DS4 dual RX 7900 XTX serving contract
+      ansible.builtin.assert:
+        that:
+          - (rendered_maya_config.content | b64decode | from_json) == strix_maya.server
+          - strix_maya.server.gpu == [0, 1, 2]
+          - strix_maya.server.env.DS4_HELPER == '2'
+          - strix_maya.server.env.DS4_DRAFT_VRAM == '96,48,32'
+          - strix_maya.server.lib_dirs[0] == strix_paths.release + '/rocblas/install/lib'
+          - "'run-maya' in rendered_unit_text"
+          - "'strix-drain-ttm-pool' in rendered_unit_text"
+          - "'RuntimeDirectory=strix-halo-inference-maya' in rendered_unit_text"
+          - "('ConditionPathExists=' + strix_paths.models + '/Maya-S/' + strix_target.files[0].name) in rendered_unit_text"
+      when: strix_system.engine == 'maya'
+

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+readonly root={{ strix_paths.release | quote }}
+readonly runtime="$root/rocm"
+readonly compat="$root/rocm-compat/usr/lib/x86_64-linux-gnu"
+readonly launch=/run/strix-halo-inference-maya/server.json
+cd "$root"
+sha256sum --check --quiet runtime.sha256
+sha256sum --check --quiet server.sha256
+[[ "$(git -c safe.directory="$root/source" -C source rev-parse HEAD)" == {{ strix_runtime.source_commit | quote }} ]]
+[[ "$(git -c safe.directory="$root/source" -C source rev-parse 'HEAD^{tree}')" == {{ strix_runtime.source_tree | quote }} ]]
+# maya.py touches the config it is given: start from a fresh byte-identical copy owned by the service user.
+install -m 0600 "$root/server.json" "$launch"
+export ROCM_PATH="$runtime" HIP_PATH="$runtime" HIP_PLATFORM=amd
+export PATH="$runtime/bin:$runtime/lib/llvm/bin:$PATH"
+export LD_LIBRARY_PATH="$compat:$runtime/lib:$runtime/lib64:$runtime/lib/llvm/lib"
+cd "$root/source"
+exec "$root/source/.venv/bin/python" "$root/source/maya.py" --config "$launch" --port {{ strix_service.port }}
