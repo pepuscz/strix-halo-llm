@@ -96,20 +96,20 @@ Qwen uses kernel `7.0.0-31-generic`; DeepSeek uses `7.0.0-29-generic`. Strata an
 
 ![DeepSeek-V4.1-Flash-1017 dual RX 7900 XTX context scaling](benchmark-dual-xtx.svg)
 
-**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, allocation 262,144 tokens, the same five-phrase prompts as the DeepSeek rows above (identical bytes, pinned by SHA-256). Each point is a fresh load from the frozen expert profile; thinking off, a 256-token cap (every answer used 64 tokens), zero cached input. This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
+**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, allocation 262,144 tokens, the same five-phrase prompts as the DeepSeek rows above (identical bytes, pinned by SHA-256). The DSpark drafter's three blocks are split across the two cards (block 0 on the second card, blocks 1 and 2 on the lead), which leaves each card room for more resident experts. Each point is a fresh load from the frozen expert profile; thinking off, a 256-token cap (every answer used 64 tokens), zero cached input. This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
-| 2,040 | 58.0 | 30.9 | 5/5 |
-| 3,840 | 97.0 | 32.0 | 5/5 |
-| 7,680 | 159.9 | 31.5 | 5/5 |
-| 15,359 | 175.3 | 31.6 | 5/5 |
-| 30,720 | 192.8 | 31.1 | 5/5 |
-| 59,933 | 201.7 | 30.4 | 5/5 |
-| 122,879 | 221.8 | 27.7 | 5/5 |
-| 163,840 | 222.8 | 29.9 | 5/5 |
-| 212,992 | 222.3 | 29.5 | 5/5 |
-| 245,760 | 220.2 | 29.3 | 5/5 |
+| 2,040 | 58.1 | 27.8 | 5/5 |
+| 3,840 | 99.5 | 34.5 | 5/5 |
+| 7,680 | 162.8 | 34.1 | 5/5 |
+| 15,359 | 178.6 | 34.3 | 5/5 |
+| 30,720 | 196.7 | 32.1 | 5/5 |
+| 59,933 | 205.8 | 33.0 | 5/5 |
+| 122,879 | 226.1 | 32.5 | 5/5 |
+| 163,840 | 226.2 | 31.7 | 5/5 |
+| 212,992 | 226.1 | 32.4 | 5/5 |
+| 245,760 | 224.1 | 31.2 | 5/5 |
 
-The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents: a 130,048-token real-code prompt read at 153.6 tok/s, wrote 768 tokens at 33.0 tok/s, and at 38.7 tok/s with that input already cached. Quality: 30/30 with the same coding and maths questions, measured at a 131,072-token allocation.
+The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents: a 130,048-token real-code prompt read at 155.4 tok/s, wrote 768 tokens at 37.1 tok/s, and at 42.8 tok/s with that input already cached. Quality: 30/30 with the same coding and maths questions, measured at a 131,072-token allocation.
 
