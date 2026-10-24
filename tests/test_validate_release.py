@@ -64,9 +64,9 @@ class ReleaseValidatorTest(unittest.TestCase):
                 else:
                     VALIDATOR.validate_manifest(path, ROOT)
 
-    def test_glm_draft_fails_on_its_pending_installer_run(self) -> None:
-        self.assertEqual(VALIDATOR.pending_fields(self.glm()), ["strix_qualification.qualified_configuration"])
-        self.assert_fails(self.glm(), "draft release: 1 value(s) are PENDING")
+    def test_glm_is_qualified(self) -> None:
+        self.assertEqual(VALIDATOR.pending_fields(self.glm()), [])
+        self.assertEqual(self.validate(self.glm())["strix_release_id"], "maya-glm-dual-xtx-512k-v1")
 
     def test_a_missing_python_lock_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -99,6 +99,13 @@ class ReleaseValidatorTest(unittest.TestCase):
             (lambda d: d["strix_qualification"]["retrieval_ladder"].update(largest_input_tokens=1), "largest input"),
             (lambda d: d["strix_qualification"]["retrieval_ladder"]["allocations"][1]["decode_tokens_per_second"].pop(),
              "one decode_tokens_per_second per point"),
+            (lambda d: d["strix_qualification"]["long_context"].pop("reused_prompt_cached_tokens"),
+             "long-context record drifted"),
+            (lambda d: d["strix_qualification"]["long_context"].update(allocation_tokens=131072),
+             "long-context record must hold"),
+            (lambda d: d["strix_qualification"]["long_context"].update(
+                reused_prompt_cached_tokens=d["strix_qualification"]["long_context"]["input_tokens"]),
+             "long-context record must hold"),
             (lambda d: d["strix_target"].update(total_size=d["strix_target"]["total_size"]
                                                 - d["strix_target"]["files"].pop()["size"]), "three Maya-M shards"),
             (lambda d: d["strix_target"]["files"][2].update(size=1), "target file total"),

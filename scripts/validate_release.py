@@ -414,8 +414,8 @@ def validate_maya_glm(data: dict, root: Path) -> None:
                                 "stapm_mw": 120000, "fast_mw": 120000, "slow_mw": 120000, "expected_watts": "120.000"}:
         fail("Maya GLM host policy drifted from the measured runs' policy")
     qualification = data["strix_qualification"]
-    if set(qualification) != {"answer_quality", "retrieval_ladder", "conversation_switch", "multi_conversation",
-                              "qualified_configuration"}:
+    if set(qualification) != {"answer_quality", "retrieval_ladder", "long_context", "conversation_switch",
+                              "multi_conversation", "qualified_configuration"}:
         fail("Maya GLM qualification sections drifted")
     quality = qualification["answer_quality"]
     if set(quality) != {"coding", "gsm8k", "math", "total", "scoring", "thinking", "allocation_tokens", "output_caps"} or \
@@ -445,6 +445,20 @@ def validate_maya_glm(data: dict, root: Path) -> None:
         largest = max(largest, high)
     if ladder["largest_input_tokens"] != largest:
         fail("Maya GLM retrieval ladder's largest input differs from its points")
+    # The DeepSeek dual RX 7900 XTX row's real-code prompt (its bytes), cold and then with its input cached, on the
+    # installed service: the retrieval filler routes to few experts and reads faster than real text.
+    long = qualification["long_context"]
+    numbers = ("input_tokens", "output_tokens", "first_request_prefill_tokens_per_second",
+               "first_request_decode_tokens_per_second", "reused_prompt_cached_tokens",
+               "reused_prompt_decode_tokens_per_second")
+    if set(long) != {"prompt_sha256", "allocation_tokens", *numbers}:
+        fail("Maya GLM long-context record drifted")
+    require_sha(long["prompt_sha256"], "Maya GLM long-context prompt")
+    if long["allocation_tokens"] != service["context"] or \
+            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers) or \
+            not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
+        fail("Maya GLM long-context record must hold positive readings on the release's allocation, "
+             "with less than its input cached on reuse")
     switch = qualification["conversation_switch"]
     if set(switch) != {"set_aside_input_tokens", "restored_tokens", "restore_seconds", "new_input_tokens",
                        "request_seconds", "cold_request_seconds", "conditions"} or \

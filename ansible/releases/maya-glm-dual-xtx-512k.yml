@@ -1,6 +1,4 @@
 ---
-# Draft until the from-scratch installer run on the qualified host is recorded: the PENDING in
-# strix_qualification.qualified_configuration fails scripts/validate_release.py until then.
 strix_release_id: maya-glm-dual-xtx-512k-v1
 strix_release_schema: 1
 strix_system:
@@ -289,7 +287,7 @@ strix_maya:
       MAYA_GLM_DSA_SCORE2: rl1b8
       MAYA_GLM_MLA_ATTN2: h32lvc
       MAYA_GLM_HELPER_CHECK: '8'
-      # Conversations set aside on disk (a full 524,288-token one is about 7 GB), kept across service restarts and
+      # Conversations set aside on disk (a full 524,288-token one is about 8 GB), kept across service restarts and
       # dropped after the engine's default 7 days. Conversation checkpoints stay at the engine default (on).
       MAYA_GLM_SLOTS: '4'
       MAYA_GLM_SLOT_GB: '32'
@@ -337,6 +335,17 @@ strix_qualification:
         input_tokens_range: [456403, 456403]
         decode_tokens_per_second: [50.1]
         prefill_tokens_per_second: [1021.3]
+  # The DeepSeek dual RX 7900 XTX row's 130,048-token real-code prompt (the same bytes; GLM counts 124,103 tokens),
+  # thinking off, 768-token cap, on the installed service: cold, then the same request again.
+  long_context:
+    prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
+    allocation_tokens: 524288
+    input_tokens: 124103
+    output_tokens: 768
+    first_request_prefill_tokens_per_second: 651.7
+    first_request_decode_tokens_per_second: 54.2
+    reused_prompt_cached_tokens: 124102
+    reused_prompt_decode_tokens_per_second: 55.4
   # Conversation A set aside on disk when B came, and taken back for its next turn.
   conversation_switch:
     set_aside_input_tokens: 114129
@@ -345,10 +354,15 @@ strix_qualification:
     new_input_tokens: 98
     request_seconds: 10.7
     cold_request_seconds: 128.2
-    conditions: conversation checkpoints on and MAYA_GLM_SLOT_KEEP unset; keeping conversations across a restart is
-      verified by the from-scratch install test
+    conditions: conversation checkpoints on and MAYA_GLM_SLOT_KEEP unset. With this release's MAYA_GLM_SLOT_KEEP=1 the
+      installed service also kept them across a stop and start; a 28,554-token conversation came back from disk in
+      0.1 s and its next turn took 4.9 s
   multi_conversation: this release serves one conversation at a time (parallel_slots 1); 2 and 3 parallel
     conversations were measured at 131,072 (a lone request's decode unchanged, conversations served together about
     45 tok/s in total) and are not part of the release
   qualified_configuration: 'the same engine source, model, pack and settings measured on the qualified host at
-    131,072, 262,144 and 524,288 allocations; the from-scratch installer run: PENDING'
+    131,072, 262,144 and 524,288 allocations. On 24 Oct 2026 the from-scratch installer ran end to end on that host
+    (install and strixctl verify passed). The installed service then read the public 128K prompt cold at 524,288
+    (114,093 tokens, 5/5, 891.2 tok/s reading, 54.9 tok/s writing) and the long_context prompt, and kept a conversation
+    across a stop and start. The test ran the service with a runtime Restart=no drop-in, and the readings in a second
+    start after a fault in the test controller'

@@ -55,22 +55,28 @@ The installer verifies the hardware and kernel, downloads publisher artifacts wi
 
 A separate setup for the same box with two **AMD Radeon RX 7900 XTX** cards added, each on its own PCIe 4.0 x4 link (M.2 to OCuLink). It is not part of the single-box comparison above.
 
+Two recipes are published for it. Install one at a time: they use the same service name and port.
+
+**GLM-5.3-Flash with Maya HIP Maya-M IQ2_S dual RX 7900 XTX**, one conversation with **512K tokens of context**. The model's layers are split between the two cards, the Radeon 8060S computes each card's routed experts held in RAM, and the model's own MTP layer drafts the next token. It writes answers at 50-58 tok/s at every length of the speed test up to 456,403 tokens and found all five phrases at each one. It passes **28 of the 30 quality tests** (two maths misses, measured at 128K). On the DeepSeek row's 130,048-token real-code prompt it reads 651.7 tok/s and writes 54.2 tok/s (DeepSeek: 155.4 and 37.1). A conversation set aside for another one is kept on disk, also across a service restart, and taken back for its next turn.
+
 **DeepSeek-V4.1-Flash-1017 with Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, one conversation with **256K tokens of context**. The two cards split the model in tensor parallel, the Radeon 8060S serves routed experts beside them, and a DSpark drafter speculates with its blocks split across the two cards. It passes all **30 quality tests** (measured at 128K) and found all five phrases at every length of the speed test up to 245,760 tokens (50/50).
 
-The chart uses the same five-phrase retrieval test as above, with a fresh model load and no cached input at each point. The top panel shows input-reading speed; the bottom shows answer-writing speed.
+The chart uses the same five-phrase retrieval test as above, with a fresh model load and no cached input at each point. Both models read the same text; GLM's tokenizer counts it as about 7 % fewer tokens. The top panel shows input-reading speed; the bottom shows answer-writing speed.
 
-![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with two RX 7900 XTX cards and a Radeon 8060S helper](docs/benchmark-dual-xtx.svg)
+![GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with two RX 7900 XTX cards and a Radeon 8060S helper](docs/benchmark-dual-xtx.svg)
 
-[All ten measurements and test method](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017) · [Exact result data](benchmarks/results.json)
+[GLM measurements](docs/BENCHMARKS.md#dual-rx-7900-xtx-glm-53-flash) · [DeepSeek measurements and test method](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017) · [Exact result data](benchmarks/results.json)
 
 ```bash
-export STRIX_SYSTEM=maya-ds4-dual-xtx
+export STRIX_SYSTEM=maya-glm-dual-xtx   # or maya-ds4-dual-xtx
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The recipe is [maya-ds4-dual-xtx-256k.yml](ansible/releases/maya-ds4-dual-xtx-256k.yml). It builds the pinned engine tag, AMD's ROCm 7.2.4 userspace (isolated, nothing installed system-wide), and rocBLAS with the [per-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781) that mixed gfx1100/gfx1151 processes need. It needs kernel `7.0.0-38-generic` and about 470 GB free. The from-scratch install ran end to end at 128K on the previous engine tag; this tag adds one engine commit (the drafter placement) and one environment variable, and the 256K setting differs only in the context size.
+The GLM recipe is [maya-glm-dual-xtx-512k.yml](ansible/releases/maya-glm-dual-xtx-512k.yml). It builds the pinned engine tag, the same isolated ROCm 7.2.4 userspace and fixed rocBLAS as the DeepSeek recipe, and packs the model with the engine's own packer (no GPU needed). It needs kernel `7.0.0-38-generic` and about 240 GB free. The from-scratch install ran end to end at 512K on the qualified host.
+
+The DeepSeek recipe is [maya-ds4-dual-xtx-256k.yml](ansible/releases/maya-ds4-dual-xtx-256k.yml). It builds the pinned engine tag, AMD's ROCm 7.2.4 userspace (isolated, nothing installed system-wide), and rocBLAS with the [per-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781) that mixed gfx1100/gfx1151 processes need. It needs kernel `7.0.0-38-generic` and about 470 GB free. The from-scratch install ran end to end at 128K on the previous engine tag; this tag adds one engine commit (the drafter placement) and one environment variable, and the 256K setting differs only in the context size.
 
 ## Host requirements
 
