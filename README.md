@@ -1,6 +1,10 @@
 # Strix Halo LLM
 
-Ansible recipes and measured performance for running Qwen and DeepSeek locally on a **128 GiB AMD Ryzen AI Max+ 395 / Radeon 8060S** Strix Halo box (BOSGAME M5 / Sixunited AXB35-02).
+![Illustration of the BOSGAME M5 with two OCuLink-connected RX 7900 XTX cards, external USB4 SSD, and a floor-mounted GPU power supply](docs/strix-halo-frankenstein.png)
+
+*Illustration of the [dual RX 7900 XTX setup](#dual-rx-7900-xtx-setup).*
+
+Ansible recipes and measured performance for running Qwen, DeepSeek and GLM locally on a **128 GiB AMD Ryzen AI Max+ 395 / Radeon 8060S** Strix Halo box (BOSGAME M5 / Sixunited AXB35-02).
 
 **Winning setup for Qwen:** Qwen3.8-Flash-Next with **Strata HIP UD-Q4_K_XL**, up to **four simultaneous conversations**, each with **256K tokens of context**. It passes all **30 quality tests**.
 
@@ -54,6 +58,19 @@ The installer verifies the hardware and kernel, downloads publisher artifacts wi
 ## Dual RX 7900 XTX setup
 
 A separate setup for the same box with two **AMD Radeon RX 7900 XTX** cards added, each on its own PCIe 4.0 x4 link (M.2 to OCuLink). It is not part of the single-box comparison above.
+
+| Hardware | Quantity | Connection / role |
+|---|---:|---|
+| BOSGAME M5 / Sixunited AXB35-02, Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM | 1 | Host and integrated GPU |
+| GIGABYTE Radeon RX 7900 XTX GAMING OC 24G | 1 | External GPU on its own PCIe 4.0 x4 M.2-to-OCuLink link |
+| SAPPHIRE NITRO+ AMD Radeon RX 7900 XTX Vapor-X 24G | 1 | External GPU on its own PCIe 4.0 x4 M.2-to-OCuLink link |
+| [M.2-to-OCuLink SFF-8612 riser and cable kit](https://allegro.pl/oferta/karta-adaptera-riser-oculink-sff-8612-m-2-pci-e-x16-4-0-rtx-5060-kabel-18681419859) | 2 | One adapter and cable per RX 7900 XTX |
+| ADATA XPG CORE REACTOR II 1000W | 1 | External GPU power supply |
+| Samsung 990 PRO 1 TB M.2 NVMe SSD | 1 | External storage in the USB4 enclosure |
+| [AXAGON EEM2-40G USB4 40 Gbps enclosure](https://www.alza.cz/axagon-eem2-40g-m-2-nvme-ssd-enclosure-usb-c-40gbps-armored-aluminum-d13390080.htm) | 1 | Connects the Samsung SSD to the M5 over USB-C |
+| Swissten USB 4.0 USB-C 240W 0.5 m cable | 1 | USB4 cable for the external SSD enclosure |
+
+The card, SSD, enclosure, power supply, and USB4 cable model names come from the owner's order list. The two OCuLink kits are the linked riser-and-cable listing.
 
 Two recipes are published for it. Install one at a time: they use the same service name and port.
 
