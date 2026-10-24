@@ -13,12 +13,12 @@ ConditionPathExists={{ strix_paths.release }}/vulkan/llama-server
 {% elif strix_system.engine == 'strata' %}
 ConditionPathExists={{ strix_paths.release }}/build/strata
 {% elif strix_system.engine == 'maya' %}
-ConditionPathExists={{ strix_paths.release }}/source/build-hip/maya-ds4
+ConditionPathExists={{ strix_paths.release }}/source/build-hip/{{ 'maya' if (strix_maya.family | default('deepseek')) == 'glm' else 'maya-ds4' }}
 {% else %}
 ConditionPathExists={{ strix_rocm.qualified_build_path }}/dflash_server
 {% endif %}ConditionPathExists={{ strix_paths.models }}/{{ (strix_target.files[0].local_subdirectory + '/') if strix_target.files[0].local_subdirectory is defined else '' }}{{ strix_target.files[0].name }}
 {% if strix_system.engine == 'strata' %}ConditionPathExists={{ strix_paths.release }}/mtp/rt/experts.bin
-{% elif strix_system.engine == 'maya' %}ConditionPathExists={{ strix_maya.pack }}/ds4.txt
+{% elif strix_system.engine == 'maya' %}ConditionPathExists={{ strix_maya.pack }}/{{ 'index.txt' if (strix_maya.family | default('deepseek')) == 'glm' else 'ds4.txt' }}
 {% else %}ConditionPathExists={{ strix_paths.models }}/{{ strix_draft.name }}
 {% endif %}
 
