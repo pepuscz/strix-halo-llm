@@ -152,7 +152,7 @@ cat > pack.sha256 <<'HASHES'
 sha256sum --check --quiet pack.sha256
 {% if maya_glm %}
 # compat-bf16.json names the shard it was packed from; everything else in it is checked against the qualified pack.
-[[ "$(sed 's#^  "source": ".*",$#  "source": "MODEL_SHARD",#' "$pack/compat-bf16.json" | sha256sum | awk '{print $1}')" == {{ strix_maya.pack_compat_bf16_normalized_sha256 | quote }} ]]
+[[ "$(sed -E 's|^( *"source" *: *)"[^"]*"|\1"MODEL_SHARD"|' "$pack/compat-bf16.json" | sha256sum | awk '{print $1}')" == {{ strix_maya.pack_compat_bf16_normalized_sha256 | quote }} ]]
 grep -qxF "  \"source\": \"$first_shard\"," "$pack/compat-bf16.json"
 {% else %}
 # ds4.txt names the model folder; everything else in it is checked against the qualified pack.

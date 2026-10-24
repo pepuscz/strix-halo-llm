@@ -63,13 +63,15 @@ flags, output binary identity, and model identities are in
 
 ## Maya HIP Maya-M IQ2_S dual RX 7900 XTX
 
-This recipe is a draft: the values marked `PENDING` in its manifest wait for the
-qualified host, and the release validator rejects it until they are pinned.
+Every source and setting below is pinned from the qualified host. The recipe stays a
+draft until its from-scratch installer run is recorded: until then the release
+validator rejects the `PENDING` in its qualification.
 
 | Component | Pinned source |
 |---|---|
-| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya) commit `3e054700b4fbfc9d31499f4f1c5f2a1c0399b9b4`, tree `b5d18000fc985e468dbcda999e868b206fb52b5f` (public tag pending): [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.25` (commit `94878e25e3860e22ea29b4fff506ade8c477a57b`) plus the expert helper beside a layer split, its load-time self-check, the tuned RDNA IQ2_S expert kernel and the take-two decode-attention kernels for the indexer scores and MLA |
+| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya) commit `3e054700b4fbfc9d31499f4f1c5f2a1c0399b9b4`, [tag `maya-glm-dual-xtx-512k-20261024`](https://github.com/pepuscz/project-maya/tree/maya-glm-dual-xtx-512k-20261024), tree `b5d18000fc985e468dbcda999e868b206fb52b5f`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.25` (commit `94878e25e3860e22ea29b4fff506ade8c477a57b`) plus the expert helper beside a layer split, its load-time self-check, the tuned RDNA IQ2_S expert kernel and the take-two decode-attention kernels for the indexer scores and MLA |
 | Pack tool | The engine source's own `tools/iq_pack.py` (SHA-256 pinned), run without a GPU with `--compat-bf16` |
+| Python | 3.14 with the engine's packages hash-locked ([lock](../ansible/roles/maya_runtime/files/requirements-glm.lock)): the wheels the qualified host's pip cache held for its installed versions |
 | GGML | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d), commit `3cf03257f219afbe7334045ff7c6a06ac68c627d`, archive SHA-256 and tree fingerprint pinned |
 | ROCm | The same AMD ROCm 7.2.4 runfile userspace as the DeepSeek dual RX 7900 XTX recipe |
 | rocBLAS | The same `rocm-7.2.4` rocBLAS with [PR 4781](https://github.com/ROCm/rocm-libraries/pull/4781) backported ([patch](../patches/rocblas-rocm724-4781-per-gfx-backport.patch)) |
@@ -77,7 +79,7 @@ qualified host, and the release validator rejects it until they are pinned.
 | Draft | None: the engine drafts with the model's own MTP layer |
 | Expert profile | `data/expert-profile-glm.bin` in the engine source, SHA-256 and size pinned; the engine only reads it |
 
-[`maya-glm-dual-xtx-128k.yml`](../ansible/releases/maya-glm-dual-xtx-128k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes, and its `compat-bf16.json`, which names the model shard it was packed from, against a digest with that path normalized.
+[`maya-glm-dual-xtx-512k.yml`](../ansible/releases/maya-glm-dual-xtx-512k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes, and its `compat-bf16.json`, which names the model shard it was packed from, against a digest with that path normalized.
 
 ## Shared host components
 

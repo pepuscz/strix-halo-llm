@@ -205,7 +205,10 @@
           - strix_maya.server.env.MAYA_GLM_DEVS == '0,1'
           - strix_maya.server.env.MAYA_GLM_EXPERT_HELPER == '2'
           - strix_maya.server.env.MAYA_GLM_RAM_GB == '80'
-          - strix_maya.server.args[:2] == ['--glm-pack', strix_maya.pack]
+          - strix_maya.server.args[:4] == ['--glm-pack', strix_maya.pack, '--max-context', '524288']
+          - strix_maya.server.env.MAYA_GLM_SLOT_DIR == strix_paths.state + '/slots'
+          - strix_maya.server.env.MAYA_GLM_SLOT_KEEP == '1'
+          - "'MAYA_GLM_CKPTS' not in strix_maya.server.env"
           - strix_maya.server.exe == strix_paths.release + '/source/build-hip/maya'
           - strix_maya.server.lib_dirs[0] == strix_paths.release + '/rocblas/install/lib'
           - "'run-maya' in rendered_unit_text"

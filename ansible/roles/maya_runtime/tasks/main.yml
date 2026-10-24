@@ -84,12 +84,3 @@
     group: "{{ strix_service.group }}"
     mode: "0644"
   when: maya_runtime_family == 'deepseek'
-
-- name: Give the GLM engine its conversation-slot folder (default <pack>/slots; the engine empties it at start)
-  ansible.builtin.file:
-    path: "{{ strix_maya.pack }}/slots"
-    state: directory
-    owner: "{{ strix_service.user }}"
-    group: "{{ strix_service.group }}"
-    mode: "0700"
-  when: maya_runtime_family == 'glm'

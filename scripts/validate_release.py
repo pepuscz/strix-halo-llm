@@ -24,8 +24,10 @@ SYSTEMS = {
     "maya-ds4-dual-xtx": ("Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
-# A pin the qualified host has yet to supply. A manifest holding one is a draft: it fails validation and never installs.
+# A pin or result the qualified host has yet to supply. A manifest holding one, alone or in a sentence, is a draft:
+# it fails validation (preflight refuses a draft whose install pins are PENDING).
 PENDING = "PENDING"
+PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
 MAYA_FAMILIES = {"maya-ds4-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
 MAYA_FILES = Path("ansible/roles/maya_runtime/files")
@@ -62,12 +64,12 @@ def require_url(value: object, label: str) -> None:
 
 
 def pending_fields(node: object, path: str = "") -> list[str]:
-    """Every dotted path in a manifest whose value is PENDING."""
+    """Every dotted path in a manifest whose value is or contains PENDING."""
     if isinstance(node, dict):
         return [found for key, value in node.items() for found in pending_fields(value, f"{path}.{key}" if path else str(key))]
     if isinstance(node, list):
         return [found for index, value in enumerate(node) for found in pending_fields(value, f"{path}[{index}]")]
-    return [path] if node == PENDING else []
+    return [path] if isinstance(node, str) and PENDING_WORD.search(node) else []
 
 
 def validate_manifest(path: Path, root: Path) -> dict:
@@ -88,7 +90,7 @@ def validate_manifest(path: Path, root: Path) -> dict:
 
     service = data["strix_service"]
     required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 262144}[system["engine"]]
-    required_context = {"maya-glm-dual-xtx": 131072}.get(system["id"], required_context)
+    required_context = {"maya-glm-dual-xtx": 524288}.get(system["id"], required_context)
     if service["context"] != required_context:
         fail(f"{system['name']} release must allocate exactly {required_context} tokens")
     if service["minimum_effective_non_cma_kib"] < 2 * 1024 * 1024:
@@ -372,7 +374,7 @@ def validate_maya_glm(data: dict, root: Path) -> None:
     if not pack.startswith(models + "/Maya-M/") or "/" in pack[len(models + "/Maya-M/"):]:
         fail("the GLM pack lives beside the shards it indexes, in Maya-M/")
     cfg = maya["server"]
-    expected_args = ["--glm-pack", pack, "--max-context", "131072", "--expert-cache", "auto", "--prefill", "auto",
+    expected_args = ["--glm-pack", pack, "--max-context", "524288", "--expert-cache", "auto", "--prefill", "auto",
                      "--kv-streaming", "on", "--expert-profile", f"{release}/source/{profile['path']}"]
     if cfg["args"] != expected_args:
         fail("qualified Maya GLM arguments drifted")
@@ -384,6 +386,9 @@ def validate_maya_glm(data: dict, root: Path) -> None:
         "MAYA_GLM_DEVS": "0,1", "MAYA_GLM_PARALLEL_LOAD": "0", "MAYA_GLM_GU22_TUNED": "1", "MAYA_GLM_MV_RDNA": "1",
         "MAYA_GLM_DSA_SCORE2": "rl1b8", "MAYA_GLM_MLA_ATTN2": "h32lvc", "MAYA_GLM_HELPER_CHECK": "8",
         "ROCBLAS_USE_HIPBLASLT": "0", "ROCBLAS_TENSILE_LIBPATH": release + "/rocm/lib/rocblas/library",
+        # Conversations kept on disk in the state directory; conversation checkpoints stay at the engine default.
+        "MAYA_GLM_SLOTS": "4", "MAYA_GLM_SLOT_GB": "32", "MAYA_GLM_SLOT_KEEP": "1",
+        "MAYA_GLM_SLOT_DIR": paths["state"] + "/slots",
     }
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
@@ -409,24 +414,46 @@ def validate_maya_glm(data: dict, root: Path) -> None:
                                 "stapm_mw": 120000, "fast_mw": 120000, "slow_mw": 120000, "expected_watts": "120.000"}:
         fail("Maya GLM host policy drifted from the measured runs' policy")
     qualification = data["strix_qualification"]
+    if set(qualification) != {"answer_quality", "retrieval_ladder", "conversation_switch", "multi_conversation",
+                              "qualified_configuration"}:
+        fail("Maya GLM qualification sections drifted")
     quality = qualification["answer_quality"]
-    if set(quality) != {"coding", "gsm8k", "math", "total", "scoring", "thinking", "output_caps"} or \
-            quality["thinking"] is not False or quality["output_caps"] != {"coding": 512, "gsm8k": 1024, "math": 2048}:
-        fail("Maya GLM answer quality must be qualified without thinking at the 512 / 1024 / 2048 output caps")
+    if set(quality) != {"coding", "gsm8k", "math", "total", "scoring", "thinking", "allocation_tokens", "output_caps"} or \
+            quality["thinking"] is not False or quality["allocation_tokens"] != 131072 or \
+            quality["output_caps"] != {"coding": 512, "gsm8k": 1024, "math": 2048}:
+        fail("Maya GLM answer quality must be qualified without thinking at the 512 / 1024 / 2048 output caps "
+             "and its 131,072-token allocation")
     scores = [quality[key] for key in ("coding", "gsm8k", "math", "total")]
-    if not all(type(score) is int for score in scores) or sum(scores[:3]) != scores[3]:
+    if not all(type(score) is int and 0 <= score <= 30 for score in scores) or sum(scores[:3]) != scores[3] or \
+            not isinstance(quality["scoring"], str):
         fail("Maya GLM answer-quality scores must be integers that sum to the total")
     ladder = qualification["retrieval_ladder"]
-    if set(ladder) != {"allocation_tokens", "points", "values", "largest_input_tokens"} or \
-            (ladder["allocation_tokens"], ladder["points"]) != (131072, 7) or \
-            type(ladder["largest_input_tokens"]) is not int or not 0 < ladder["largest_input_tokens"] < 131072:
-        fail("Maya GLM retrieval ladder must be seven points inside the 131,072-token allocation")
-    reference = qualification["multi_conversation_reference"]
-    if set(reference) != {"conversations", "other_state_tokens", "result"} or \
-            (reference["conversations"], reference["other_state_tokens"]) != (4, 32768):
-        fail("Maya GLM multi-conversation reference must be four conversations with 32,768-token other states")
-    if not isinstance(qualification.get("qualified_configuration"), str) or not qualification["qualified_configuration"]:
-        fail("Maya GLM qualification must state its qualified configuration")
+    allocations = ladder.get("allocations") or []
+    if set(ladder) != {"workload", "largest_input_tokens", "allocations"} or \
+            [(row.get("allocation_tokens"), row.get("points")) for row in allocations] != \
+            [(131072, 7), (262144, 4), (524288, 1)]:
+        fail("Maya GLM retrieval ladder must hold 7, 4 and 1 points at 131,072, 262,144 and 524,288 tokens")
+    largest = 0
+    for row in allocations:
+        low, high = row["input_tokens_range"]
+        found = re.fullmatch(r"(\d+)/(\d+)", str(row["values"]))
+        if not found or int(found.group(1)) > int(found.group(2)) or not 0 < low <= high < row["allocation_tokens"]:
+            fail(f"Maya GLM retrieval ladder at {row['allocation_tokens']} tokens is malformed")
+        for key in ("decode_tokens_per_second", "prefill_tokens_per_second"):
+            if key in row and len(row[key]) != row["points"]:
+                fail(f"Maya GLM retrieval ladder at {row['allocation_tokens']} tokens: one {key} per point")
+        largest = max(largest, high)
+    if ladder["largest_input_tokens"] != largest:
+        fail("Maya GLM retrieval ladder's largest input differs from its points")
+    switch = qualification["conversation_switch"]
+    if set(switch) != {"set_aside_input_tokens", "restored_tokens", "restore_seconds", "new_input_tokens",
+                       "request_seconds", "cold_request_seconds", "conditions"} or \
+            not 0 < switch["restored_tokens"] <= switch["set_aside_input_tokens"] or \
+            not switch["request_seconds"] < switch["cold_request_seconds"]:
+        fail("Maya GLM conversation switch record drifted")
+    for key in ("multi_conversation", "qualified_configuration"):
+        if not isinstance(qualification[key], str) or not qualification[key]:
+            fail(f"Maya GLM qualification must state its {key}")
 
 
 def validate_benchmarks(root: Path) -> None:
@@ -435,10 +462,10 @@ def validate_benchmarks(root: Path) -> None:
     for path in sorted((root / "ansible/releases").glob("*.yml")):
         manifest = yaml.safe_load(path.read_text())
         identity = manifest["strix_system"]["id"]
-        if pending_fields(manifest):
-            # A draft has no published measurements yet and is never the default.
-            if manifest["strix_system"]["selected_default"] or identity in data["systems"]:
-                fail("a draft release can be neither the default nor a published benchmark: " + identity)
+        if identity not in data["systems"] and pending_fields(manifest):
+            # A draft may have no published measurements yet; it is never the default.
+            if manifest["strix_system"]["selected_default"]:
+                fail("a draft release cannot be the default: " + identity)
             continue
         system = data["systems"][identity]
         if system["name"] != manifest["strix_system"]["name"]:

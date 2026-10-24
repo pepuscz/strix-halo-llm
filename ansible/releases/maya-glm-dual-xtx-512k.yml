@@ -1,7 +1,7 @@
 ---
-# Draft: every value marked PENDING waits for the qualified host and fails scripts/validate_release.py until it is
-# pinned. Nothing else in this recipe is a placeholder.
-strix_release_id: maya-glm-dual-xtx-128k-v1
+# Draft until the from-scratch installer run on the qualified host is recorded: the PENDING in
+# strix_qualification.qualified_configuration fails scripts/validate_release.py until then.
+strix_release_id: maya-glm-dual-xtx-512k-v1
 strix_release_schema: 1
 strix_system:
   id: maya-glm-dual-xtx
@@ -12,9 +12,7 @@ strix_system:
 strix_platform:
   os_id: ubuntu
   os_version: '26.04'
-  # PENDING: the qualified host's running kernel (uname -r) during the measured GLM runs. The DeepSeek dual
-  # RX 7900 XTX recipe's 7.0.0-38-generic is the likely value; confirm it on the host before pinning.
-  kernel: PENDING
+  kernel: 7.0.0-38-generic
   architecture: x86_64
   gpu_pci_id: 1002:1586
   board_name: AXB35-02
@@ -31,32 +29,30 @@ strix_platform:
     - name: AMD Radeon RX 7900 XTX
       pci_id: 1002:744c
       count: 2
-  # 116.0 GB of model shards + 1.0 GB pack (dense.bin 0.94 GB, tokenizer) + 16 GB of conversation slots the
-  # engine may keep in <pack>/slots (MAYA_GLM_SLOT_GB default) + the 81 GB the DeepSeek dual RX 7900 XTX recipe
-  # reserves beyond its model files for the ROCm runfile and userspace, rocBLAS and engine build trees, its pack
-  # and the venv (470 GB - 388.9 GB) = 214 GB, rounded up.
-  minimum_free_bytes: 220000000000
+  # 116.0 GB of model shards + 1.0 GB pack (dense.bin 0.94 GB, tokenizer) + 32 GB of conversations kept on disk
+  # (MAYA_GLM_SLOT_GB, in the state directory) + the engine's own 8 GB free-space floor beside them + the 81 GB
+  # the DeepSeek dual RX 7900 XTX recipe reserves beyond its model files for the ROCm runfile and userspace,
+  # rocBLAS and engine build trees, its pack and the venv (470 GB - 388.9 GB) = 238 GB, rounded up.
+  minimum_free_bytes: 240000000000
 strix_paths:
   root: /opt/strix-halo
   source: /opt/strix-halo/src
   bin: /opt/strix-halo/bin
-  downloads: /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/downloads
-  release: /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1
+  downloads: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/downloads
+  release: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1
   models: /opt/strix-halo/models/glm-53-flash-maya
   state: /var/lib/strix-halo-inference
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
-  # PENDING: the public tag created at source_commit, and its annotated tag object.
-  release_tag: PENDING
-  tag_object: PENDING
+  release_tag: maya-glm-dual-xtx-512k-20261024
+  tag_object: f6d35964bce31c6334d2bc443e8dc214239f7ac3
   tag_object_type: tag
   source_commit: 3e054700b4fbfc9d31499f4f1c5f2a1c0399b9b4
   source_tree: b5d18000fc985e468dbcda999e868b206fb52b5f
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.25
   upstream_commit: 94878e25e3860e22ea29b4fff506ade8c477a57b
-  # PENDING: SHA-256 of the qualified host's source/build-hip/maya (the reference build identity).
-  server_sha256: PENDING
+  server_sha256: 9338c9e71a7376645f4f3572e4f9dc9b8afb4ea3776ec969b050a9770b1e99e6
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so a
     portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -152,7 +148,7 @@ strix_service:
   host: 127.0.0.1
   port: 18109
   alias: glm-5.3-flash
-  context: 131072
+  context: 524288
   parallel_slots: 1
   # The measured runs' unit envelope: the engine's pinned RAM tier counts against it.
   memory_high: 123G
@@ -203,10 +199,10 @@ strix_maya:
     - libdrm-amdgpu1
     - libelf1t64
     - libnuma1
-  # PENDING: a hash-locked environment for this engine's setup.py (v1.1.25 base), committed as
-  # ansible/roles/maya_runtime/files/requirements-glm.lock; the DeepSeek recipe's lock was made for an older engine.
+  # The engine's own Python environment (setup.py's packages) as the qualified host's venv held it; the DeepSeek
+  # recipe's lock was made for an older engine.
   requirements_lock: requirements-glm.lock
-  requirements_sha256: PENDING
+  requirements_sha256: 385a10730478142a75e2ea1289b41d8995485eabd88785bdca7ad798c5fa6429
   pack: /opt/strix-halo/models/glm-53-flash-maya/Maya-M/maya-glm-pack
   # The engine source's own packer (tools/iq_pack.py at source_commit), run without a GPU.
   pack_tool:
@@ -222,21 +218,21 @@ strix_maya:
     tokenizer/tokenizer.json: 60458021da45393b01761d2c49144a02759a52927239bd665136dcf870e64bb5
     tokenizer/vocab.json: 168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2
   # compat-bf16.json records the absolute path of the shard it was packed from ("source"), so the qualified
-  # host's file (2968db66...) differs at this release's model path. PENDING: recompute on the host as
-  # sed 's#^  "source": ".*",$#  "source": "MODEL_SHARD",#' compat-bf16.json | sha256sum
-  pack_compat_bf16_normalized_sha256: PENDING
+  # host's file (2968db66...) differs at this release's model path. This digest is the host's file as
+  # sed -E 's|^( *"source" *: *)"[^"]*"|\1"MODEL_SHARD"|' compat-bf16.json | sha256sum
+  pack_compat_bf16_normalized_sha256: bd2e2b79c35ccafb8c8643776cc28337e75d3bca57b07ac31914f88f716899a9
   # Routing counts shipped in the engine source; read-only for the engine (no --expert-profile-save).
   expert_profile:
     path: data/expert-profile-glm.bin
     size: 106008
     sha256: 53b03a13482b6fedc599d149be2d69f88c38d9edc4611a740da46314ab1dc5a7
   server:
-    exe: /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/build-hip/maya
+    exe: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/build-hip/maya
     args:
       - --glm-pack
       - /opt/strix-halo/models/glm-53-flash-maya/Maya-M/maya-glm-pack
       - --max-context
-      - '131072'
+      - '524288'
       - --expert-cache
       - auto
       - --prefill
@@ -244,8 +240,8 @@ strix_maya:
       - --kv-streaming
       - 'on'
       - --expert-profile
-      - /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/data/expert-profile-glm.bin
-    cwd: /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source
+      - /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/data/expert-profile-glm.bin
+    cwd: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source
     tokenizer: /opt/strix-halo/models/glm-53-flash-maya/Maya-M/maya-glm-pack/tokenizer
     model_name: glm-5.3-flash
     gpu: [0, 1, 2]
@@ -258,8 +254,8 @@ strix_maya:
     port: 18109
     host: 127.0.0.1
     lib_dirs:
-      - /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/rocblas/install/lib
-      - /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/rocm/lib
+      - /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/rocm/lib
     log: /var/lib/strix-halo-inference/native.log
     installer:
       models_dir: /opt/strix-halo/models/glm-53-flash-maya
@@ -278,12 +274,12 @@ strix_maya:
       MAYA_GLM_RAM_RESIDENT: '1'
       MAYA_GLM_PREFILL_SUB: '1024'
       MAYA_GLM_PREFILL_MB: '6144'
-      MAYA_HIPBLASLT_TUNING: "/opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100202.txt:\
-        /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100401.txt:\
-        /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100500.txt:\
-        /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100202.txt:\
-        /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100401.txt:\
-        /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100500.txt"
+      MAYA_HIPBLASLT_TUNING: "/opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100202.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100401.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100500.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100202.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100401.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100500.txt"
       MAYA_GLM_EXPERT_HELPER: '2'
       MAYA_GLM_SPLIT: '25'
       MAYA_GLM_DEVS: '0,1'
@@ -293,29 +289,66 @@ strix_maya:
       MAYA_GLM_DSA_SCORE2: rl1b8
       MAYA_GLM_MLA_ATTN2: h32lvc
       MAYA_GLM_HELPER_CHECK: '8'
+      # Conversations set aside on disk (a full 524,288-token one is about 7 GB), kept across service restarts and
+      # dropped after the engine's default 7 days. Conversation checkpoints stay at the engine default (on).
+      MAYA_GLM_SLOTS: '4'
+      MAYA_GLM_SLOT_GB: '32'
+      MAYA_GLM_SLOT_KEEP: '1'
+      MAYA_GLM_SLOT_DIR: /var/lib/strix-halo-inference/slots
       ROCBLAS_USE_HIPBLASLT: '0'
-      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-glm-dual-xtx-128k-v1/rocm/lib/rocblas/library
-# PENDING: the measured results of this exact configuration, filled from the qualification runs.
+      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/rocm/lib/rocblas/library
+# Measured on the qualified host with engine 3e05470 and this configuration, at the allocation each entry names.
 strix_qualification:
+  # The quality suite ran at a 131,072-token allocation; there is no quality claim for 524,288.
   answer_quality:
-    coding: PENDING
-    gsm8k: PENDING
-    math: PENDING
-    total: PENDING
-    scoring: PENDING
+    coding: 10
+    gsm8k: 10
+    math: 8
+    total: 28
+    scoring: raw and audited both 28/30 (math_08 and math_09 missed)
     thinking: false
-    # Qualified on the declared per-workload output caps; no question is raised to 4096.
+    allocation_tokens: 131072
+    # Qualified on the declared per-workload output caps (math_10 included); no question is raised to 4096.
     output_caps:
       coding: 512
       gsm8k: 1024
       math: 2048
   retrieval_ladder:
-    allocation_tokens: 131072
-    points: 7
-    values: PENDING
-    largest_input_tokens: PENDING
-  multi_conversation_reference:
-    conversations: 4
-    other_state_tokens: 32768
-    result: PENDING
-  qualified_configuration: PENDING
+    workload: the public retrieval prompts, cold, 256-token output cap, one run each
+    largest_input_tokens: 456403
+    allocations:
+      - allocation_tokens: 131072
+        points: 7
+        span: 2K-128K
+        values: 35/35
+        input_tokens_range: [1886, 114093]
+        decode_tokens_per_second_range: [55.8, 57.7]
+      - allocation_tokens: 262144
+        points: 4
+        span: 128K-240K
+        values: 20/20
+        input_tokens_range: [114093, 228197]
+        decode_tokens_per_second: [55.8, 55.1, 54.7, 53.4]
+        prefill_tokens_per_second: [895.3, 972.8, 1012.8, 1032.3]
+      - allocation_tokens: 524288
+        points: 1
+        span: 480K
+        values: 5/5
+        input_tokens_range: [456403, 456403]
+        decode_tokens_per_second: [50.1]
+        prefill_tokens_per_second: [1021.3]
+  # Conversation A set aside on disk when B came, and taken back for its next turn.
+  conversation_switch:
+    set_aside_input_tokens: 114129
+    restored_tokens: 114128
+    restore_seconds: 3.0
+    new_input_tokens: 98
+    request_seconds: 10.7
+    cold_request_seconds: 128.2
+    conditions: conversation checkpoints on and MAYA_GLM_SLOT_KEEP unset; keeping conversations across a restart is
+      verified by the from-scratch install test
+  multi_conversation: this release serves one conversation at a time (parallel_slots 1); 2 and 3 parallel
+    conversations were measured at 131,072 (a lone request's decode unchanged, conversations served together about
+    45 tok/s in total) and are not part of the release
+  qualified_configuration: 'the same engine source, model, pack and settings measured on the qualified host at
+    131,072, 262,144 and 524,288 allocations; the from-scratch installer run: PENDING'

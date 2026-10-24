@@ -27,12 +27,12 @@ jobs:
         run: |
           set -euo pipefail
           for release in ansible/releases/*.yml; do
-            # A draft release (PENDING pins awaiting the qualified host) must fail with the draft message;
+            # A draft release (PENDING values awaiting the qualified host) must fail with the draft message;
             # tests/test_validate_release.py checks its structure with dummy pins.
             if output=$(python scripts/validate_release.py "$release" 2>&1); then
               printf '%s\n' "$output"
             elif grep -q '^ERROR: draft release: ' <<< "$output"; then
-              printf 'draft, not installable: %s\n%s\n' "$release" "$output"
+              printf 'draft, PENDING values remain: %s\n%s\n' "$release" "$output"
             else
               printf '%s\n' "$output" >&2
               exit 1
@@ -53,7 +53,7 @@ jobs:
           test -f ansible/releases/rocm-rocmfpx-128k.yml
           test -f ansible/releases/strata-qwen-q4xl-4x256k.yml
           test -f ansible/releases/maya-ds4-dual-xtx-256k.yml
-          test -f ansible/releases/maya-glm-dual-xtx-128k.yml
+          test -f ansible/releases/maya-glm-dual-xtx-512k.yml
           test "$(find ansible/releases -maxdepth 1 -type f -name '*.yml' | wc -l)" -eq 5
       - name: Render and inspect every service contract
         shell: bash

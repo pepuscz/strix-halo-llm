@@ -8,7 +8,7 @@ The recipes require Ubuntu 26.04, AMD GPU PCI ID `1002:1586`, AXB35-02 board, at
 | DeepSeek / Vulkan | `7.0.0-29-generic` | 120 GB | 2 GiB |
 | DeepSeek / Lucebox | `7.0.0-29-generic` | 120 GB | 4 GiB |
 | DeepSeek V4.1 / Maya dual RX 7900 XTX | `7.0.0-38-generic` | 470 GB | 14 GiB |
-| GLM-5.3-Flash / Maya dual RX 7900 XTX (draft) | pending host confirmation | 220 GB | 12 GiB |
+| GLM-5.3-Flash / Maya dual RX 7900 XTX | `7.0.0-38-generic` | 240 GB | 12 GiB |
 
 The qualified machine used BIOS `3.10`. Set these options before installation;
 the labels and values below match the BOSGAME BIOS menus:

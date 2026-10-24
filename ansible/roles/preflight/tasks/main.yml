@@ -19,7 +19,7 @@
         (strix_system.engine == 'vulkan' and strix_service.context | int == 524288) or
         (strix_system.engine == 'rocm' and strix_service.context | int == 131072) or
         (strix_system.engine == 'maya' and strix_service.context | int ==
-         (131072 if (strix_maya.family | default('deepseek')) == 'glm' else 262144)) or
+         (524288 if (strix_maya.family | default('deepseek')) == 'glm' else 262144)) or
         (strix_system.engine == 'strata' and strix_service.context | int == 262144 and
          strix_service.parallel_slots | int == 4)
       # The large envelope: Strata, and the GLM engine's pinned RAM tier; DeepSeek's mmap regime keeps 118G / 120G.
@@ -29,7 +29,7 @@
       - >-
         strix_service.memory_max == ('125G' if strix_system.engine == 'strata' or
         (strix_system.engine == 'maya' and (strix_maya.family | default('deepseek')) == 'glm') else '120G')
-      # A draft release (PENDING pins awaiting the qualified host) never installs.
+      # A release whose install pins are PENDING never installs (only qualification results may still be pending).
       - >-
         [strix_platform, strix_runtime, strix_target, strix_service, strix_maya | default({})]
         | to_json is not search('"PENDING"')
