@@ -1,5 +1,9 @@
 # Strix Halo LLM
 
+![Illustration of the BOSGAME M5 with two RX 7900 XTX cards connected by OCuLink and an external USB4 SSD](docs/strix-halo-frankenstein.png)
+
+*Illustration of the [dual RX 7900 XTX setup](#dual-rx-7900-xtx-setup).*
+
 Ansible recipes and measured performance for running Qwen and DeepSeek locally on a **128 GiB AMD Ryzen AI Max+ 395 / Radeon 8060S** Strix Halo box (BOSGAME M5 / Sixunited AXB35-02).
 
 **Winning setup for Qwen:** Qwen3.8-Flash-Next with **Strata HIP UD-Q4_K_XL**, up to **four simultaneous conversations**, each with **256K tokens of context**. It passes all **30 quality tests**.
