@@ -1070,7 +1070,7 @@
           "needle_passes": 5
         }
       ],
-      "context_scaling_note": "Each point: a fresh load from the frozen expert profile, thinking off, 256-token cap (every answer used 64 tokens), zero cached input. The retrieval filler routes to few experts, so its prefill is faster than real text: a 130,048-token real-code prompt read at 153.6 tok/s (long_context)."
+      "context_scaling_note": "Each point: a fresh load from the frozen expert profile, thinking off, 256-token cap (every answer used 64 tokens), zero cached input. The retrieval filler routes to few experts, so its prefill is faster than real text: a 130,048-token real-code prompt read at 155.4 tok/s (long_context)."
     }
   },
   "winning_setups": {
