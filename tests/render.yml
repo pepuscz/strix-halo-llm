@@ -168,6 +168,12 @@
       register: rendered_maya_config
       when: strix_system.engine == 'maya'
 
+    - name: Read rendered Maya engine build program
+      ansible.builtin.slurp:
+        src: "{{ render_root }}/build-maya-engine"
+      register: rendered_maya_build
+      when: strix_system.engine == 'maya'
+
     - name: Assert Maya DS4 dual RX 7900 XTX serving contract
       ansible.builtin.assert:
         that:
@@ -181,5 +187,44 @@
           - "'strix-drain-ttm-pool' in rendered_unit_text"
           - "'RuntimeDirectory=strix-halo-inference-maya' in rendered_unit_text"
           - "('ConditionPathExists=' + strix_paths.models + '/Maya-S/' + strix_target.files[0].name) in rendered_unit_text"
-      when: strix_system.engine == 'maya'
+          - "('ConditionPathExists=' + strix_paths.release + '/source/build-hip/maya-ds4') in rendered_unit_text"
+          - "('ConditionPathExists=' + strix_maya.pack + '/ds4.txt') in rendered_unit_text"
+          - "'--target maya-ds4 ' in (rendered_maya_build.content | b64decode)"
+          - "'packtool/tools/ds4/pack_gguf.py' in (rendered_maya_build.content | b64decode)"
+      when:
+        - strix_system.engine == 'maya'
+        - (strix_maya.family | default('deepseek')) == 'deepseek'
+
+    - name: Assert Maya HIP Maya-M IQ2_S dual RX 7900 XTX serving contract
+      ansible.builtin.assert:
+        that:
+          - (rendered_maya_config.content | b64decode | from_json) == strix_maya.server
+          - strix_maya.server.gpu == [0, 1, 2]
+          - strix_maya.server.layer_split == '25'
+          - strix_maya.server.env.MAYA_GLM_SPLIT == '25'
+          - strix_maya.server.env.MAYA_GLM_DEVS == '0,1'
+          - strix_maya.server.env.MAYA_GLM_EXPERT_HELPER == '2'
+          - strix_maya.server.env.MAYA_GLM_RAM_GB == '80'
+          - strix_maya.server.args[:4] == ['--glm-pack', strix_maya.pack, '--max-context', '524288']
+          - strix_maya.server.env.MAYA_GLM_SLOT_DIR == strix_paths.state + '/slots'
+          - strix_maya.server.env.MAYA_GLM_SLOT_KEEP == '1'
+          - "'MAYA_GLM_CKPTS' not in strix_maya.server.env"
+          - strix_maya.server.exe == strix_paths.release + '/source/build-hip/maya'
+          - strix_maya.server.lib_dirs[0] == strix_paths.release + '/rocblas/install/lib'
+          - "'run-maya' in rendered_unit_text"
+          - "'strix-drain-ttm-pool' in rendered_unit_text"
+          - "'RuntimeDirectory=strix-halo-inference-maya' in rendered_unit_text"
+          - "('ConditionPathExists=' + strix_paths.models + '/Maya-M/' + strix_target.files[0].name) in rendered_unit_text"
+          - "('ConditionPathExists=' + strix_paths.release + '/source/build-hip/maya') in rendered_unit_text"
+          - "'build-hip/maya-ds4' not in rendered_unit_text"
+          - "('ConditionPathExists=' + strix_maya.pack + '/index.txt') in rendered_unit_text"
+          - "'MemoryHigh=123G' in rendered_unit_text"
+          - "'--target maya -j ' in (rendered_maya_build.content | b64decode)"
+          - "'tools/iq_pack.py' in (rendered_maya_build.content | b64decode)"
+          - "'--compat-bf16' in (rendered_maya_build.content | b64decode)"
+          - "'pack_gguf.py' not in (rendered_maya_build.content | b64decode)"
+          - "'source/data/expert-profile-glm.bin' in (rendered_maya_build.content | b64decode)"
+      when:
+        - strix_system.engine == 'maya'
+        - (strix_maya.family | default('deepseek')) == 'glm'
 

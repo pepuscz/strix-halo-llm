@@ -15,10 +15,12 @@ SERIES = [
     ('vulkan-iq3xxs', '#8957e5', 'DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS'),
     ('rocm-rocmfpx', '#bc4c00', 'DeepSeek · Lucebox ROCm ROCmFPX'),
 ]
+DUAL_SERIES = [('maya-glm-dual-xtx', '#1a7f37'), ('maya-ds4-dual-xtx', '#0969da')]
 
 
 def render(data, dual=False):
-    series = SERIES if not dual else [('maya-ds4-dual-xtx', '#0969da', data['systems']['maya-ds4-dual-xtx']['name'])]
+    series = SERIES if not dual else [(sid, color, f"{data['systems'][sid]['model']} · {data['systems'][sid]['name']}")
+                                      for sid, color in DUAL_SERIES]
     lines = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 775" role="img" aria-labelledby="title desc">',
              '<title id="title">Strix Halo LLM throughput: Qwen and DeepSeek</title>',
              '<desc id="desc">Reading and answer-writing speeds on a 128 GiB Ryzen AI Max+ 395. The test asks each model to find five labelled phrases placed in a long text. Every run found all five correctly. The winning setup for Qwen and the winning setup for DeepSeek are shown with their respective comparison baselines. Each point measures one request at the input length shown. Each horizontal tick doubles the input length.</desc>',
@@ -27,17 +29,17 @@ def render(data, dual=False):
              '<text x="70" y="40" class="title">Strix Halo LLM benchmarks</text>',
              '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · Radeon 8060S · 128 GiB RAM · 120 W · reasoning mode disabled</text>']
     if dual:
-        lines[1] = '<title id="title">DeepSeek-V4.1-Flash-1017: dual RX 7900 XTX throughput</title>'
-        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper. Ten fresh loads at 262144-token capacity, from 2040 to 245760 input tokens; every answer found all five phrases. Each answer used 64 tokens. Each horizontal tick doubles the input length.</desc>'
-        lines[-2] = '<text x="70" y="40" class="title">DeepSeek-V4.1-Flash-1017 · dual RX 7900 XTX</text>'
-        lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · 256K capacity · thinking off</text>'
+        lines[1] = '<title id="title">Dual RX 7900 XTX throughput: GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017</title>'
+        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017: ten fresh loads at 262144-token capacity, from 2040 to 245760 of its tokens. Every answer found all five phrases. Each horizontal tick doubles the input length.</desc>'
+        lines[-2] = '<text x="70" y="40" class="title">Dual RX 7900 XTX · GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017</text>'
+        lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>'
     for i, (sid, color, name) in enumerate(series):
         yy = 99 + i * 24
         weight = 700 if dual or sid in data["winning_setups"].values() else 400
         lines += [f'<line x1="70" y1="{yy}" x2="98" y2="{yy}" stroke="{color}" stroke-width="3"/>',
                   f'<text x="110" y="{yy+5}" class="label" style="font-weight:{weight}">{html.escape(name)}</text>']
     left, right, height = 80, 1020, 165
-    xmin, xmax = 1800, 262144 if dual else 524288
+    xmin, xmax = 1800, 524288
 
     def x(tokens):
         return left + math.log(tokens / xmin) / math.log(xmax / xmin) * (right-left)
@@ -45,7 +47,7 @@ def render(data, dual=False):
     panels = [('Reading the input (tokens/second) · higher is better', 'prefill_tokens_per_second', 235, 900),
               ('Writing the answer (tokens/second) · higher is better', 'decode_tokens_per_second', 480, 60)]
     if dual:
-        panels = [(title, key, top, maximum) for (title, key, top, _), maximum in zip(panels, (250, 40))]
+        panels = [(title, key, top, maximum) for (title, key, top, _), maximum in zip(panels, (1200, 60))]
     for title, key, top, maximum in panels:
         bottom = top + height
         def y(value):
@@ -55,7 +57,7 @@ def render(data, dual=False):
             yy = y(maximum*fraction)
             lines.extend([f'<line class="grid" x1="80" y1="{yy:.2f}" x2="1020" y2="{yy:.2f}"/>',
                           f'<text class="tick" x="68" y="{yy+4:.2f}" text-anchor="end">{maximum*fraction:g}</text>'])
-        for exp in range(1,9 if dual else 10):
+        for exp in range(1,10):
             tokens=1024*2**exp;xx=x(tokens)
             lines.extend([f'<line class="grid" x1="{xx:.2f}" y1="{top}" x2="{xx:.2f}" y2="{bottom}"/>',
                           f'<text class="tick" x="{xx:.2f}" y="{bottom+22}" text-anchor="middle">{2**exp}K</text>'])
@@ -70,7 +72,7 @@ def render(data, dual=False):
             for p,(xx,yy) in zip(points,coords):
                 lines.append(f'<circle cx="{xx:.2f}" cy="{yy:.2f}" r="4" fill="{color}"><title>{p["actual_input_tokens"]:,} tokens: {p[key]:.2f}</title></circle>')
             xx,yy=coords[-1];value=points[-1][key]
-            offset=-12 if sid in ('strata-qwen-q4xl','vulkan-iq3xxs') or (sid == 'qwen-vulkan-q4xl' and key != 'decode_tokens_per_second') else 21
+            offset=-12 if sid in ('strata-qwen-q4xl','vulkan-iq3xxs','maya-glm-dual-xtx') or (sid == 'qwen-vulkan-q4xl' and key != 'decode_tokens_per_second') else 21
             lines.append(f'<text class="value" x="{xx:.2f}" y="{yy+offset:.2f}" text-anchor="end" style="fill:{color}">{value:.1f}</text>')
     lines += ['<text x="550" y="700" text-anchor="middle" class="label">Input length (tokens; each tick doubles)</text>',
               '<text x="550" y="735" text-anchor="middle" class="label">Test: find five phrases hidden in a long text. Every run found all five correctly.</text>',

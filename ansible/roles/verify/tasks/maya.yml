@@ -14,7 +14,9 @@
       - verify_maya_status.json.model == strix_service.alias
       - verify_maya_status.json.context.native | int == strix_service.context | int
       - verify_maya_status.json.concurrency.serving | int == strix_service.parallel_slots | int
-    fail_msg: The live API does not match Maya DS4 HIP dual RX 7900 XTX.
+    fail_msg: >-
+      The live API does not match {{ strix_system.name if (strix_maya.family | default('deepseek')) == 'glm'
+      else 'Maya DS4 HIP dual RX 7900 XTX' }}.
 
 - name: Verify sealed Maya runtime artifacts
   ansible.builtin.command:

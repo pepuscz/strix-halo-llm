@@ -22,7 +22,22 @@ SYSTEMS = {
     "vulkan-iq3xxs": ("Strix Halo llama.cpp Vulkan IQ3_XXS", "vulkan"),
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
     "maya-ds4-dual-xtx": ("Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX", "maya"),
+    "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
+# A pin or result the qualified host has yet to supply. A manifest holding one, alone or in a sentence, is a draft:
+# it fails validation (preflight refuses a draft whose install pins are PENDING).
+PENDING = "PENDING"
+PENDING_WORD = re.compile(r"\bPENDING\b")
+# The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
+MAYA_FAMILIES = {"maya-ds4-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+MAYA_FILES = Path("ansible/roles/maya_runtime/files")
+# compat-bf16.json is not here: it names the model shard it was packed from, so it is pinned normalized.
+GLM_PACK_FILES = {
+    "dense.bin", "index.txt", "native_experts.txt", "tokenizer/chat_template.jinja", "tokenizer/merges.txt",
+    "tokenizer/token_type.json", "tokenizer/tokenizer.json", "tokenizer/vocab.json",
+}
+GLM_HIPBLASLT_TABLES = tuple(f"{arch}-glm-hipblaslt-{version}.txt"
+                             for arch in ("gfx1100", "gfx1151") for version in ("100202", "100401", "100500"))
 FORBIDDEN_PUBLIC_PATTERNS = {
     "macOS home path": re.compile(r"/Users/[^/\s]+/"),
     "private IPv4 address": re.compile(r"(?<![0-9])(?:10|192\.168)\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}(?![0-9])"),
@@ -48,6 +63,15 @@ def require_url(value: object, label: str) -> None:
         fail(f"{label} is not an allowed HTTPS publisher URL: {value}")
 
 
+def pending_fields(node: object, path: str = "") -> list[str]:
+    """Every dotted path in a manifest whose value is or contains PENDING."""
+    if isinstance(node, dict):
+        return [found for key, value in node.items() for found in pending_fields(value, f"{path}.{key}" if path else str(key))]
+    if isinstance(node, list):
+        return [found for index, value in enumerate(node) for found in pending_fields(value, f"{path}[{index}]")]
+    return [path] if isinstance(node, str) and PENDING_WORD.search(node) else []
+
+
 def validate_manifest(path: Path, root: Path) -> dict:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     if data.get("strix_release_schema") != 1:
@@ -57,14 +81,23 @@ def validate_manifest(path: Path, root: Path) -> dict:
     expected = SYSTEMS.get(system.get("id"))
     if expected != (system.get("name"), system.get("engine")):
         fail("non-canonical strix_system identity")
+    pending = pending_fields(data)
+    if pending:
+        lock = (data.get("strix_maya") or {}).get("requirements_lock")
+        missing = f"; build input missing: {MAYA_FILES / lock}" if lock and not (root / MAYA_FILES / lock).is_file() else ""
+        fail(f"draft release: {len(pending)} value(s) are PENDING until the qualified host supplies them: "
+             + ", ".join(pending) + missing)
 
     service = data["strix_service"]
     required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 262144}[system["engine"]]
+    required_context = {"maya-glm-dual-xtx": 524288}.get(system["id"], required_context)
     if service["context"] != required_context:
-        fail(f"{system['engine']} release must allocate exactly {required_context} tokens")
+        fail(f"{system['name']} release must allocate exactly {required_context} tokens")
     if service["minimum_effective_non_cma_kib"] < 2 * 1024 * 1024:
         fail("effective non-CMA memory floor is below 2 GiB")
-    envelope = ("123G", "125G") if system["engine"] == "strata" else ("118G", "120G")
+    # The large envelope: Strata, and the GLM engine's pinned RAM tier; DeepSeek's mmap regime keeps 118G / 120G.
+    large = system["engine"] == "strata" or system["id"] == "maya-glm-dual-xtx"
+    envelope = ("123G", "125G") if large else ("118G", "120G")
     if (service["memory_high"], service["memory_max"]) != envelope:
         fail("cgroup memory envelope drifted")
     if service["memory_swap_max"] != 0:
@@ -208,17 +241,25 @@ def validate_manifest(path: Path, root: Path) -> dict:
     return data
 
 
+def require_build_inputs(root: Path, pins: dict[str, str]) -> None:
+    """Repository files the Maya runtime role installs, each pinned by digest; a missing one is an error."""
+    for name, digest in pins.items():
+        path = root / MAYA_FILES / name
+        if not path.is_file():
+            fail(f"Maya build input missing: {MAYA_FILES / name} (pinned {digest})")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            fail("Maya build input drifted: " + name)
+
+
 def validate_maya(data: dict, root: Path) -> None:
-    """Maya DS4 HIP on two RX 7900 XTX cards with the Radeon 8060S as the expert helper."""
-    service, files = data["strix_service"], data["strix_target"]["files"]
-    runtime, rocm, rocblas, maya = data["strix_runtime"], data["strix_rocm724"], data["strix_rocblas"], data["strix_maya"]
-    if len(files) != 4 or service["parallel_slots"] != 1:
-        fail("Maya DS4 dual RX 7900 XTX requires four Maya-S shards and one session")
+    """Maya HIP on two RX 7900 XTX cards with the Radeon 8060S as the expert helper, for one model family."""
+    family = data["strix_maya"].get("family", "deepseek")   # the DeepSeek release predates the family switch
+    if family != MAYA_FAMILIES[data["strix_system"]["id"]]:
+        fail(f"Maya family {family!r} does not match {data['strix_system']['id']}")
+    service, runtime = data["strix_service"], data["strix_runtime"]
+    rocm, rocblas, maya = data["strix_rocm724"], data["strix_rocblas"], data["strix_maya"]
     if data["strix_platform"].get("discrete_gpus") != [{"name": "AMD Radeon RX 7900 XTX", "pci_id": "1002:744c", "count": 2}]:
-        fail("Maya DS4 dual RX 7900 XTX requires exactly two RX 7900 XTX cards")
-    for extra in data["strix_extra_artifacts"]:
-        require_sha(extra["sha256"], extra["name"])
-        require_sha(extra["revision"], extra["name"] + " revision", HEX40)
+        fail("Maya dual RX 7900 XTX requires exactly two RX 7900 XTX cards")
     require_sha(data["strix_target"]["revision"], "target revision", HEX40)
     require_url(runtime["repository"], "Maya repository")
     for key in ("tag_object", "source_tree", "upstream_commit", "ggml_commit"):
@@ -242,15 +283,32 @@ def validate_maya(data: dict, root: Path) -> None:
     patch = root / "patches" / rocblas["patch"]["name"]
     if hashlib.sha256(patch.read_bytes()).hexdigest() != rocblas["patch"]["sha256"]:
         fail("rocBLAS backport patch hash drifted")
-    files_dir = root / "ansible/roles/maya_runtime/files"
-    pins = {
+    cfg = maya["server"]
+    if cfg["gpu"] != [0, 1, 2] or cfg["port"] != service["port"] or cfg["model_name"] != service["alias"]:
+        fail("Maya server identity differs from the service contract")
+    if cfg["lib_dirs"][0] != data["strix_paths"]["release"] + "/rocblas/install/lib":
+        fail("the per-architecture rocBLAS must lead the engine's library path")
+    if family == "glm":
+        validate_maya_glm(data, root)
+    else:
+        validate_maya_deepseek(data, root)
+
+
+def validate_maya_deepseek(data: dict, root: Path) -> None:
+    """Maya DS4 HIP Maya-S: tensor parallel over the two cards, DSpark drafting, the Radeon 8060S as the expert helper."""
+    service, files = data["strix_service"], data["strix_target"]["files"]
+    rocblas, maya = data["strix_rocblas"], data["strix_maya"]
+    if len(files) != 4 or service["parallel_slots"] != 1:
+        fail("Maya DS4 dual RX 7900 XTX requires four Maya-S shards and one session")
+    for extra in data["strix_extra_artifacts"]:
+        require_sha(extra["sha256"], extra["name"])
+        require_sha(extra["revision"], extra["name"] + " revision", HEX40)
+    files_dir = root / MAYA_FILES
+    require_build_inputs(root, {
         "requirements.lock": maya["requirements_sha256"],
         "rocblas-stock-tensile.cmake": rocblas["initializer_sha256"],
         maya["expert_profile"]["file"]: maya["expert_profile"]["sha256"],
-    }
-    for name, digest in pins.items():
-        if hashlib.sha256((files_dir / name).read_bytes()).hexdigest() != digest:
-            fail("Maya build input drifted: " + name)
+    })
     if (files_dir / maya["expert_profile"]["file"]).stat().st_size != maya["expert_profile"]["size"]:
         fail("expert profile size drifted")
     tool = maya["pack_tool"]
@@ -273,12 +331,143 @@ def validate_maya(data: dict, root: Path) -> None:
     for key, value in qualified_env.items():
         if env.get(key) != value:
             fail("qualified Maya environment drifted: " + key)
-    if cfg["gpu"] != [0, 1, 2] or cfg["port"] != service["port"] or cfg["model_name"] != service["alias"]:
-        fail("Maya server identity differs from the service contract")
-    if cfg["lib_dirs"][0] != data["strix_paths"]["release"] + "/rocblas/install/lib":
-        fail("the per-architecture rocBLAS must lead the engine's library path")
     if service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
         fail("Maya requires the qualified 14 GiB non-CMA floor")
+
+
+def validate_maya_glm(data: dict, root: Path) -> None:
+    """Maya HIP Maya-M (GLM-5.3-Flash): a layer split over the two cards, each part with the Radeon 8060S as its
+    expert helper, drafting with the model's own MTP layer."""
+    service, target, maya = data["strix_service"], data["strix_target"], data["strix_maya"]
+    paths, files, rocblas = data["strix_paths"], target["files"], data["strix_rocblas"]
+    release, models, pack = paths["release"], paths["models"], maya["pack"]
+    if len(files) != 3 or service["parallel_slots"] != 1:
+        fail("Maya GLM dual RX 7900 XTX requires three Maya-M shards and one session")
+    if (target["quantization"], target["subdirectory"]) != ("Maya-M IQ2_S", "Maya-M") or \
+            [item["name"] for item in files] != [f"GLM-5.3-Flash-Maya-M-IQ2_S-{i:05d}-of-00003.gguf" for i in (1, 2, 3)] or \
+            any(item.get("local_subdirectory") != "Maya-M" for item in files):
+        fail("Maya GLM requires the three Maya-M IQ2_S shards in Maya-M/")
+    if data.get("strix_extra_artifacts"):
+        fail("Maya GLM serves the target shards alone; it has no extra artifacts")
+    if data["strix_draft"] != {"repository": target["repository"], "revision": target["revision"], "files": []}:
+        fail("Maya GLM drafts with the model's own MTP layer from the target shards: no separate drafter")
+    if maya.get("requirements_lock") != "requirements-glm.lock":
+        fail("Maya GLM uses its own Python lock, requirements-glm.lock")
+    require_sha(maya["requirements_sha256"], "Maya GLM Python lock")
+    require_build_inputs(root, {
+        maya["requirements_lock"]: maya["requirements_sha256"],
+        "rocblas-stock-tensile.cmake": rocblas["initializer_sha256"],
+    })
+    profile, tool = maya["expert_profile"], maya["pack_tool"]
+    if set(profile) != {"path", "size", "sha256"} or profile["path"] != "data/expert-profile-glm.bin" or \
+            not isinstance(profile["size"], int) or profile["size"] <= 0:
+        fail("the GLM expert profile ships in the engine source as data/expert-profile-glm.bin")
+    require_sha(profile["sha256"], "GLM expert profile")
+    if tool.get("path") != "tools/iq_pack.py" or set(tool) != {"path", "sha256"}:
+        fail("the GLM pack is built with the engine source's tools/iq_pack.py")
+    require_sha(tool["sha256"], "GLM pack tool")
+    if set(maya["pack_files"]) != GLM_PACK_FILES:
+        fail("GLM pack file set drifted (compat-bf16.json names the model shard and is pinned normalized)")
+    for name, digest in maya["pack_files"].items():
+        require_sha(digest, "GLM pack " + name)
+    require_sha(maya["pack_compat_bf16_normalized_sha256"], "GLM pack compat-bf16.json (normalized)")
+    if not pack.startswith(models + "/Maya-M/") or "/" in pack[len(models + "/Maya-M/"):]:
+        fail("the GLM pack lives beside the shards it indexes, in Maya-M/")
+    cfg = maya["server"]
+    expected_args = ["--glm-pack", pack, "--max-context", "524288", "--expert-cache", "auto", "--prefill", "auto",
+                     "--kv-streaming", "on", "--expert-profile", f"{release}/source/{profile['path']}"]
+    if cfg["args"] != expected_args:
+        fail("qualified Maya GLM arguments drifted")
+    tables = ":".join(f"{release}/source/tools/hip/{name}" for name in GLM_HIPBLASLT_TABLES)
+    expected_env = {
+        "MAYA_GLM_RESERVE_MB": "1024", "MAYA_GLM_RAM_HEADROOM_GB": "16", "MAYA_GLM_RAM_GB": "80",
+        "MAYA_GLM_RAM_RESIDENT": "1", "MAYA_GLM_PREFILL_SUB": "1024", "MAYA_GLM_PREFILL_MB": "6144",
+        "MAYA_HIPBLASLT_TUNING": tables, "MAYA_GLM_EXPERT_HELPER": "2", "MAYA_GLM_SPLIT": "25",
+        "MAYA_GLM_DEVS": "0,1", "MAYA_GLM_PARALLEL_LOAD": "0", "MAYA_GLM_GU22_TUNED": "1", "MAYA_GLM_MV_RDNA": "1",
+        "MAYA_GLM_DSA_SCORE2": "rl1b8", "MAYA_GLM_MLA_ATTN2": "h32lvc", "MAYA_GLM_HELPER_CHECK": "8",
+        "ROCBLAS_USE_HIPBLASLT": "0", "ROCBLAS_TENSILE_LIBPATH": release + "/rocm/lib/rocblas/library",
+        # Conversations kept on disk in the state directory; conversation checkpoints stay at the engine default.
+        "MAYA_GLM_SLOTS": "4", "MAYA_GLM_SLOT_GB": "32", "MAYA_GLM_SLOT_KEEP": "1",
+        "MAYA_GLM_SLOT_DIR": paths["state"] + "/slots",
+    }
+    if cfg["env"] != expected_env:
+        drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
+        fail("qualified Maya GLM environment drifted: " + ", ".join(drifted))
+    expected_identity = {
+        "exe": release + "/source/build-hip/maya", "cwd": release + "/source", "tokenizer": pack + "/tokenizer",
+        "layer_split": "25", "sampling": {"temperature": 1.0, "top_p": 0.95}, "reasoning_effort": "high",
+        "backend": "hip", "host": service["host"], "log": paths["state"] + "/native.log",
+        "lib_dirs": [release + "/rocblas/install/lib", release + "/rocm/lib"],
+    }
+    for key, value in expected_identity.items():
+        if cfg.get(key) != value:
+            fail("qualified Maya GLM server setting drifted: " + key)
+    installer = cfg["installer"]
+    if {key: value for key, value in installer.items() if key != "written"} != {
+        "models_dir": models, "quant": "Maya-M", "gguf": None, "gguf_dir": None, "draft": "mtp",
+        "speed_calibration": installer.get("speed_calibration"),
+    } or not isinstance(installer.get("written"), str) or installer["speed_calibration"].get("skipped") is not True:
+        fail("Maya GLM installer record drifted")
+    if service["minimum_effective_non_cma_kib"] != 12 * 1024 * 1024:
+        fail("Maya GLM requires the measured runs' 12 GiB non-CMA floor")
+    if data["strix_policy"] != {"cpu_governor": "performance", "cpu_min_khz": 2000000, "cpu_boost": 0, "gpu_dpm": "auto",
+                                "stapm_mw": 120000, "fast_mw": 120000, "slow_mw": 120000, "expected_watts": "120.000"}:
+        fail("Maya GLM host policy drifted from the measured runs' policy")
+    qualification = data["strix_qualification"]
+    if set(qualification) != {"answer_quality", "retrieval_ladder", "long_context", "conversation_switch",
+                              "multi_conversation", "qualified_configuration"}:
+        fail("Maya GLM qualification sections drifted")
+    quality = qualification["answer_quality"]
+    if set(quality) != {"coding", "gsm8k", "math", "total", "scoring", "thinking", "allocation_tokens", "output_caps"} or \
+            quality["thinking"] is not False or quality["allocation_tokens"] != 131072 or \
+            quality["output_caps"] != {"coding": 512, "gsm8k": 1024, "math": 2048}:
+        fail("Maya GLM answer quality must be qualified without thinking at the 512 / 1024 / 2048 output caps "
+             "and its 131,072-token allocation")
+    scores = [quality[key] for key in ("coding", "gsm8k", "math", "total")]
+    if not all(type(score) is int and 0 <= score <= 30 for score in scores) or sum(scores[:3]) != scores[3] or \
+            not isinstance(quality["scoring"], str):
+        fail("Maya GLM answer-quality scores must be integers that sum to the total")
+    ladder = qualification["retrieval_ladder"]
+    allocations = ladder.get("allocations") or []
+    if set(ladder) != {"workload", "largest_input_tokens", "allocations"} or \
+            [(row.get("allocation_tokens"), row.get("points")) for row in allocations] != \
+            [(131072, 7), (262144, 4), (524288, 1)]:
+        fail("Maya GLM retrieval ladder must hold 7, 4 and 1 points at 131,072, 262,144 and 524,288 tokens")
+    largest = 0
+    for row in allocations:
+        low, high = row["input_tokens_range"]
+        found = re.fullmatch(r"(\d+)/(\d+)", str(row["values"]))
+        if not found or int(found.group(1)) > int(found.group(2)) or not 0 < low <= high < row["allocation_tokens"]:
+            fail(f"Maya GLM retrieval ladder at {row['allocation_tokens']} tokens is malformed")
+        for key in ("decode_tokens_per_second", "prefill_tokens_per_second"):
+            if key in row and len(row[key]) != row["points"]:
+                fail(f"Maya GLM retrieval ladder at {row['allocation_tokens']} tokens: one {key} per point")
+        largest = max(largest, high)
+    if ladder["largest_input_tokens"] != largest:
+        fail("Maya GLM retrieval ladder's largest input differs from its points")
+    # The DeepSeek dual RX 7900 XTX row's real-code prompt (its bytes), cold and then with its input cached, on the
+    # installed service: the retrieval filler routes to few experts and reads faster than real text.
+    long = qualification["long_context"]
+    numbers = ("input_tokens", "output_tokens", "first_request_prefill_tokens_per_second",
+               "first_request_decode_tokens_per_second", "reused_prompt_cached_tokens",
+               "reused_prompt_decode_tokens_per_second")
+    if set(long) != {"prompt_sha256", "allocation_tokens", *numbers}:
+        fail("Maya GLM long-context record drifted")
+    require_sha(long["prompt_sha256"], "Maya GLM long-context prompt")
+    if long["allocation_tokens"] != service["context"] or \
+            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers) or \
+            not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
+        fail("Maya GLM long-context record must hold positive readings on the release's allocation, "
+             "with less than its input cached on reuse")
+    switch = qualification["conversation_switch"]
+    if set(switch) != {"set_aside_input_tokens", "restored_tokens", "restore_seconds", "new_input_tokens",
+                       "request_seconds", "cold_request_seconds", "conditions"} or \
+            not 0 < switch["restored_tokens"] <= switch["set_aside_input_tokens"] or \
+            not switch["request_seconds"] < switch["cold_request_seconds"]:
+        fail("Maya GLM conversation switch record drifted")
+    for key in ("multi_conversation", "qualified_configuration"):
+        if not isinstance(qualification[key], str) or not qualification[key]:
+            fail(f"Maya GLM qualification must state its {key}")
 
 
 def validate_benchmarks(root: Path) -> None:
@@ -287,6 +476,11 @@ def validate_benchmarks(root: Path) -> None:
     for path in sorted((root / "ansible/releases").glob("*.yml")):
         manifest = yaml.safe_load(path.read_text())
         identity = manifest["strix_system"]["id"]
+        if identity not in data["systems"] and pending_fields(manifest):
+            # A draft may have no published measurements yet; it is never the default.
+            if manifest["strix_system"]["selected_default"]:
+                fail("a draft release cannot be the default: " + identity)
+            continue
         system = data["systems"][identity]
         if system["name"] != manifest["strix_system"]["name"]:
             fail("benchmark stack name differs from manifest")

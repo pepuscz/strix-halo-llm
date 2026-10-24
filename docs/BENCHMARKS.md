@@ -94,7 +94,7 @@ Qwen uses kernel `7.0.0-31-generic`; DeepSeek uses `7.0.0-29-generic`. Strata an
 
 ## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017
 
-![DeepSeek-V4.1-Flash-1017 dual RX 7900 XTX context scaling](benchmark-dual-xtx.svg)
+![Dual RX 7900 XTX context scaling: GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017](benchmark-dual-xtx.svg)
 
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, allocation 262,144 tokens, the same five-phrase prompts as the DeepSeek rows above (identical bytes, pinned by SHA-256). The DSpark drafter's three blocks are split across the two cards (block 0 on the second card, blocks 1 and 2 on the lead), which leaves each card room for more resident experts. Each point is a fresh load from the frozen expert profile; thinking off, a 256-token cap (every answer used 64 tokens), zero cached input. This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
 
@@ -112,4 +112,26 @@ Qwen uses kernel `7.0.0-31-generic`; DeepSeek uses `7.0.0-29-generic`. Strata an
 | 245,760 | 224.1 | 31.2 | 5/5 |
 
 The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents: a 130,048-token real-code prompt read at 155.4 tok/s, wrote 768 tokens at 37.1 tok/s, and at 42.8 tok/s with that input already cached. Quality: 30/30 with the same coding and maths questions, measured at a 131,072-token allocation.
+
+## Dual RX 7900 XTX: GLM-5.3-Flash
+
+**Maya HIP Maya-M IQ2_S dual RX 7900 XTX**, on the same two cards and Radeon 8060S as the DeepSeek rows above, with the same five-phrase prompts (identical bytes, pinned by SHA-256). GLM's tokenizer counts about 7 % fewer tokens for the same text, so its input counts are lower at each length. The layers are split between the cards (0-24 on the first, the rest on the second). The 8060S computes each card's routed experts held in RAM, and the model's own MTP layer drafts the next token. Each point is a fresh load, with thinking off, a 256-token cap (answers used 52-61 tokens) and zero cached input. The release allocates 524,288 tokens; each point ran at the smallest of 131,072, 262,144 and 524,288 that holds it. At 128K the two smaller allocations read at 907.1 and 895.3 tok/s and both wrote at 55.8.
+
+| Input tokens | Allocation | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
+|---:|---:|---:|---:|---:|
+| 1,886 | 131,072 | 183.1 | 56.0 | 5/5 |
+| 3,557 | 131,072 | 294.7 | 57.7 | 5/5 |
+| 7,123 | 131,072 | 464.1 | 56.1 | 5/5 |
+| 14,253 | 131,072 | 644.8 | 56.5 | 5/5 |
+| 28,517 | 131,072 | 691.2 | 56.8 | 5/5 |
+| 55,644 | 131,072 | 728.6 | 56.7 | 5/5 |
+| 114,093 | 262,144 | 895.3 | 55.8 | 5/5 |
+| 152,129 | 262,144 | 972.8 | 55.1 | 5/5 |
+| 197,770 | 262,144 | 1,012.8 | 54.7 | 5/5 |
+| 228,197 | 262,144 | 1,032.3 | 53.4 | 5/5 |
+| 456,403 | 524,288 | 1,021.3 | 50.1 | 5/5 |
+
+The installed 512K service read the 128K prompt (114,093 tokens) at 891.2 tok/s and wrote at 54.9, slightly below the 262,144-token row. The test text routes to few experts and reads faster than real documents. The DeepSeek row's 130,048-token real-code prompt (124,103 GLM tokens) read at 651.7 tok/s on that service. It wrote 768 tokens at 54.2 tok/s, and at 55.4 tok/s with that input already cached. Quality: 28/30 with the same coding and maths questions (math_08 and math_09 missed), measured at a 131,072-token allocation. This is a different model and quantization from the DeepSeek rows, so it is not a matched comparison.
+
+The service holds one conversation at a time. When another conversation arrives, the current one is set aside on disk, up to four of them in 32 GB, and dropped after seven days. In the qualification run, a 114,129-token conversation set aside this way came back for its next turn in 3.0 s (114,128 tokens from disk), and that turn took 10.7 s against 128.2 s cold. Set-aside conversations also survive a service restart. After a stop and start of the installed service, a 28,554-token conversation came back from disk in 0.1 s, and its next turn took 4.9 s.
 

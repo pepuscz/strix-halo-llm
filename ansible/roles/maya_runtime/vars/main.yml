@@ -1,0 +1,6 @@
+---
+# The model family a Maya release builds: deepseek (maya-ds4 and its DSpark pack) or glm (maya and its GLM pack).
+# The DeepSeek release predates the switch and its manifest identity is pinned in benchmarks/results.json, so a
+# release without strix_maya.family is DeepSeek.
+maya_runtime_family: "{{ strix_maya.family | default('deepseek') }}"
+maya_runtime_requirements_lock: "{{ strix_maya.requirements_lock | default('requirements.lock') }}"

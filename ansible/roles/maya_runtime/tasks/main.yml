@@ -13,11 +13,11 @@
     owner: root
     group: "{{ strix_service.group }}"
     mode: "0755"
-  loop:
-    - "{{ strix_paths.release }}/patches"
-    - "{{ strix_paths.models }}/Maya-S"
-    - "{{ strix_paths.models }}/Engram"
-    - "{{ strix_paths.models }}/dspark"
+  loop: >-
+    {{ [strix_paths.release + '/patches']
+       + ((strix_target.files + (strix_extra_artifacts | default([])))
+          | map(attribute='local_subdirectory') | unique
+          | map('regex_replace', '^', strix_paths.models + '/') | list) }}
 
 - name: Install verified Maya build inputs
   ansible.builtin.copy:
@@ -26,11 +26,13 @@
     owner: root
     group: "{{ strix_service.group }}"
     mode: "0444"
-  loop:
-    - {src: requirements.lock, dest: requirements.lock}
-    - {src: rocblas-stock-tensile.cmake, dest: rocblas-stock-tensile.cmake}
-    - {src: "{{ strix_maya.expert_profile.file }}", dest: "{{ strix_maya.expert_profile.file }}"}
-    - {src: "{{ role_path }}/../../../patches/{{ strix_rocblas.patch.name }}", dest: "patches/{{ strix_rocblas.patch.name }}"}
+  loop: >-
+    {{ [{'src': maya_runtime_requirements_lock, 'dest': maya_runtime_requirements_lock},
+        {'src': 'rocblas-stock-tensile.cmake', 'dest': 'rocblas-stock-tensile.cmake'}]
+       + ([{'src': strix_maya.expert_profile.file, 'dest': strix_maya.expert_profile.file}]
+          if maya_runtime_family == 'deepseek' else [])
+       + [{'src': role_path + '/../../../patches/' + strix_rocblas.patch.name,
+           'dest': 'patches/' + strix_rocblas.patch.name}] }}
   loop_control:
     label: "{{ item.dest }}"
 
@@ -51,7 +53,7 @@
   async: 21600
   poll: 30
 
-- name: Build and seal the Maya engine and the DSpark pack
+- name: Build and seal the Maya engine and the model's pack
   ansible.builtin.command:
     argv: ["{{ strix_paths.bin }}/build-maya-engine-{{ strix_release_id }}"]
   register: maya_runtime_build
@@ -65,7 +67,10 @@
     owner: "{{ strix_service.user }}"
     group: "{{ strix_service.group }}"
     mode: "0444"
-  loop: "{{ strix_target.files + (strix_extra_artifacts | selectattr('owned_by_service', 'defined') | selectattr('owned_by_service') | list) }}"
+  loop: >-
+    {{ strix_target.files
+       + (strix_extra_artifacts | default([]) | selectattr('owned_by_service', 'defined')
+          | selectattr('owned_by_service') | list) }}
   loop_control:
     label: "{{ item.name }}"
 
@@ -78,3 +83,4 @@
     owner: "{{ strix_service.user }}"
     group: "{{ strix_service.group }}"
     mode: "0644"
+  when: maya_runtime_family == 'deepseek'

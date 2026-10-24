@@ -1070,7 +1070,206 @@
           "needle_passes": 5
         }
       ],
-      "context_scaling_note": "Each point: a fresh load from the frozen expert profile, thinking off, 256-token cap (every answer used 64 tokens), zero cached input. The retrieval filler routes to few experts, so its prefill is faster than real text: a 130,048-token real-code prompt read at 153.6 tok/s (long_context)."
+      "context_scaling_note": "Each point: a fresh load from the frozen expert profile, thinking off, 256-token cap (every answer used 64 tokens), zero cached input. The retrieval filler routes to few experts, so its prefill is faster than real text: a 130,048-token real-code prompt read at 155.4 tok/s (long_context)."
+    },
+    "maya-glm-dual-xtx": {
+      "name": "Maya HIP Maya-M IQ2_S dual RX 7900 XTX",
+      "manifest": "ansible/releases/maya-glm-dual-xtx-512k.yml",
+      "hardware": {
+        "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
+        "helper_gpu": "AMD Radeon 8060S (1002:1586) computes each card's routed experts held in RAM"
+      },
+      "runtime": {
+        "repository": "https://github.com/pepuscz/project-maya",
+        "release_tag": "maya-glm-dual-xtx-512k-20261024",
+        "source_commit": "3e054700b4fbfc9d31499f4f1c5f2a1c0399b9b4",
+        "upstream": "https://github.com/mw00/project-maya v1.1.25"
+      },
+      "power_watts": {
+        "stapm": 120,
+        "fast": 120,
+        "slow": 120
+      },
+      "cpu": {
+        "governor": "performance",
+        "minimum_khz": 2000000,
+        "boost": false
+      },
+      "gpu_dpm": "auto",
+      "context_allocation": 524288,
+      "target": {
+        "quantization": "Maya-M IQ2_S",
+        "bytes": 116003563168
+      },
+      "draft": {
+        "type": "MTP",
+        "placement": "the model's own next-token layer, no separate draft model"
+      },
+      "layer_split": "layers 0-24 on the first card, the rest on the second (MAYA_GLM_SPLIT=25)",
+      "quality": {
+        "coding": 10,
+        "gsm8k": 10,
+        "math": 8,
+        "total": 28,
+        "thinking": false,
+        "allocation_tokens": 131072,
+        "misses": "math_08 and math_09"
+      },
+      "long_context": {
+        "input_tokens": 124103,
+        "public_input_tokens": 130048,
+        "prompt_sha256": "5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a",
+        "output_tokens": 768,
+        "cached_tokens": 0,
+        "prefill_tokens_per_second": 651.7,
+        "decode_tokens_per_second": 54.2,
+        "request_seconds": 205.7,
+        "reused_prompt": {
+          "cached_tokens": 124102,
+          "decode_tokens_per_second": 55.4,
+          "request_seconds": 13.9
+        },
+        "allocation_tokens": 524288
+      },
+      "model": "GLM-5.3-Flash",
+      "manifest_sha256": "ac4996b2906d433cc8ae5ed6778c7947be197d2d0d7236db53ea29fef2798011",
+      "release_id": "maya-glm-dual-xtx-512k-v1",
+      "selection": "added_hardware",
+      "context_scaling": [
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 131072,
+          "actual_input_tokens": 1886,
+          "public_input_tokens": 2040,
+          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+          "prefill_tokens_per_second": 183.1,
+          "decode_tokens_per_second": 56.0,
+          "completion_tokens": 52,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 131072,
+          "actual_input_tokens": 3557,
+          "public_input_tokens": 3840,
+          "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
+          "prefill_tokens_per_second": 294.7,
+          "decode_tokens_per_second": 57.7,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 131072,
+          "actual_input_tokens": 7123,
+          "public_input_tokens": 7680,
+          "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
+          "prefill_tokens_per_second": 464.1,
+          "decode_tokens_per_second": 56.1,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 131072,
+          "actual_input_tokens": 14253,
+          "public_input_tokens": 15359,
+          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
+          "prefill_tokens_per_second": 644.8,
+          "decode_tokens_per_second": 56.5,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 131072,
+          "actual_input_tokens": 28517,
+          "public_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 691.2,
+          "decode_tokens_per_second": 56.8,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 131072,
+          "actual_input_tokens": 55644,
+          "public_input_tokens": 59933,
+          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
+          "prefill_tokens_per_second": 728.6,
+          "decode_tokens_per_second": 56.7,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 114093,
+          "public_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 895.3,
+          "decode_tokens_per_second": 55.8,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 152129,
+          "public_input_tokens": 163840,
+          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
+          "prefill_tokens_per_second": 972.8,
+          "decode_tokens_per_second": 55.1,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 197770,
+          "public_input_tokens": 212992,
+          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
+          "prefill_tokens_per_second": 1012.8,
+          "decode_tokens_per_second": 54.7,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 262144,
+          "actual_input_tokens": 228197,
+          "public_input_tokens": 245760,
+          "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
+          "prefill_tokens_per_second": 1032.3,
+          "decode_tokens_per_second": 53.4,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 456403,
+          "public_input_tokens": 491520,
+          "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
+          "prefill_tokens_per_second": 1021.3,
+          "decode_tokens_per_second": 50.1,
+          "completion_tokens": 61,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        }
+      ],
+      "context_scaling_note": "Each point: a fresh load, the public prompt bytes of the DeepSeek rows (GLM counts fewer tokens for the same text), thinking off, 256-token cap (answers used 52-61 tokens), zero cached input. 2K-64K at a 131,072-token allocation, 128K-240K at 262,144, 480K at 524,288; the 128K prompt read at 907.1 tok/s and decoded at 55.8 at 131,072. The retrieval filler routes to few experts, so its prefill is faster than real text (long_context)."
     }
   },
   "winning_setups": {

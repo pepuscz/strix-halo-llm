@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Isolated ROCm 7.2.4 userspace and the per-architecture rocBLAS for the Maya DS4 release.
+# Isolated ROCm 7.2.4 userspace and the per-architecture rocBLAS for the {{ 'Maya GLM' if (strix_maya.family | default('deepseek')) == 'glm' else 'Maya DS4' }} release.
 # Nothing is installed system-wide: no AMD APT repository, driver, /opt/rocm, ldconfig, or
 # dependency installation. Every input is pinned by size and SHA-256 or by Git object identity.
 set -Eeuo pipefail

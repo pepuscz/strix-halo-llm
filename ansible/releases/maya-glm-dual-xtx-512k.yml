@@ -1,0 +1,368 @@
+---
+strix_release_id: maya-glm-dual-xtx-512k-v1
+strix_release_schema: 1
+strix_system:
+  id: maya-glm-dual-xtx
+  name: Maya HIP Maya-M IQ2_S dual RX 7900 XTX
+  engine: maya
+  selected_default: false
+  model: GLM-5.3-Flash
+strix_platform:
+  os_id: ubuntu
+  os_version: '26.04'
+  kernel: 7.0.0-38-generic
+  architecture: x86_64
+  gpu_pci_id: 1002:1586
+  board_name: AXB35-02
+  minimum_memory_kib: 125000000
+  strict_kernel: true
+  secure_boot: disabled
+  kernel_arguments:
+    - amd_pstate=active
+    - amd_iommu=off
+    - amdgpu.gttsize=126976
+    - ttm.pages_limit=32505856
+    - ttm.page_pool_size=32505856
+  discrete_gpus:
+    - name: AMD Radeon RX 7900 XTX
+      pci_id: 1002:744c
+      count: 2
+  # 116.0 GB of model shards + 1.0 GB pack (dense.bin 0.94 GB, tokenizer) + 32 GB of conversations kept on disk
+  # (MAYA_GLM_SLOT_GB, in the state directory) + the engine's own 8 GB free-space floor beside them + the 81 GB
+  # the DeepSeek dual RX 7900 XTX recipe reserves beyond its model files for the ROCm runfile and userspace,
+  # rocBLAS and engine build trees, its pack and the venv (470 GB - 388.9 GB) = 238 GB, rounded up.
+  minimum_free_bytes: 240000000000
+strix_paths:
+  root: /opt/strix-halo
+  source: /opt/strix-halo/src
+  bin: /opt/strix-halo/bin
+  downloads: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/downloads
+  release: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1
+  models: /opt/strix-halo/models/glm-53-flash-maya
+  state: /var/lib/strix-halo-inference
+strix_runtime:
+  repository: https://github.com/pepuscz/project-maya
+  release_tag: maya-glm-dual-xtx-512k-20261024
+  tag_object: f6d35964bce31c6334d2bc443e8dc214239f7ac3
+  tag_object_type: tag
+  source_commit: 3e054700b4fbfc9d31499f4f1c5f2a1c0399b9b4
+  source_tree: b5d18000fc985e468dbcda999e868b206fb52b5f
+  upstream_repository: https://github.com/mw00/project-maya
+  upstream_tag: v1.1.25
+  upstream_commit: 94878e25e3860e22ea29b4fff506ade8c477a57b
+  server_sha256: 9338c9e71a7376645f4f3572e4f9dc9b8afb4ea3776ec969b050a9770b1e99e6
+  binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so a
+    portable install seals its own binary after the pinned source, toolchain and pack checks
+  ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
+  ggml_archive_url: https://github.com/ggml-org/llama.cpp/archive/3cf03257f219afbe7334045ff7c6a06ac68c627d.zip
+  ggml_archive_sha256: cbe23c594282ead2937abb3f008e51fcec4609d9256652fff42c7cc1c21ea47b
+  ggml_tree_fingerprint: 8053cd007a594545d97657e1d5db2e944277a8252fe7670ae0b1ecee407acc47
+  gcc_version: 15.2.0
+strix_rocm724:
+  version: 7.2.4
+  runfile_url: https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-7.2.4/ubuntu/24.04/rocm-installer_1.2.9.70204-62-93~24.04.run
+  runfile_name: rocm-installer_1.2.9.70204-62-93~24.04.run
+  runfile_size: 9389960949
+  runfile_sha256: 866779bfcdc24863c58fe7d8f8cfe21e9e20dc978ce77a153af64e1038f0ab5b
+  installer_script_sha256: 5fa797b77d29bef75b00103ad08451469bcea04ab9c9bad03c3c6131dd024928
+  components: 97
+  include_entries: 52
+  file_sha256:
+    bin/hipcc: 7e6614203ff9838f64581a4c9522dd4794834d7e91bad8074bb8c88d85618d09
+    lib/libamdhip64.so.7.2.70204: f1043337461c8e54ee135e95fa979a7d0e4344676ad5b0554652f844f8f098ac
+  compat_debs:
+    - file: libicu74_74.2-1ubuntu3.1_amd64.deb
+      url: https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu74_74.2-1ubuntu3.1_amd64.deb
+      size: 10860078
+      sha256: c9a70989678660eed9a1e904c74fa043da8bec8e2036856fc16e31ced79b04f8
+    - file: libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      url: https://launchpadlibrarian.net/865991952/libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      size: 763972
+      sha256: bfd07c01d6e5ab3e327f3ca5819409b1914bbfb3f1a016d53e4dabd5f96143bb
+strix_rocblas:
+  repository: https://github.com/ROCm/rocm-libraries.git
+  tag: rocm-7.2.4
+  tag_object: 3a2a9bc877edcf5decd36eeaf897a8c9b6017030
+  commit: dabb6df2b988f8eabed1e2fecefaaf4e818bc7ef
+  tree: 7c5998a2fc3b9da49b0ee1a218d0fe3a603a7eb6
+  upstream_fix: https://github.com/ROCm/rocm-libraries/pull/4781
+  upstream_fix_merge_commit: 51c8fc419dda452252d36545d04335424ca1a1bf
+  patch:
+    name: rocblas-rocm724-4781-per-gfx-backport.patch
+    sha256: 72f127645d241e3e515ae868d8e3bb80df211b04b095abbcddffe4f8ee447e17
+  patched_tree: d34d2f545bd3d281c671476b797b81948d77deec
+  initializer_sha256: d666c4e35b62abb63effbab8222b47c4b6cf30aacc7e64857bc3af7cf3cc60b3
+  gpu_targets: gfx1100;gfx1151
+  build_jobs: 2
+  deps:
+    - name: libmsgpack-cxx-dev
+      version: 7.0.0-2
+      sha256: 033efcbd18ea9eec440e2a4277366623834ec0553a136bfa7ece2a94dbfbcdb2
+    - name: libboost1.90-dev
+      version: 1.90.0-6ubuntu1
+      sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
+  reference_library_sha256: d89e9ada0fb0d0d679e8d427d1ece26db3f424cca8b6e189bce785bd33212ee0
+strix_target:
+  repository: peasantsmith/GLM-5.3-Flash-Maya-GGUF
+  revision: f16ee4ba50d8fd2bb726ea1862ca6ca14ba188da
+  quantization: Maya-M IQ2_S
+  subdirectory: Maya-M
+  total_size: 116003563168
+  files:
+    - name: GLM-5.3-Flash-Maya-M-IQ2_S-00001-of-00003.gguf
+      local_subdirectory: Maya-M
+      size: 47678327584
+      sha256: 3f740d1b1022b4a0ddad50cd861bb071dd415bde94afa1292d0476641186c638
+    - name: GLM-5.3-Flash-Maya-M-IQ2_S-00002-of-00003.gguf
+      local_subdirectory: Maya-M
+      size: 47820244896
+      sha256: 285951d2afa0cd98285b03d0dc4aa68d83daf1a6f4a2594fe40b0cdd27ade485
+    - name: GLM-5.3-Flash-Maya-M-IQ2_S-00003-of-00003.gguf
+      local_subdirectory: Maya-M
+      size: 20504990688
+      sha256: ebf1ce713f71207747e10eeebed87597969d8b5e1d9dd817420d2c2f7ca51e0e
+# No separate drafter: the engine drafts with the model's own MTP (NextN) layer, read from the target shards.
+strix_draft:
+  repository: peasantsmith/GLM-5.3-Flash-Maya-GGUF
+  revision: f16ee4ba50d8fd2bb726ea1862ca6ca14ba188da
+  files: []
+strix_ryzenadj:
+  repository: https://github.com/FlyGoat/RyzenAdj.git
+  commit: 5775fc3e6dbb25c7030ee2d100a1bdd6e8bf2d0a
+  version: 5775fc3
+  tested_binary_sha256: 2755abdb70fbe9a20245590fcf6af6e3d424d924cc54f30d172d5b6af5bbb1e2
+  enforce_tested_binary_sha256: true
+strix_fan:
+  manage: true
+  repository: https://github.com/cmetz/ec-su_axb35-linux.git
+  commit: 7a9f372edcaa99e562dece70204c4f609692a778
+  dkms_version: 0.1.0_git7a9f372
+  sysfs: /sys/class/ec_su_axb35
+  minimum_max_rpm: 2000
+strix_service:
+  name: strix-halo-inference.service
+  user: inference
+  group: inference
+  host: 127.0.0.1
+  port: 18109
+  alias: glm-5.3-flash
+  context: 524288
+  parallel_slots: 1
+  # The measured runs' unit envelope: the engine's pinned RAM tier counts against it.
+  memory_high: 123G
+  memory_max: 125G
+  memory_swap_max: 0
+  # The measured runs' hard floor (12 GiB available and non-CMA); their loads stayed well above it.
+  minimum_effective_non_cma_kib: 12582912
+  # The same bounded page-pool drain target as the DeepSeek recipe on this box; the 80 GB pinned tier and the
+  # engine's 16 GB headroom need about 96 GB of it.
+  load_available_kib: 115343360
+  thermal_limit_millic: 95000
+  health_retries: 720
+  health_delay_seconds: 5
+  auto_start: true
+  conflicts:
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
+  retire_units:
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
+strix_policy:
+  cpu_governor: performance
+  cpu_min_khz: 2000000
+  cpu_boost: 0
+  gpu_dpm: auto
+  stapm_mw: 120000
+  fast_mw: 120000
+  slow_mw: 120000
+  expected_watts: '120.000'
+strix_allow_reboot: false
+strix_verify_full_model_hashes: false
+strix_verify_api_smoke: true
+strix_maya:
+  family: glm
+  python: '3.14'
+  build_jobs: 4
+  hip_architectures: gfx1100;gfx1151
+  packages:
+    - build-essential
+    - cmake
+    - curl
+    - git
+    - ninja-build
+    - python3
+    - python3-venv
+    - python3-yaml
+    - python3-rich
+    - libdrm-amdgpu1
+    - libelf1t64
+    - libnuma1
+  # The engine's own Python environment (setup.py's packages) as the qualified host's venv held it; the DeepSeek
+  # recipe's lock was made for an older engine.
+  requirements_lock: requirements-glm.lock
+  requirements_sha256: 385a10730478142a75e2ea1289b41d8995485eabd88785bdca7ad798c5fa6429
+  pack: /opt/strix-halo/models/glm-53-flash-maya/Maya-M/maya-glm-pack
+  # The engine source's own packer (tools/iq_pack.py at source_commit), run without a GPU.
+  pack_tool:
+    path: tools/iq_pack.py
+    sha256: 61e21828a6488a119e80279185dde4203e2a91640fdf13190ef4eaf68d526899
+  pack_files:
+    dense.bin: 9dcd1dc9ff74bf483cb5d8046634e625f94b36bac6ee1d1b221e7617a6a72fac
+    index.txt: 73706db6223e225025b034fae6c69dd0f3188c14c0f83bf4dce9d5fa2d2882e1
+    native_experts.txt: a53732d7d32ad3cb8f7b3174dfe01034f81238b3f482a54d34721e483efcd6d1
+    tokenizer/chat_template.jinja: a4fddbbf0b432101a296c17094f8bc5a2b0d30713b5b5cd92f86be78511aa724
+    tokenizer/merges.txt: bb93732e5136ac1b2b731f55573988442a91a33c10178ef18e24b4443b593f4a
+    tokenizer/token_type.json: 3d226d66989eaa352fc8093536ece4b9398c85b57ba33860031bef042251ddb9
+    tokenizer/tokenizer.json: 60458021da45393b01761d2c49144a02759a52927239bd665136dcf870e64bb5
+    tokenizer/vocab.json: 168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2
+  # compat-bf16.json records the absolute path of the shard it was packed from ("source"), so the qualified
+  # host's file (2968db66...) differs at this release's model path. This digest is the host's file as
+  # sed -E 's|^( *"source" *: *)"[^"]*"|\1"MODEL_SHARD"|' compat-bf16.json | sha256sum
+  pack_compat_bf16_normalized_sha256: bd2e2b79c35ccafb8c8643776cc28337e75d3bca57b07ac31914f88f716899a9
+  # Routing counts shipped in the engine source; read-only for the engine (no --expert-profile-save).
+  expert_profile:
+    path: data/expert-profile-glm.bin
+    size: 106008
+    sha256: 53b03a13482b6fedc599d149be2d69f88c38d9edc4611a740da46314ab1dc5a7
+  server:
+    exe: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/build-hip/maya
+    args:
+      - --glm-pack
+      - /opt/strix-halo/models/glm-53-flash-maya/Maya-M/maya-glm-pack
+      - --max-context
+      - '524288'
+      - --expert-cache
+      - auto
+      - --prefill
+      - auto
+      - --kv-streaming
+      - 'on'
+      - --expert-profile
+      - /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/data/expert-profile-glm.bin
+    cwd: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source
+    tokenizer: /opt/strix-halo/models/glm-53-flash-maya/Maya-M/maya-glm-pack/tokenizer
+    model_name: glm-5.3-flash
+    gpu: [0, 1, 2]
+    layer_split: '25'
+    sampling:
+      temperature: 1.0
+      top_p: 0.95
+    reasoning_effort: high
+    backend: hip
+    port: 18109
+    host: 127.0.0.1
+    lib_dirs:
+      - /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/rocm/lib
+    log: /var/lib/strix-halo-inference/native.log
+    installer:
+      models_dir: /opt/strix-halo/models/glm-53-flash-maya
+      quant: Maya-M
+      gguf: null
+      gguf_dir: null
+      draft: mtp
+      written: '2026-10-24 00:00'
+      speed_calibration:
+        skipped: true
+        reason: The qualified release drafts with the model's own MTP layer; no startup calibration
+    env:
+      MAYA_GLM_RESERVE_MB: '1024'
+      MAYA_GLM_RAM_HEADROOM_GB: '16'
+      MAYA_GLM_RAM_GB: '80'
+      MAYA_GLM_RAM_RESIDENT: '1'
+      MAYA_GLM_PREFILL_SUB: '1024'
+      MAYA_GLM_PREFILL_MB: '6144'
+      MAYA_HIPBLASLT_TUNING: "/opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100202.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100401.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1100-glm-hipblaslt-100500.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100202.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100401.txt:\
+        /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/source/tools/hip/gfx1151-glm-hipblaslt-100500.txt"
+      MAYA_GLM_EXPERT_HELPER: '2'
+      MAYA_GLM_SPLIT: '25'
+      MAYA_GLM_DEVS: '0,1'
+      MAYA_GLM_PARALLEL_LOAD: '0'
+      MAYA_GLM_GU22_TUNED: '1'
+      MAYA_GLM_MV_RDNA: '1'
+      MAYA_GLM_DSA_SCORE2: rl1b8
+      MAYA_GLM_MLA_ATTN2: h32lvc
+      MAYA_GLM_HELPER_CHECK: '8'
+      # Conversations set aside on disk (a full 524,288-token one is about 8 GB), kept across service restarts and
+      # dropped after the engine's default 7 days. Conversation checkpoints stay at the engine default (on).
+      MAYA_GLM_SLOTS: '4'
+      MAYA_GLM_SLOT_GB: '32'
+      MAYA_GLM_SLOT_KEEP: '1'
+      MAYA_GLM_SLOT_DIR: /var/lib/strix-halo-inference/slots
+      ROCBLAS_USE_HIPBLASLT: '0'
+      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-glm-dual-xtx-512k-v1/rocm/lib/rocblas/library
+# Measured on the qualified host with engine 3e05470 and this configuration, at the allocation each entry names.
+strix_qualification:
+  # The quality suite ran at a 131,072-token allocation; there is no quality claim for 524,288.
+  answer_quality:
+    coding: 10
+    gsm8k: 10
+    math: 8
+    total: 28
+    scoring: raw and audited both 28/30 (math_08 and math_09 missed)
+    thinking: false
+    allocation_tokens: 131072
+    # Qualified on the declared per-workload output caps (math_10 included); no question is raised to 4096.
+    output_caps:
+      coding: 512
+      gsm8k: 1024
+      math: 2048
+  retrieval_ladder:
+    workload: the public retrieval prompts, cold, 256-token output cap, one run each
+    largest_input_tokens: 456403
+    allocations:
+      - allocation_tokens: 131072
+        points: 7
+        span: 2K-128K
+        values: 35/35
+        input_tokens_range: [1886, 114093]
+        decode_tokens_per_second_range: [55.8, 57.7]
+      - allocation_tokens: 262144
+        points: 4
+        span: 128K-240K
+        values: 20/20
+        input_tokens_range: [114093, 228197]
+        decode_tokens_per_second: [55.8, 55.1, 54.7, 53.4]
+        prefill_tokens_per_second: [895.3, 972.8, 1012.8, 1032.3]
+      - allocation_tokens: 524288
+        points: 1
+        span: 480K
+        values: 5/5
+        input_tokens_range: [456403, 456403]
+        decode_tokens_per_second: [50.1]
+        prefill_tokens_per_second: [1021.3]
+  # The DeepSeek dual RX 7900 XTX row's 130,048-token real-code prompt (the same bytes; GLM counts 124,103 tokens),
+  # thinking off, 768-token cap, on the installed service: cold, then the same request again.
+  long_context:
+    prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
+    allocation_tokens: 524288
+    input_tokens: 124103
+    output_tokens: 768
+    first_request_prefill_tokens_per_second: 651.7
+    first_request_decode_tokens_per_second: 54.2
+    reused_prompt_cached_tokens: 124102
+    reused_prompt_decode_tokens_per_second: 55.4
+  # Conversation A set aside on disk when B came, and taken back for its next turn.
+  conversation_switch:
+    set_aside_input_tokens: 114129
+    restored_tokens: 114128
+    restore_seconds: 3.0
+    new_input_tokens: 98
+    request_seconds: 10.7
+    cold_request_seconds: 128.2
+    conditions: conversation checkpoints on and MAYA_GLM_SLOT_KEEP unset. With this release's MAYA_GLM_SLOT_KEEP=1 the
+      installed service also kept them across a stop and start; a 28,554-token conversation came back from disk in
+      0.1 s and its next turn took 4.9 s
+  multi_conversation: this release serves one conversation at a time (parallel_slots 1); 2 and 3 parallel
+    conversations were measured at 131,072 (a lone request's decode unchanged, conversations served together about
+    45 tok/s in total) and are not part of the release
+  qualified_configuration: 'the same engine source, model, pack and settings measured on the qualified host at
+    131,072, 262,144 and 524,288 allocations. On 24 Oct 2026 the from-scratch installer ran end to end on that host
+    (install and strixctl verify passed). The installed service then read the public 128K prompt cold at 524,288
+    (114,093 tokens, 5/5, 891.2 tok/s reading, 54.9 tok/s writing) and the long_context prompt, and kept a conversation
+    across a stop and start. The test ran the service with a runtime Restart=no drop-in, and the readings in a second
+    start after a fault in the test controller'
