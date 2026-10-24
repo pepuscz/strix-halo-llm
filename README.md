@@ -1,6 +1,6 @@
 # Strix Halo LLM
 
-![Illustration of the BOSGAME M5 with two RX 7900 XTX cards connected by OCuLink and an external USB4 SSD](docs/strix-halo-frankenstein.png)
+![Illustration of the BOSGAME M5 with two OCuLink-connected RX 7900 XTX cards, external USB4 SSD, and a floor-mounted GPU power supply](docs/strix-halo-frankenstein.png)
 
 *Illustration of the [dual RX 7900 XTX setup](#dual-rx-7900-xtx-setup).*
 
