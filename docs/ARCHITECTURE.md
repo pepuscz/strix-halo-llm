@@ -1,6 +1,19 @@
 # Architecture
 
-The winning setups are Strata HIP UD-Q4_K_XL for Qwen and Strix Halo llama.cpp Vulkan IQ3_XXS for DeepSeek. This table describes the three published Ansible recipes; the measured Qwen Vulkan baseline settings are recorded in [BENCHMARKS.md](BENCHMARKS.md#qwen-context-scaling).
+## Dual RX 7900 XTX
+
+The current dual-card setup runs one recipe at a time. Each RX 7900 XTX has its own PCIe 4.0 ×4 M.2-to-OCuLink link; the Radeon 8060S serves routed experts held in the M5's RAM. An external SSD connects over USB4.
+
+| Model | Stack | Context | Parallel work |
+|---|---|---:|---|
+| GLM-5.3-Flash Maya-M IQ2_S | **Maya HIP Maya-M IQ2_S dual RX 7900 XTX** | 1 × 512K | Layers split across the cards; model MTP drafts tokens |
+| DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS | **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | 1 × 256K | Tensor parallel across the cards; DSpark drafter split across them |
+
+The [GLM recipe](../ansible/releases/maya-glm-dual-xtx-512k.yml) and [DeepSeek recipe](../ansible/releases/maya-ds4-dual-xtx-256k.yml) pin the runtime and serving settings.
+
+## BOSGAME M5 only — historical architecture
+
+The single-box comparison selected Strata HIP UD-Q4_K_XL for Qwen and Strix Halo llama.cpp Vulkan IQ3_XXS for DeepSeek. This table describes the three published Ansible recipes; the measured Qwen Vulkan baseline settings are recorded in [BENCHMARKS.md](BENCHMARKS.md#qwen-context-scaling).
 
 | Layer | **Qwen / Strata HIP UD-Q4_K_XL** | **DeepSeek / Strix Halo llama.cpp Vulkan IQ3_XXS** | DeepSeek / Lucebox ROCm ROCmFPX |
 |---|---|---|---|

@@ -1,10 +1,71 @@
 # Benchmarks
 
-These tests measure how fast each setup reads a long input and writes an answer, and whether the answer is correct. All setups run on the same BOSGAME M5 with Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM, and a 120 W power limit. Reasoning mode is disabled.
+The current dual RX 7900 XTX setup and the historical BOSGAME M5-only setup use different models and hardware. Their speeds are not a matched comparison. Prefill means reading the input; decode means writing the answer. Input tokens are model-specific counts, while context allocation is the memory reserved for a conversation.
 
-The input contains five labelled phrases at different positions, such as `BOSGAME_ALPHA: violet canoe`. The model is asked to find and repeat all five. Every speed-test run returned all five phrases correctly. Compared setups receive the same text.
+The cold retrieval test places five labelled phrases at different positions in an input and asks the model to find them. Every recorded speed-test request found all five. Each point measures one request with no cached input. Detailed sources, settings and result data are linked below.
 
-The chart measures one request at a time. Qwen's recommended recipe also supports four simultaneous conversations; that capacity is tested separately below. A server **slot** means capacity for one active conversation.
+## Dual RX 7900 XTX: GLM-5.3-Flash
+
+![Dual RX 7900 XTX context scaling: GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017](benchmark-dual-xtx.svg)
+
+**Maya HIP Maya-M IQ2_S dual RX 7900 XTX**, on the same two cards and Radeon 8060S as the DeepSeek rows below, with the same five-phrase prompts (identical bytes, pinned by SHA-256). GLM's tokenizer counts about 7 % fewer tokens for the same text, so its input counts are lower at each length. The layers are split between the cards (0-24 on the first, the rest on the second). The 8060S computes each card's routed experts held in RAM, and the model's own MTP layer drafts the next token. Each point is a fresh load, with thinking off, a 256-token cap (answers used 52-61 tokens) and zero cached input. The release allocates 524,288 tokens; each point ran at the smallest of 131,072, 262,144 and 524,288 that holds it. At 128K the two smaller allocations read at 907.1 and 895.3 tok/s and both wrote at 55.8.
+
+### Public Project Maya benchmark
+
+[Project Maya issue #458](https://github.com/mw00/project-maya/issues/458) reports a public prompt ladder on this hardware. The Maya v1.1.25 and tuned-branch columns use the same prompt at each length. Values are decode / prefill tokens per second; all points found five of five values.
+
+| Exact GLM input tokens | Maya v1.1.25 | Tuned branch |
+|---:|---:|---:|
+| 1,886 | 29.0 / 178 | 56.0 / 183 |
+| 28,517 | 28.3 / 689 | 56.8 / 691 |
+| 114,093 | 27.5 / 906 | 55.8 / 907 |
+
+The issue also reports 152,129–456,403-token prompts and the 28/30 quality result. Its 114,093-token public point uses a smaller context allocation than the installed 512K service, which measured 54.9 decode / 891.2 prefill tok/s. The detailed table below preserves the context-scaling measurements from this repository.
+
+[Pinned public issue snapshot](../benchmarks/project-maya-issue-458.json)
+
+### Recorded context scaling
+
+| Input tokens | Allocation | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
+|---:|---:|---:|---:|---:|
+| 1,886 | 131,072 | 183.1 | 56.0 | 5/5 |
+| 3,557 | 131,072 | 294.7 | 57.7 | 5/5 |
+| 7,123 | 131,072 | 464.1 | 56.1 | 5/5 |
+| 14,253 | 131,072 | 644.8 | 56.5 | 5/5 |
+| 28,517 | 131,072 | 691.2 | 56.8 | 5/5 |
+| 55,644 | 131,072 | 728.6 | 56.7 | 5/5 |
+| 114,093 | 262,144 | 895.3 | 55.8 | 5/5 |
+| 152,129 | 262,144 | 972.8 | 55.1 | 5/5 |
+| 197,770 | 262,144 | 1,012.8 | 54.7 | 5/5 |
+| 228,197 | 262,144 | 1,032.3 | 53.4 | 5/5 |
+| 456,403 | 524,288 | 1,021.3 | 50.1 | 5/5 |
+
+The installed 512K service read the 128K prompt (114,093 tokens) at 891.2 tok/s and wrote at 54.9, slightly below the 262,144-token row. The test text routes to few experts and reads faster than real documents. The DeepSeek row's 130,048-token real-code prompt (124,103 GLM tokens) read at 651.7 tok/s on that service. It wrote 768 tokens at 54.2 tok/s, and at 55.4 tok/s with that input already cached. Quality: 28/30 with the same coding and maths questions (math_08 and math_09 missed), measured at a 131,072-token allocation. This is a different model and quantization from the DeepSeek rows, so it is not a matched comparison.
+
+The service holds one conversation at a time. When another conversation arrives, the current one is set aside on disk, up to four of them in 32 GB, and dropped after seven days. In the qualification run, a 114,129-token conversation set aside this way came back for its next turn in 3.0 s (114,128 tokens from disk), and that turn took 10.7 s against 128.2 s cold. Set-aside conversations also survive a service restart. After a stop and start of the installed service, a 28,554-token conversation came back from disk in 0.1 s, and its next turn took 4.9 s.
+
+## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017
+
+**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, allocation 262,144 tokens, the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256). The DSpark drafter's three blocks are split across the two cards (block 0 on the second card, blocks 1 and 2 on the lead), which leaves each card room for more resident experts. Each point is a fresh load from the frozen expert profile; thinking off, a 256-token cap (every answer used 64 tokens), zero cached input. This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
+
+| Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
+|---:|---:|---:|---:|
+| 2,040 | 58.1 | 27.8 | 5/5 |
+| 3,840 | 99.5 | 34.5 | 5/5 |
+| 7,680 | 162.8 | 34.1 | 5/5 |
+| 15,359 | 178.6 | 34.3 | 5/5 |
+| 30,720 | 196.7 | 32.1 | 5/5 |
+| 59,933 | 205.8 | 33.0 | 5/5 |
+| 122,879 | 226.1 | 32.5 | 5/5 |
+| 163,840 | 226.2 | 31.7 | 5/5 |
+| 212,992 | 226.1 | 32.4 | 5/5 |
+| 245,760 | 224.1 | 31.2 | 5/5 |
+
+The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents: a 130,048-token real-code prompt read at 155.4 tok/s, wrote 768 tokens at 37.1 tok/s, and at 42.8 tok/s with that input already cached. Quality: 30/30 with the same coding and maths questions, measured at a 131,072-token allocation.
+
+## BOSGAME M5 only — historical measurements
+
+The sections below preserve the earlier single-box comparison on the Radeon 8060S without the external cards. Qwen and DeepSeek-V4-Flash-0731 were benchmarked with different models and quantizations from the dual-card releases above.
 
 ## Qwen3.8-Flash-Next UD-Q4_K_XL
 
@@ -71,7 +132,7 @@ Four conversations each received a different long prompt containing 228,244 toke
 
 ## Protocol and quality
 
-Cold retrieval uses deterministic filler with five values near 2%, 20%, 50%, 80%, and 98% depth, temperature 0, top-k 1, top-p 1, and one cold request per point. The output cap is 80 tokens for Qwen and 256 for DeepSeek. Throughput is reported by each engine; request time is input-processing time plus generation time. Exact prompt SHA-256 values, output counts, and Qwen completion-count/time rates are in [results.json](../benchmarks/results.json). Different model tokenizers produce different token counts for the same prompt bytes.
+Cold retrieval uses deterministic filler with five values near 2%, 20%, 50%, 80%, and 98% depth, temperature 0, top-k 1, top-p 1, and one cold request per point. The output cap is 80 tokens for Qwen and 256 for DeepSeek and GLM. Throughput is reported by each engine; request time is input-processing time plus generation time. Exact prompt SHA-256 values, output counts, and Qwen completion-count/time rates are in [results.json](../benchmarks/results.json). Different model tokenizers produce different token counts for the same prompt bytes.
 
 Quality uses all ten coding, ten GSM8K-style, and ten MATH-style cases from the [pinned Lucebox harness](https://github.com/Luce-Org/lucebox/tree/90f85fa401c6a3c61d9e4d0e2da7fc48a5e8915e/harness). Coding answers execute against their tests; numeric scores use reviewed final answers. The corrected `math_08` reference is `20/3`; interval whitespace is normalized.
 
@@ -91,47 +152,3 @@ The four-slot Strata quality checkpoint uses a 16K prefill cap and prompts of at
 [results.json](../benchmarks/results.json) contains source/model identities, prompt hashes, request parameters, exact token counts, all measured points, and qualification aggregates. Ansible manifests pin artifacts and build inputs. The published Strata recipe preserves the qualified serving flags and tensor hashes with portable installation paths; the reference executable hash identifies the measured build, and each portable build is sealed locally.
 
 Qwen uses kernel `7.0.0-31-generic`; DeepSeek uses `7.0.0-29-generic`. Strata and Vulkan run with CPU boost off and GPU DPM auto. Lucebox runs with CPU boost on and GPU DPM high. The demand fan controller samples once per second, returns to firmware-auto after 300 idle seconds, and uses maximum cooling on failure. Its measured activation latency is 1.520 seconds; prefill/decode/end-to-end ratios against fixed fans are 1.0000/1.0018/1.0018.
-
-## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017
-
-![Dual RX 7900 XTX context scaling: GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017](benchmark-dual-xtx.svg)
-
-**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, allocation 262,144 tokens, the same five-phrase prompts as the DeepSeek rows above (identical bytes, pinned by SHA-256). The DSpark drafter's three blocks are split across the two cards (block 0 on the second card, blocks 1 and 2 on the lead), which leaves each card room for more resident experts. Each point is a fresh load from the frozen expert profile; thinking off, a 256-token cap (every answer used 64 tokens), zero cached input. This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
-
-| Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
-|---:|---:|---:|---:|
-| 2,040 | 58.1 | 27.8 | 5/5 |
-| 3,840 | 99.5 | 34.5 | 5/5 |
-| 7,680 | 162.8 | 34.1 | 5/5 |
-| 15,359 | 178.6 | 34.3 | 5/5 |
-| 30,720 | 196.7 | 32.1 | 5/5 |
-| 59,933 | 205.8 | 33.0 | 5/5 |
-| 122,879 | 226.1 | 32.5 | 5/5 |
-| 163,840 | 226.2 | 31.7 | 5/5 |
-| 212,992 | 226.1 | 32.4 | 5/5 |
-| 245,760 | 224.1 | 31.2 | 5/5 |
-
-The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents: a 130,048-token real-code prompt read at 155.4 tok/s, wrote 768 tokens at 37.1 tok/s, and at 42.8 tok/s with that input already cached. Quality: 30/30 with the same coding and maths questions, measured at a 131,072-token allocation.
-
-## Dual RX 7900 XTX: GLM-5.3-Flash
-
-**Maya HIP Maya-M IQ2_S dual RX 7900 XTX**, on the same two cards and Radeon 8060S as the DeepSeek rows above, with the same five-phrase prompts (identical bytes, pinned by SHA-256). GLM's tokenizer counts about 7 % fewer tokens for the same text, so its input counts are lower at each length. The layers are split between the cards (0-24 on the first, the rest on the second). The 8060S computes each card's routed experts held in RAM, and the model's own MTP layer drafts the next token. Each point is a fresh load, with thinking off, a 256-token cap (answers used 52-61 tokens) and zero cached input. The release allocates 524,288 tokens; each point ran at the smallest of 131,072, 262,144 and 524,288 that holds it. At 128K the two smaller allocations read at 907.1 and 895.3 tok/s and both wrote at 55.8.
-
-| Input tokens | Allocation | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
-|---:|---:|---:|---:|---:|
-| 1,886 | 131,072 | 183.1 | 56.0 | 5/5 |
-| 3,557 | 131,072 | 294.7 | 57.7 | 5/5 |
-| 7,123 | 131,072 | 464.1 | 56.1 | 5/5 |
-| 14,253 | 131,072 | 644.8 | 56.5 | 5/5 |
-| 28,517 | 131,072 | 691.2 | 56.8 | 5/5 |
-| 55,644 | 131,072 | 728.6 | 56.7 | 5/5 |
-| 114,093 | 262,144 | 895.3 | 55.8 | 5/5 |
-| 152,129 | 262,144 | 972.8 | 55.1 | 5/5 |
-| 197,770 | 262,144 | 1,012.8 | 54.7 | 5/5 |
-| 228,197 | 262,144 | 1,032.3 | 53.4 | 5/5 |
-| 456,403 | 524,288 | 1,021.3 | 50.1 | 5/5 |
-
-The installed 512K service read the 128K prompt (114,093 tokens) at 891.2 tok/s and wrote at 54.9, slightly below the 262,144-token row. The test text routes to few experts and reads faster than real documents. The DeepSeek row's 130,048-token real-code prompt (124,103 GLM tokens) read at 651.7 tok/s on that service. It wrote 768 tokens at 54.2 tok/s, and at 55.4 tok/s with that input already cached. Quality: 28/30 with the same coding and maths questions (math_08 and math_09 missed), measured at a 131,072-token allocation. This is a different model and quantization from the DeepSeek rows, so it is not a matched comparison.
-
-The service holds one conversation at a time. When another conversation arrives, the current one is set aside on disk, up to four of them in 32 GB, and dropped after seven days. In the qualification run, a 114,129-token conversation set aside this way came back for its next turn in 3.0 s (114,128 tokens from disk), and that turn took 10.7 s against 128.2 s cold. Set-aside conversations also survive a service restart. After a stop and start of the installed service, a 28,554-token conversation came back from disk in 0.1 s, and its next turn took 4.9 s.
-

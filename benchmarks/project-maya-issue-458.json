@@ -1,0 +1,45 @@
+{
+  "source": {
+    "url": "https://github.com/mw00/project-maya/issues/458",
+    "issue_id": 6014056282,
+    "issue_number": 458,
+    "updated_at": "2026-10-24T14:36:07Z",
+    "body_sha256": "734ad007d846de892db5578cc2910437539af7318d037fda7d6b30d89d5e1b17"
+  },
+  "model": {
+    "name": "GLM-5.3-Flash-Maya-M-IQ2_S",
+    "repository": "peasantsmith/GLM-5.3-Flash-Maya-GGUF",
+    "revision_prefix": "f16ee4b"
+  },
+  "hardware": {
+    "host": "BOSGAME M5, Ryzen AI Max+ 395, Radeon 8060S, 128 GB RAM",
+    "external_gpus": "2 x RX 7900 XTX, each on PCIe 4.0 x4",
+    "os": "Ubuntu 26.04",
+    "rocm": "7.2.4"
+  },
+  "units": "tokens per second",
+  "public_prompt_ladder": [
+    {
+      "input_tokens": 1886,
+      "maya_v1_1_25": {"decode": 29.0, "prefill": 178},
+      "tuned_branch": {"decode": 56.0, "prefill": 183}
+    },
+    {
+      "input_tokens": 28517,
+      "maya_v1_1_25": {"decode": 28.3, "prefill": 689},
+      "tuned_branch": {"decode": 56.8, "prefill": 691}
+    },
+    {
+      "input_tokens": 114093,
+      "maya_v1_1_25": {"decode": 27.5, "prefill": 906},
+      "tuned_branch": {"decode": 55.8, "prefill": 907}
+    }
+  ],
+  "quality": {
+    "cold_retrieval": "5/5 at every reported point",
+    "suite_passed": 28,
+    "suite_total": 30,
+    "misses": "two maths cases"
+  },
+  "note": "This file snapshots the public issue's 2K, 32K and 128K prompt ladder. The repository's context-scaling and installed-service measurements in results.json use their recorded allocations and must be read separately."
+}
