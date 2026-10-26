@@ -36,7 +36,7 @@ manifest.
 
 [`maya-ds4-dual-xtx-512k.yml`](../ansible/releases/maya-ds4-dual-xtx-512k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes.
 
-## BOSGAME M5 only — historical recipes
+## BOSGAME M5 only
 
 ## Strata HIP UD-Q4_K_XL / Qwen
 

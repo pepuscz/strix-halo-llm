@@ -2,25 +2,9 @@
 
 ![Illustration of the BOSGAME M5 with two OCuLink-connected RX 7900 XTX cards, external USB4 SSD, and a floor-mounted GPU power supply](docs/strix-halo-frankenstein.png)
 
-A **BOSGAME M5 / Ryzen AI Max+ 395** with **two RX 7900 XTX cards** runs GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017 locally. Each card connects through its own PCIe 4.0 ×4 M.2-to-OCuLink link; the M5's Radeon 8060S helps compute experts held in system RAM. This repository contains the installable recipes, measured results, and pinned sources.
+A **BOSGAME M5 / Ryzen AI Max+ 395** with **two RX 7900 XTX cards** runs DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash locally. Each card connects through its own PCIe 4.0 ×4 M.2-to-OCuLink link; the M5's Radeon 8060S helps compute experts held in system RAM. This repository contains the installable recipes, measured results, and pinned sources.
 
 ## Dual RX 7900 XTX setup
-
-### GLM-5.3-Flash Maya-M IQ2_S
-
-**Maya HIP Maya-M IQ2_S dual RX 7900 XTX** runs one conversation with up to **512K tokens of context**. The model's layers are split across the cards, the Radeon 8060S assists with routed experts, and the model's MTP layer drafts tokens. It found all five values in every cold retrieval test and passed **28/30 quality cases** (two maths misses).
-
-The [public Project Maya benchmark](https://github.com/mw00/project-maya/issues/458) uses the same prompts for Maya v1.1.25 and our branch. **Prefill** is input-reading speed; **decode** is answer-writing speed. Input tokens are the actual GLM token counts, not the context allocation. Each row is one cold request; values are tokens per second.
-
-| Public prompt | Maya v1.1.25 decode / prefill | Our branch decode / prefill |
-|---|---:|---:|
-| 2K (1,886 input tokens) | 29.0 / 178 | **56.0 / 183** |
-| 32K (28,517) | 28.3 / 689 | **56.8 / 691** |
-| 128K (114,093) | 27.5 / 906 | **55.8 / 907** |
-
-At the 114,093-token public prompt, answer-writing speed rises from **27.5 to 55.8 tok/s**. On the installed 512K service, that prompt measured **54.9 decode / 891.2 prefill tok/s**; its larger context allocation makes it a separate measurement. The public issue also reports 160K–480K prompt lengths, parallel-request behavior, and the 30-case quality score.
-
-[Pinned snapshot of the public 2K/32K/128K results](benchmarks/project-maya-issue-458.json)
 
 ### DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS
 
@@ -35,29 +19,39 @@ The DSpark drafter guesses the next few tokens, with its blocks split across the
 
 The release passed **30/30 quality cases**. It found all five phrases at every measured length, up to 491,520 input tokens, and all five values in a 520,000-token deep-needle test.
 
-Project Maya's own speed test, `maya.py --bench`, is the benchmark its maintainers compare setups with. It writes three 256-token answers and reads a 2,048- and an 8,192-token prompt. All three rows ran on this box with the same model, inputs and context allocation; values are tokens per second.
+Measured on the installed release at its 524,288-token allocation. Values are tokens per second; every retrieval prompt found all five phrases.
 
-| `maya.py --bench` | Decode (mean of 3) | Prefill 2K | Prefill 8K |
-|---|---:|---:|---:|
-| Maya v1.1.28, as released | 37.2 | 70 | 241 |
-| Maya v1.1.28 + our nine proposed pull requests | 41.3 | 180 | 482 |
-| **This release** | **41.9** | **177** | **474** |
-
-The same public five-phrase prompts as the GLM table, cold, at the 524,288-token allocation. Values are decode / prefill tokens per second; every point found five of five. Decode here is one cold 64-token answer, so it is noisy; `--bench` above is the steadier decode comparison.
-
-| Public prompt | Maya v1.1.28 decode / prefill | This release decode / prefill |
+| Test | Decode | Prefill |
 |---|---:|---:|
-| 2K (2,040 input tokens) | 39.1 / 87 | **29.7 / 212** |
-| 32K (30,720) | 32.4 / 524 | **31.7 / 1,053** |
-| 128K (122,879) | 31.7 / 750 | **31.8 / 1,514** |
+| `maya.py --bench`, Project Maya's speed test (three 256-token answers; 2K / 8K prompts) | **41.3** | **180 / 482** |
+| Public five-phrase prompt, 2K (2,040 input tokens) | 29.7 | 212 |
+| 32K (30,720) | 31.7 | 1,053 |
+| 128K (122,879) | 31.8 | 1,514 |
+| 480K (491,520) | 29.9 | 1,164 |
+| Real code, 130,048 tokens: cold / prompt cached | **36.2 / 46.1** | **1,291** |
 
-**The v1.1.28 rows are what that release can do here:**
-- `--tp 2` with the expert helper (merged upstream);
-- without the uneven split, `--tp 2` gives each card its own layers on Maya-S, so the drafter stays where v1.1.28 places it.
+Decode on the five-phrase prompts is one cold 64-token answer, so it is noisy; `--bench` and the real-code prompt are the steadier decode figures. Those two rows are the measurements of [issue #510](https://github.com/mw00/project-maya/issues/510): the release's engine changes on Maya v1.1.28, which matched the release's own engine within 2 % when the two ran side by side.
 
-This release runs the engine changes we are proposing to Project Maya, ported to v1.1.28.
+This release runs the engine changes we are proposing to Project Maya, ported to v1.1.28, in [issue #510](https://github.com/mw00/project-maya/issues/510).
 
 A 1,048,576-token allocation also works on this box. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
+
+### GLM-5.3-Flash Maya-M IQ2_S
+
+**Maya HIP Maya-M IQ2_S dual RX 7900 XTX** runs one conversation with up to **512K tokens of context**. The model's layers are split across the cards, the Radeon 8060S assists with routed experts, and the model's MTP layer drafts tokens. It found all five values in every cold retrieval test and passed **28/30 quality cases** (two maths misses).
+
+Values are tokens per second; each row is one cold request, and every one found all five values. Input tokens are GLM's own counts of the same prompt bytes.
+
+| Test | Decode | Prefill |
+|---|---:|---:|
+| Public five-phrase prompt, 2K (1,886 input tokens) | 56.0 | 183 |
+| 32K (28,517) | 56.8 | 691 |
+| 128K (114,093), on the installed 512K service | **54.9** | **891** |
+| Real code, the 130,048-token DeepSeek prompt (124,103 GLM tokens): cold / prompt cached | **54.2 / 55.4** | **652** |
+
+The 2K and 32K rows ran at a 131,072-token allocation; the rest at the release's 524,288. Our measurements on more prompt lengths, parallel requests and quality are in [issue #458](https://github.com/mw00/project-maya/issues/458).
+
+[Pinned snapshot of the public 2K/32K/128K results](benchmarks/project-maya-issue-458.json)
 
 ### Hardware
 
@@ -76,15 +70,15 @@ The two GPUs occupy M.2 connections through OCuLink; the external SSD connects o
 
 ### Our recorded dual-card measurements
 
-Our chart retains the full cold five-phrase retrieval curves for GLM and DeepSeek. The models read the same text, but their tokenizers count different numbers of tokens; their speeds are **not** a matched model-to-model comparison. The public Maya table above is the benchmark used in [issue #458](https://github.com/mw00/project-maya/issues/458); the chart below records our installation and context-scaling runs, including a different context allocation for the 512K GLM service.
+Our chart retains the full cold five-phrase retrieval curves for DeepSeek and GLM. The models read the same text, but their tokenizers count different numbers of tokens; their speeds are **not** a matched model-to-model comparison. Comparisons with Project Maya's own releases are in [issue #510](https://github.com/mw00/project-maya/issues/510) (DeepSeek) and [issue #458](https://github.com/mw00/project-maya/issues/458) (GLM); the chart below records our installation and context-scaling runs, including a different context allocation for the 512K GLM service.
 
 ![GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with two RX 7900 XTX cards and a Radeon 8060S helper](docs/benchmark-dual-xtx.svg)
 
-[GLM measurements](docs/BENCHMARKS.md#dual-rx-7900-xtx-glm-53-flash) · [DeepSeek measurements](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017) · [Exact result data](benchmarks/results.json)
+[DeepSeek measurements](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017) · [GLM measurements](docs/BENCHMARKS.md#dual-rx-7900-xtx-glm-53-flash) · [Exact result data](benchmarks/results.json)
 
 ### Install
 
-The two recipes use the same service name and port; install one at a time. Select GLM below, or set `STRIX_SYSTEM=maya-ds4-dual-xtx` for DeepSeek.
+The two recipes use the same service name and port; install one at a time. Select DeepSeek below, or set `STRIX_SYSTEM=maya-glm-dual-xtx` for GLM.
 
 ```bash
 git clone https://github.com/pepuscz/strix-halo-llm.git
@@ -93,7 +87,7 @@ cp ansible/inventory/hosts.example.yml ansible/inventory/hosts.yml
 $EDITOR ansible/inventory/hosts.yml
 python3 -m venv .venv
 .venv/bin/pip install --require-hashes -r requirements.lock
-export STRIX_SYSTEM=maya-glm-dual-xtx
+export STRIX_SYSTEM=maya-ds4-dual-xtx
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify
@@ -101,7 +95,7 @@ bin/strixctl verify
 
 The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) needs about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
 
-## BOSGAME M5 only — historical measurements
+## BOSGAME M5 only
 
 These measurements record Qwen3.8-Flash-Next and DeepSeek-V4-Flash-0731 on the M5's Radeon 8060S and 128 GiB RAM, without the external cards. They use **different models, quantizations and hardware** from the dual-card GLM and DeepSeek-V4.1 results above, so the speeds are not a before/after comparison.
 
@@ -116,9 +110,9 @@ The speed test hides five labelled phrases in a long input and asks the model to
 
 At 114,089 Qwen input tokens, the four-conversation **Strata HIP UD-Q4_K_XL** profile took **168.3 seconds**, versus **329.4 seconds** for the Qwen Vulkan comparison setup (1.96× faster). The four slots were also tested with four simultaneous 228,244-token conversations.
 
-![Historical BOSGAME-only Qwen and DeepSeek reading and answer-writing speeds](docs/benchmark.svg)
+![BOSGAME M5-only Qwen and DeepSeek reading and answer-writing speeds](docs/benchmark.svg)
 
-[Historical measurements and method](docs/BENCHMARKS.md) · [Exact result data](benchmarks/results.json)
+[Measurements and method](docs/BENCHMARKS.md#bosgame-m5-only) · [Exact result data](benchmarks/results.json)
 
 For the single-box Qwen recipe, omit `STRIX_SYSTEM` in the install commands above; it is the controller default. Select the single-box DeepSeek recipe with `STRIX_SYSTEM=vulkan-iq3xxs` or the Lucebox comparison with `STRIX_SYSTEM=rocm-rocmfpx`.
 

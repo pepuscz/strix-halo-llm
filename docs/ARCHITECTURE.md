@@ -6,10 +6,10 @@ The current dual-card setup runs one recipe at a time. Each RX 7900 XTX has its 
 
 | Model | Stack | Context | Parallel work |
 |---|---|---:|---|
-| GLM-5.3-Flash Maya-M IQ2_S | **Maya HIP Maya-M IQ2_S dual RX 7900 XTX** | 1 × 512K | Layers split across the cards; model MTP drafts tokens |
 | DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS | **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | 1 × 512K | Tensor parallel across the cards; DSpark drafter split across them |
+| GLM-5.3-Flash Maya-M IQ2_S | **Maya HIP Maya-M IQ2_S dual RX 7900 XTX** | 1 × 512K | Layers split across the cards; model MTP drafts tokens |
 
-The [GLM recipe](../ansible/releases/maya-glm-dual-xtx-512k.yml) and [DeepSeek recipe](../ansible/releases/maya-ds4-dual-xtx-512k.yml) pin the runtime and serving settings.
+The [DeepSeek recipe](../ansible/releases/maya-ds4-dual-xtx-512k.yml) and [GLM recipe](../ansible/releases/maya-glm-dual-xtx-512k.yml) pin the runtime and serving settings.
 
 ### The DeepSeek engine's settings
 
@@ -24,7 +24,7 @@ The model (about 178 GB, plus a 203 GB Engram shard read in place) is far larger
 - **Writing an answer.** Each step verifies the drafter's guesses in one pass of about 1,600 kernel launches on the lead card. The recipe fuses the small ones (`DS4_HC_FUSE`, `DS4_ROUTE_FUSE`, `DS4_DECODE_TRIM`) and routes the step's all-reduces through the same pipelined kernel (`DS4_AR2_DECODE`). All four give the same bits as the unfused path; the engine compares them at every load.
 - **Kept conversations.** A conversation set aside for another is saved to disk (up to 16 of them in 16 GB) and comes back without re-reading its prompt.
 
-## BOSGAME M5 only — historical architecture
+## BOSGAME M5 only
 
 The single-box comparison selected Strata HIP UD-Q4_K_XL for Qwen and Strix Halo llama.cpp Vulkan IQ3_XXS for DeepSeek. This table describes the three published Ansible recipes; the measured Qwen Vulkan baseline settings are recorded in [BENCHMARKS.md](BENCHMARKS.md#qwen-context-scaling).
 
