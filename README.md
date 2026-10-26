@@ -51,8 +51,8 @@ The same public five-phrase prompts as the GLM table, cold, at the 524,288-token
 | 128K (122,879) | PENDING | **PENDING** |
 
 **The v1.1.28 rows are what that release can do here:**
-- `--tp 2` with the helper and the drafter on the group's cards (both merged upstream);
-- without the uneven split, `--tp 2` gives each card its own layers on Maya-S.
+- `--tp 2` with the expert helper (merged upstream);
+- without the uneven split, `--tp 2` gives each card its own layers on Maya-S, so the drafter stays where v1.1.28 places it.
 
 This release runs the engine changes we are proposing upstream as [a pull-request series](PENDING).
 

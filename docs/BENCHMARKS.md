@@ -91,7 +91,7 @@ This release's engine predates two upstream fixes to that test on HIP: it launch
 Maya v1.1.28's setup cannot choose this box (two cards and an integrated helper), so its row uses setup's own form with the pieces upstream has merged:
 - `--tp 2`, which v1.1.28 turns into one card a layer on Maya-S, since its 256-value blocks don't halve the experts' 2,304 columns without the uneven split;
 - the Radeon 8060S as the expert helper, with the same 95 GB pool;
-- the drafter's first block on the second card;
+- the drafter where v1.1.28 places it, since its drafter-placement setting only applies to a tensor-parallel group;
 - the same allocation and frozen profile, and an empty learned store.
 
 Each point is a fresh load. Values are decode / prefill tok/s.
