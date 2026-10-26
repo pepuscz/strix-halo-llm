@@ -2,24 +2,25 @@
 
 ![Illustration of the BOSGAME M5 with two OCuLink-connected RX 7900 XTX cards, external USB4 SSD, and a floor-mounted GPU power supply](docs/strix-halo-frankenstein.png)
 
-A **BOSGAME M5 / Ryzen AI Max+ 395** with **two RX 7900 XTX cards** runs DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash locally. Each card connects through its own PCIe 4.0 ×4 M.2-to-OCuLink link; the M5's Radeon 8060S helps compute experts held in system RAM. This repository contains the installable recipes, measured results, and pinned sources.
+A **BOSGAME M5 / Ryzen AI Max+ 395** with **two RX 7900 XTX cards** runs DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash locally. This repository contains the installable recipes, measured results, and pinned sources.
 
 ## Dual RX 7900 XTX setup
 
+Both models run on the same hardware ([list below](#hardware)):
+- **Two RX 7900 XTX cards**, 48 GB of VRAM together, each on its own PCIe 4.0 ×4 M.2-to-OCuLink link.
+- **The M5's Radeon 8060S**, which computes the routed experts the cards can't hold from a pool in system RAM.
+- **An NVMe over USB4**, from which the rest of the model streams when a prompt or an answer needs it.
+
+Each model runs one conversation with up to **512K tokens of context**. Values are tokens per second, and every retrieval prompt found all five values.
+
 ### DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS
 
-**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** runs one conversation with up to **512K tokens of context** (524,288).
+**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** runs the 178 GB model with these settings:
+- the two cards as one tensor-parallel group;
+- a 95 GB expert pool on the 8060S;
+- the DSpark drafter's blocks split across the cards.
 
-The model is about 178 GB, and the box has 48 GB of VRAM and 128 GiB of RAM, so it is spread three ways:
-- **The cards:** the two cards act as one tensor-parallel group, each holding a share of every layer and of the experts it keeps in VRAM.
-- **The Radeon 8060S:** it computes the most-used remaining experts from a 95 GB pool in system RAM.
-- **The NVMe:** everything else is read from it when a prompt or an answer needs it.
-
-The DSpark drafter guesses the next few tokens, with its blocks split across the two cards.
-
-The release passed **30/30 quality cases**. It found all five phrases at every measured length, up to 491,520 input tokens, and all five values in a 520,000-token deep-needle test.
-
-Measured on the installed release at its 524,288-token allocation. Values are tokens per second; every retrieval prompt found all five phrases.
+It passed **30/30 quality cases**, found all five phrases at every length up to 491,520 input tokens, and found all five values in a 520,000-token deep-needle test. Measured on the installed release at 524,288 tokens:
 
 | Test | Decode | Prefill |
 |---|---:|---:|
@@ -30,17 +31,19 @@ Measured on the installed release at its 524,288-token allocation. Values are to
 | 480K (491,520) | 29.9 | 1,164 |
 | Real code, 130,048 tokens: cold / prompt cached | **36.2 / 46.1** | **1,291** |
 
-Decode on the five-phrase prompts is one cold 64-token answer, so it is noisy; `--bench` and the real-code prompt are the steadier decode figures. Those two rows are the measurements of [issue #510](https://github.com/mw00/project-maya/issues/510): the release's engine changes on Maya v1.1.28, which matched the release's own engine within 2 % when the two ran side by side.
+Decode on the five-phrase prompts is one cold 64-token answer, so it is noisy; `--bench` and the real-code prompt are the steadier decode figures.
 
-This release runs the engine changes we are proposing to Project Maya, ported to v1.1.28, in [issue #510](https://github.com/mw00/project-maya/issues/510).
+The release's engine changes are proposed to Project Maya in [issue #510](https://github.com/mw00/project-maya/issues/510). The `--bench` and real-code rows are that issue's measurements, the changes ported to Maya v1.1.28. They matched the release's own engine within 2 % when the two ran side by side.
 
-A 1,048,576-token allocation also works on this box. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
+A 1,048,576-token allocation also works. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
 
 ### GLM-5.3-Flash Maya-M IQ2_S
 
-**Maya HIP Maya-M IQ2_S dual RX 7900 XTX** runs one conversation with up to **512K tokens of context**. The model's layers are split across the cards, the Radeon 8060S assists with routed experts, and the model's MTP layer drafts tokens. It found all five values in every cold retrieval test and passed **28/30 quality cases** (two maths misses).
+**Maya HIP Maya-M IQ2_S dual RX 7900 XTX** runs the model with these settings:
+- its layers split across the cards;
+- the model's own MTP layer drafting.
 
-Values are tokens per second; each row is one cold request, and every one found all five values. Input tokens are GLM's own counts of the same prompt bytes.
+It passed **28/30 quality cases** (two maths misses). Each row below is one cold request; input tokens are GLM's own counts of the same prompt bytes.
 
 | Test | Decode | Prefill |
 |---|---:|---:|
