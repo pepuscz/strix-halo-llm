@@ -27,7 +27,7 @@ The cold retrieval test places five labelled phrases at different positions in a
 | 245,760 | 1,432.4 | 30.5 | 5/5 |
 | 491,520 | 1,163.8 | 29.9 | 5/5 |
 
-The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents. A 130,048-token real-code prompt read at 1,278.5 tok/s and wrote 768 tokens at 36.1 tok/s. With that input already cached (130,047 tokens reused), it wrote at 44.6 tok/s.
+The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents. A 130,048-token real-code prompt read at 1,278.5 tok/s and wrote 768 tokens at 36.1 tok/s. With that input already cached (130,047 tokens reused), it wrote at 44.6 tok/s. The same changes ported to Maya v1.1.28 ([issue #510](https://github.com/mw00/project-maya/issues/510)), run side by side with the release's engine later the same day: 1,291 tok/s prefill, 36.2 / 46.1 tok/s decode.
 
 **Quality: 30/30** with the same coding and maths questions. It was measured before four later changes that keep every result bit-identical, each checked by the engine at load: the fused decode launches, the decode trims, the one-launch decode all-reduce, and each card reading only its own part of the down projection. A deep-needle test found all five values in a 520,000-token prompt at this allocation (before the decode trims).
 
