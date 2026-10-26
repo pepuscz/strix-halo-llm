@@ -19,10 +19,13 @@ assert SPEC is not None and SPEC.loader is not None
 VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
 GLM = ROOT / "ansible/releases/maya-glm-dual-xtx-512k.yml"
+DS4 = ROOT / "ansible/releases/maya-ds4-dual-xtx-512k.yml"
 DUMMY_HEX64 = "0123456789abcdef" * 4
 # Typed dummies where the validator requires a type other than a 64-hex digest.
 DUMMIES = {"tag_object": "0123456789abcdef0123456789abcdef01234567",
-           "coding": 10, "gsm8k": 10, "math": 10, "total": 30, "largest_input_tokens": 122880}
+           "coding": 10, "gsm8k": 10, "math": 10, "total": 30, "largest_input_tokens": 122880, "values": "55/55",
+           "first_request_prefill_tokens_per_second": 1000.0, "first_request_decode_tokens_per_second": 40.0,
+           "reused_prompt_decode_tokens_per_second": 45.0}
 
 
 def without_pending(node: object, key: str = "") -> object:
@@ -114,6 +117,56 @@ class ReleaseValidatorTest(unittest.TestCase):
             mutate(broken)
             with self.subTest(expect=message):
                 self.assert_fails(broken, message)
+
+
+    def ds4(self) -> dict:
+        return yaml.safe_load(DS4.read_text(encoding="utf-8"))
+
+    def test_ds4_validates_once_filled_and_rejects_drift(self) -> None:
+        data = without_pending(self.ds4())
+        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-dual-xtx-512k-v4")
+        env = data["strix_maya"]["server"]["env"]
+        self.assertEqual((env["MAYA_DS4_SLOT_DIR"], env["DS4_DECODE_TRIM"]),
+                         (data["strix_paths"]["state"] + "/ds4-slots", "15"))
+        for mutate, message in (
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_DECODE_TRIM="7"), "environment drifted: DS4_DECODE_TRIM"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_FLOW_STATS="1"), "environment drifted: DS4_FLOW_STATS"),
+            (lambda d: d["strix_maya"]["server"]["env"].pop("MAYA_DS4_SLOT_KEEP"), "MAYA_DS4_SLOT_KEEP"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(
+                MAYA_DS4_SLOT_DIR=d["strix_paths"]["state"] + "/slots"), "MAYA_DS4_SLOT_DIR"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_HC_FUSE="1"), "environment drifted: DS4_HC_FUSE"),
+            (lambda d: d["strix_maya"]["server"]["args"].__setitem__(3, "262144"), "arguments drifted"),
+            (lambda d: d["strix_maya"]["server"]["args"].__delitem__(slice(-2, None)), "arguments drifted"),
+            (lambda d: d["strix_service"].update(context=262144), "allocate exactly 524288 tokens"),
+            (lambda d: d["strix_maya"]["server"].update(log="/tmp/native.log"), "server setting drifted: log"),
+            (lambda d: d["strix_qualification"]["retrieval_ladder"].update(points=10), "eleven five-value points"),
+            (lambda d: d["strix_qualification"]["retrieval_ladder"].update(values="50/50"), "eleven five-value points"),
+            (lambda d: d["strix_qualification"]["long_context"].update(allocation_tokens=131072),
+             "long-context record must hold"),
+            (lambda d: d["strix_qualification"]["long_context"].update(reused_prompt_cached_tokens=130048),
+             "long-context record must hold"),
+            (lambda d: d["strix_qualification"].pop("deep_needle"), "qualification sections drifted"),
+            (lambda d: d["strix_qualification"]["answer_quality"].update(total=29), "sum to the total"),
+        ):
+            broken = copy.deepcopy(data)
+            mutate(broken)
+            with self.subTest(expect=message):
+                self.assert_fails(broken, message)
+
+    def test_a_draft_is_skipped_by_the_benchmark_check(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "benchmarks", root / "benchmarks")
+            shutil.copytree(ROOT / "ansible/releases", root / "ansible/releases")
+            if VALIDATOR.pending_fields(self.ds4()):
+                VALIDATOR.validate_benchmarks(root)   # (the draft's predecessor's results do not fail it)
+            data = self.ds4()
+            data["strix_system"]["selected_default"] = True
+            (root / "ansible/releases" / DS4.name).write_text(yaml.safe_dump(
+                data if VALIDATOR.pending_fields(data) else dict(data, strix_qualification="PENDING"), sort_keys=False))
+            with self.assertRaises(SystemExit) as raised:
+                VALIDATOR.validate_benchmarks(root)
+            self.assertIn("a draft release cannot be the default", str(raised.exception))
 
 
 if __name__ == "__main__":

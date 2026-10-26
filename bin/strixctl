@@ -13,7 +13,7 @@ case "$system" in
     strata-qwen-q4xl) default_release="$repo_root/ansible/releases/strata-qwen-q4xl-4x256k.yml" ;;
     vulkan-iq3xxs) default_release="$repo_root/ansible/releases/vulkan-iq3xxs-512k.yml" ;;
     rocm-rocmfpx) default_release="$repo_root/ansible/releases/rocm-rocmfpx-128k.yml" ;;
-    maya-ds4-dual-xtx) default_release="$repo_root/ansible/releases/maya-ds4-dual-xtx-256k.yml" ;;
+    maya-ds4-dual-xtx) default_release="$repo_root/ansible/releases/maya-ds4-dual-xtx-512k.yml" ;;
     maya-glm-dual-xtx) default_release="$repo_root/ansible/releases/maya-glm-dual-xtx-512k.yml" ;;
     *) fail "Unknown system: $system" ;;
 esac

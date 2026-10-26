@@ -7,9 +7,22 @@ The current dual-card setup runs one recipe at a time. Each RX 7900 XTX has its 
 | Model | Stack | Context | Parallel work |
 |---|---|---:|---|
 | GLM-5.3-Flash Maya-M IQ2_S | **Maya HIP Maya-M IQ2_S dual RX 7900 XTX** | 1 × 512K | Layers split across the cards; model MTP drafts tokens |
-| DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS | **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | 1 × 256K | Tensor parallel across the cards; DSpark drafter split across them |
+| DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS | **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | 1 × 512K | Tensor parallel across the cards; DSpark drafter split across them |
 
-The [GLM recipe](../ansible/releases/maya-glm-dual-xtx-512k.yml) and [DeepSeek recipe](../ansible/releases/maya-ds4-dual-xtx-256k.yml) pin the runtime and serving settings.
+The [GLM recipe](../ansible/releases/maya-glm-dual-xtx-512k.yml) and [DeepSeek recipe](../ansible/releases/maya-ds4-dual-xtx-512k.yml) pin the runtime and serving settings.
+
+### The DeepSeek engine's settings
+
+The model (about 178 GB, plus a 203 GB Engram shard read in place) is far larger than the cards' 48 GB, so the work is where the bytes are. The recipe turns on these Maya settings; each is checked by the engine when it loads.
+
+- **Placement.** The two cards are one tensor-parallel group (`DS4_TP_GGUF_UNEVEN`: each takes whole 256-value blocks of every expert), and each keeps its part of about 2,750 experts in VRAM. The Radeon 8060S holds the next ~8,300 most-used experts in a 95 GB pool and computes them (`DS4_HELPER`), keeping a few recently repeated ones in reserved slots (`DS4_HELPER_RECENT`). The rest are read from the NVMe. The DSpark drafter's first block runs on the second card (`DS4_DRAFT_DEV`).
+- **Reading a prompt.** A long prompt is read in 32,768-token chunks. Its experts reach the cards over their PCIe 4.0 ×4 links, so the recipe cuts those bytes:
+  - experts the 8060S already holds are copied from its pool rather than read from the disk (`DS4_FLOW_HELPER`);
+  - each card receives only its own columns of an expert's down projection, and the disk read is shared (`DS4_FLOW_DOWN_PART`, `DS4_FLOW_DOWN_SHARE`);
+  - the cards lend their least-used expert slots to the prompt while it runs (`DS4_TP_BORROW`), and the exact long-prompt skip runs on the group (`DS4_YOCO_TP`);
+  - the cards' partial sums meet in a pipelined all-reduce (`DS4_AR2`).
+- **Writing an answer.** Each step verifies the drafter's guesses in one pass of about 1,600 kernel launches on the lead card. The recipe fuses the small ones (`DS4_HC_FUSE`, `DS4_ROUTE_FUSE`, `DS4_DECODE_TRIM`) and routes the step's all-reduces through the same pipelined kernel (`DS4_AR2_DECODE`). All four give the same bits as the unfused path; the engine compares them at every load.
+- **Kept conversations.** A conversation set aside for another is saved to disk (up to 16 of them in 16 GB) and comes back without re-reading its prompt.
 
 ## BOSGAME M5 only — historical architecture
 

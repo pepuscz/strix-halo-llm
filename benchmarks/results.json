@@ -1,6 +1,6 @@
 {
   "schema": 10,
-  "published_at": "2026-10-22",
+  "published_at": "2026-10-26",
   "default_system": "strata-qwen-q4xl",
   "hardware": {
     "system": "BOSGAME M5 / Sixunited AXB35-02",
@@ -901,15 +901,15 @@
     },
     "maya-ds4-dual-xtx": {
       "name": "Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX",
-      "manifest": "ansible/releases/maya-ds4-dual-xtx-256k.yml",
+      "manifest": "ansible/releases/maya-ds4-dual-xtx-512k.yml",
       "hardware": {
         "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
         "helper_gpu": "AMD Radeon 8060S (1002:1586) serves routed experts beside the two cards"
       },
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-draftdev-dspark-256k-20261022",
-        "source_commit": "ac95fc974d4bcc745e7fda15ee9081a1566ed27f",
+        "release_tag": "maya-ds4-q3-dspark-512k-20261025",
+        "source_commit": "3d86762aa4fa20395174b5ff0df6cf6d530520c6",
         "upstream": "https://github.com/mw00/project-maya v1.1.21"
       },
       "power_watts": {
@@ -923,7 +923,7 @@
         "boost": true
       },
       "gpu_dpm": "high",
-      "context_allocation": 262144,
+      "context_allocation": 524288,
       "target": {
         "quantization": "Maya-S IQ2_XXS + Unsloth UD-Q8_K_XL Engram",
         "bytes": 380951187664
@@ -944,115 +944,48 @@
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 155.4,
-        "decode_tokens_per_second": 37.1,
-        "request_seconds": 857.4,
+        "prefill_tokens_per_second": 1278.5,
+        "decode_tokens_per_second": 36.1,
+        "request_seconds": 123.2,
         "reused_prompt": {
           "cached_tokens": 130047,
-          "decode_tokens_per_second": 42.8,
-          "request_seconds": 18.0
+          "decode_tokens_per_second": 44.6,
+          "request_seconds": 17.4
         },
-        "allocation_tokens": 131072
+        "allocation_tokens": 524288
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "manifest_sha256": "ee2036d6df5a35b892168c2fa1ccaff38cf163793afbc342f977dba460a5667c",
-      "release_id": "maya-ds4-dual-xtx-256k-v3",
+      "release_id": "maya-ds4-dual-xtx-512k-v4",
       "selection": "added_hardware",
       "context_scaling": [
         {
           "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
+          "allocation_tokens": 524288,
           "actual_input_tokens": 2040,
           "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 58.1,
-          "decode_tokens_per_second": 27.8,
+          "prefill_tokens_per_second": 212.3,
+          "decode_tokens_per_second": 29.7,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
         },
         {
           "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
+          "allocation_tokens": 524288,
           "actual_input_tokens": 3840,
           "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-          "prefill_tokens_per_second": 99.5,
-          "decode_tokens_per_second": 34.5,
+          "prefill_tokens_per_second": 348.9,
+          "decode_tokens_per_second": 31.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
         },
         {
           "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
+          "allocation_tokens": 524288,
           "actual_input_tokens": 7680,
           "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 162.8,
-          "decode_tokens_per_second": 34.1,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
-          "actual_input_tokens": 15359,
-          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-          "prefill_tokens_per_second": 178.6,
-          "decode_tokens_per_second": 34.3,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
-          "actual_input_tokens": 30720,
-          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 196.7,
-          "decode_tokens_per_second": 32.1,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
-          "actual_input_tokens": 59933,
-          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-          "prefill_tokens_per_second": 205.8,
-          "decode_tokens_per_second": 33.0,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
-          "actual_input_tokens": 122879,
-          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 226.1,
-          "decode_tokens_per_second": 32.5,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
-          "actual_input_tokens": 163840,
-          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-          "prefill_tokens_per_second": 226.2,
-          "decode_tokens_per_second": 31.7,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
-          "actual_input_tokens": 212992,
-          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-          "prefill_tokens_per_second": 226.1,
+          "prefill_tokens_per_second": 562.9,
           "decode_tokens_per_second": 32.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
@@ -1060,17 +993,164 @@
         },
         {
           "workload": "deep_retrieval",
-          "allocation_tokens": 262144,
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 15359,
+          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
+          "prefill_tokens_per_second": 834.7,
+          "decode_tokens_per_second": 33.5,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 1052.9,
+          "decode_tokens_per_second": 31.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 59933,
+          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
+          "prefill_tokens_per_second": 1331.8,
+          "decode_tokens_per_second": 32.4,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 1513.8,
+          "decode_tokens_per_second": 31.8,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 163840,
+          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
+          "prefill_tokens_per_second": 1514.9,
+          "decode_tokens_per_second": 31.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 212992,
+          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
+          "prefill_tokens_per_second": 1481.9,
+          "decode_tokens_per_second": 32.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
           "actual_input_tokens": 245760,
           "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-          "prefill_tokens_per_second": 224.1,
-          "decode_tokens_per_second": 31.2,
+          "prefill_tokens_per_second": 1432.4,
+          "decode_tokens_per_second": 30.5,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 491520,
+          "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
+          "prefill_tokens_per_second": 1163.8,
+          "decode_tokens_per_second": 29.9,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
         }
       ],
-      "context_scaling_note": "Each point: a fresh load from the frozen expert profile, thinking off, 256-token cap (every answer used 64 tokens), zero cached input. The retrieval filler routes to few experts, so its prefill is faster than real text: a 130,048-token real-code prompt read at 155.4 tok/s (long_context)."
+      "context_scaling_note": "Each point: a fresh load of the installed release from its frozen expert profile, no conversation kept from an earlier point, thinking off, 256-token cap, zero cached input, at the 524,288-token allocation.",
+      "maya_bench": {
+        "procedure": "Project Maya v1.1.28's maya.py --bench, DeepSeek on HIP: three 256-token answers (greedy, thinking off; decode is their mean) and 2,048- and 8,192-token prompts of its docs, the engine alone, both engines on identical token ids",
+        "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
+        "this_release": {
+          "decode_mean_tokens_per_second": 41.9,
+          "prefill_tokens_per_second": {
+            "2048": 177,
+            "8192": 474
+          }
+        },
+        "maya_v1_1_28": {
+          "decode_mean_tokens_per_second": 37.2,
+          "prefill_tokens_per_second": {
+            "2048": 70,
+            "8192": 241
+          }
+        },
+        "maya_v1_1_28_own_bench": {
+          "decode_mean_tokens_per_second": 36.9,
+          "prefill_tokens_per_second": {
+            "2048": 70,
+            "8192": 240
+          }
+        },
+        "maya_v1_1_28_with_proposed_prs": {
+          "decode_mean_tokens_per_second": 41.3,
+          "prefill_tokens_per_second": {
+            "2048": 180,
+            "8192": 482
+          },
+          "source": "Maya v1.1.28 + the proposed pull-request series (35 commits), the release's settings without kept conversations, measured beside this_release"
+        },
+        "cooling": "every row with the box fans held at full speed"
+      },
+      "maya_v1_1_28_context_scaling": [
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 2040,
+          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+          "prefill_tokens_per_second": 86.7,
+          "decode_tokens_per_second": 39.1,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 524.5,
+          "decode_tokens_per_second": 32.4,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 750.5,
+          "decode_tokens_per_second": 31.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        }
+      ],
+      "manifest_sha256": "4aa5ff8116bae92db281a3392ff402df65ef92dbc764e1efcaa16914e2172045"
     },
     "maya-glm-dual-xtx": {
       "name": "Maya HIP Maya-M IQ2_S dual RX 7900 XTX",

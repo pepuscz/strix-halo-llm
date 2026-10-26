@@ -3,9 +3,11 @@
 ## Select a setup
 
 ```bash
-export STRIX_SYSTEM=strata-qwen-q4xl  # Winning Qwen setup; default when unset
-# export STRIX_SYSTEM=vulkan-iq3xxs  # Winning DeepSeek setup
-# export STRIX_SYSTEM=rocm-rocmfpx   # DeepSeek comparison baseline
+export STRIX_SYSTEM=strata-qwen-q4xl     # Winning single-box Qwen setup; default when unset
+# export STRIX_SYSTEM=vulkan-iq3xxs     # Winning single-box DeepSeek setup
+# export STRIX_SYSTEM=rocm-rocmfpx      # Single-box DeepSeek comparison baseline
+# export STRIX_SYSTEM=maya-glm-dual-xtx # GLM-5.3-Flash on two RX 7900 XTX cards
+# export STRIX_SYSTEM=maya-ds4-dual-xtx # DeepSeek-V4.1-Flash-1017 on two RX 7900 XTX cards
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify
@@ -36,7 +38,7 @@ polls the model API.
 
 Set `strix_verify_full_model_hashes=true` for an explicit full model scrub.
 Normal operation verifies immutable download markers and byte sizes to avoid
-rehashing approximately 100–111 GB on each run.
+rehashing the model files (about 100–380 GB, depending on the setup) on each run.
 
 ## Updates and rollback
 
