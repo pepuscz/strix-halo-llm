@@ -46,22 +46,61 @@ The service holds one conversation at a time. When another conversation arrives,
 
 ## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017
 
-**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, allocation 262,144 tokens, the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256). The DSpark drafter's three blocks are split across the two cards (block 0 on the second card, blocks 1 and 2 on the lead), which leaves each card room for more resident experts. Each point is a fresh load from the frozen expert profile; thinking off, a 256-token cap (every answer used 64 tokens), zero cached input. This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
+**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
+- Each point is a fresh load of the installed service, from the release's frozen expert profile, with no conversation kept from an earlier point.
+- Thinking is off, with a 256-token cap and zero cached input.
+- This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
-| 2,040 | 58.1 | 27.8 | 5/5 |
-| 3,840 | 99.5 | 34.5 | 5/5 |
-| 7,680 | 162.8 | 34.1 | 5/5 |
-| 15,359 | 178.6 | 34.3 | 5/5 |
-| 30,720 | 196.7 | 32.1 | 5/5 |
-| 59,933 | 205.8 | 33.0 | 5/5 |
-| 122,879 | 226.1 | 32.5 | 5/5 |
-| 163,840 | 226.2 | 31.7 | 5/5 |
-| 212,992 | 226.1 | 32.4 | 5/5 |
-| 245,760 | 224.1 | 31.2 | 5/5 |
+| 2,040 | PENDING | PENDING | PENDING |
+| 3,840 | PENDING | PENDING | PENDING |
+| 7,680 | PENDING | PENDING | PENDING |
+| 15,359 | PENDING | PENDING | PENDING |
+| 30,720 | PENDING | PENDING | PENDING |
+| 59,933 | PENDING | PENDING | PENDING |
+| 122,879 | PENDING | PENDING | PENDING |
+| 163,840 | PENDING | PENDING | PENDING |
+| 212,992 | PENDING | PENDING | PENDING |
+| 245,760 | PENDING | PENDING | PENDING |
+| 491,520 | PENDING | PENDING | PENDING |
 
-The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents: a 130,048-token real-code prompt read at 155.4 tok/s, wrote 768 tokens at 37.1 tok/s, and at 42.8 tok/s with that input already cached. Quality: 30/30 with the same coding and maths questions, measured at a 131,072-token allocation.
+The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents. A 130,048-token real-code prompt read at PENDING tok/s and wrote 768 tokens at PENDING tok/s. With that input already cached (130,047 tokens reused), it wrote at PENDING tok/s.
+
+**Quality: 30/30** with the same coding and maths questions. It was measured before four later changes that keep every result bit-identical, each checked by the engine at load: the fused decode launches, the decode trims, the one-launch decode all-reduce, and each card reading only its own part of the down projection. A deep-needle test found all five values in a 520,000-token prompt at this allocation (before the decode trims).
+
+A 1,048,576-token allocation also works. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
+
+### Maya's own benchmark
+
+`maya.py --bench` is Project Maya's public speed test:
+- it writes three 256-token answers (greedy, thinking off), and decode is their mean;
+- it reads a 2,048- and an 8,192-token prompt cut from Maya's own documentation.
+
+It measures much shorter prompts than the table above, so its prefill is far lower.
+
+This release's engine predates two upstream fixes to that test on HIP: it launched the wrong engine for a DeepSeek config, and it wrapped the questions in the wrong chat markers. So both engines below ran Maya v1.1.28's procedure on identical token ids, the engine alone. Stock v1.1.28's own `maya.py --bench` agreed within PENDING.
+
+| `maya.py --bench`, tok/s | Decode (mean of 3) | Prefill 2,048 | Prefill 8,192 |
+|---|---:|---:|---:|
+| Maya v1.1.28, as released | PENDING | PENDING | PENDING |
+| **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | **PENDING** | **PENDING** | **PENDING** |
+
+### Maya v1.1.28 on the same prompts
+
+Maya v1.1.28's setup cannot choose this box (two cards and an integrated helper), so its row uses setup's own form with the pieces upstream has merged:
+- `--tp 2`, which v1.1.28 turns into one card a layer on Maya-S, since its 256-value blocks don't halve the experts' 2,304 columns without the uneven split;
+- the Radeon 8060S as the expert helper, with the same 95 GB pool;
+- the drafter's first block on the second card;
+- the same allocation and frozen profile, and an empty learned store.
+
+Each point is a fresh load. Values are decode / prefill tok/s.
+
+| Input tokens | Maya v1.1.28 | **This release** |
+|---:|---:|---:|
+| 2,040 | PENDING | PENDING |
+| 30,720 | PENDING | PENDING |
+| 122,879 | PENDING | PENDING |
 
 ## BOSGAME M5 only — historical measurements
 

@@ -24,7 +24,7 @@ manifest.
 
 | Component | Pinned source |
 |---|---|
-| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya/tree/maya-ds4-draftdev-dspark-256k-20261022), tag `maya-ds4-draftdev-dspark-256k-20261022`, commit `ac95fc974d4bcc745e7fda15ee9081a1566ed27f`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.21` plus the dual-card tensor-parallel, expert-helper, DSpark memory-cap and drafter-placement changes |
+| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya/tree/maya-ds4-q3-dspark-512k-20261025), tag `maya-ds4-q3-dspark-512k-20261025` (tag object `bf9bce11d81d032c4fb20f6ea4b713abb0cdf1db`), commit `3d86762aa4fa20395174b5ff0df6cf6d530520c6`, tree `53ef06444db66090fdad1169e18386d793bb7a8b`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.21` (commit `451f9cb6a21ea65673bdde2e57b4a670ae2b8859`) plus the dual-card changes: the uneven tensor-parallel split, the expert helper on the group, the drafter's placement, the prompt path's expert copies and lending, the pipelined all-reduce and the exact decode fusions. The same changes, ported to `v1.1.28`, are proposed upstream as [a pull-request series](PENDING) |
 | Pack tool | `pepuscz/project-maya` commit `1b8f5ec2bc4d1e4ba18c3d538fa5d44470c7296c` (`tools/ds4/pack_gguf.py`, the tool the qualified pack came from) |
 | GGML | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d), commit `3cf03257f219afbe7334045ff7c6a06ac68c627d`, archive SHA-256 and tree fingerprint pinned |
 | ROCm | AMD ROCm 7.2.4 runfile installer for Ubuntu 24.04 (`repo.radeon.com`), byte size and SHA-256 pinned; 97 userspace components copied into the release; Ubuntu 24.04 `libicu74` and `libxml2` extracted for its linker |
@@ -34,7 +34,7 @@ manifest.
 | Draft | `peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF`, revision `276e0badcfb4a6d8f6c2b9d4da1b468cd339c221`, DSpark |
 | Expert profile | Routing counts learned on the qualified host ([file](../ansible/roles/maya_runtime/files/expert-profile-maya-s.bin), SHA-256 pinned); the engine keeps updating its copy while serving |
 
-[`maya-ds4-dual-xtx-256k.yml`](../ansible/releases/maya-ds4-dual-xtx-256k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes.
+[`maya-ds4-dual-xtx-512k.yml`](../ansible/releases/maya-ds4-dual-xtx-512k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes.
 
 ## BOSGAME M5 only — historical recipes
 

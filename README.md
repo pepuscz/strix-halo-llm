@@ -24,7 +24,39 @@ At the 114,093-token public prompt, answer-writing speed rises from **27.5 to 55
 
 ### DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS
 
-**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** runs one conversation with **256K tokens of context**. The cards split the model in tensor parallel, the Radeon 8060S serves routed experts, and the DSpark drafter is split across the cards. It passed **30/30 quality cases** and found all five phrases at every measured length up to 245,760 input tokens.
+**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** runs one conversation with up to **512K tokens of context** (524,288).
+
+The model is about 178 GB, and the box has 48 GB of VRAM and 128 GiB of RAM, so it is spread three ways:
+- **The cards:** the two cards act as one tensor-parallel group, each holding a share of every layer and of the experts it keeps in VRAM.
+- **The Radeon 8060S:** it computes the most-used remaining experts from a 95 GB pool in system RAM.
+- **The NVMe:** everything else is read from it when a prompt or an answer needs it.
+
+The DSpark drafter guesses the next few tokens, with its blocks split across the two cards.
+
+The release passed **30/30 quality cases**. It found all five phrases at every measured length, up to PENDING input tokens, and all five values in a 520,000-token deep-needle test.
+
+Project Maya's own speed test, `maya.py --bench`, is the benchmark its maintainers compare setups with. It writes three 256-token answers and reads a 2,048- and an 8,192-token prompt. Both rows below ran on this box with the same model, inputs and context allocation; values are tokens per second.
+
+| `maya.py --bench` | Decode (mean of 3) | Prefill 2K | Prefill 8K |
+|---|---:|---:|---:|
+| Maya v1.1.28, as released | PENDING | PENDING | PENDING |
+| **This release** | **PENDING** | **PENDING** | **PENDING** |
+
+The same public five-phrase prompts as the GLM table, cold, at the 524,288-token allocation. Values are decode / prefill tokens per second; every point found five of five.
+
+| Public prompt | Maya v1.1.28 decode / prefill | This release decode / prefill |
+|---|---:|---:|
+| 2K (2,040 input tokens) | PENDING | **PENDING** |
+| 32K (30,720) | PENDING | **PENDING** |
+| 128K (122,879) | PENDING | **PENDING** |
+
+**The v1.1.28 rows are what that release can do here:**
+- `--tp 2` with the helper and the drafter on the group's cards (both merged upstream);
+- without the uneven split, `--tp 2` gives each card its own layers on Maya-S.
+
+This release runs the engine changes we are proposing upstream as [a pull-request series](PENDING).
+
+A 1,048,576-token allocation also works on this box. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
 
 ### Hardware
 
@@ -66,7 +98,7 @@ bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek recipe](ansible/releases/maya-ds4-dual-xtx-256k.yml) needs about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
+The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) needs about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
 
 ## BOSGAME M5 only — historical measurements
 
