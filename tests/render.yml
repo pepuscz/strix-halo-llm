@@ -182,6 +182,11 @@
           - strix_maya.server.env.DS4_HELPER == '2'
           - strix_maya.server.env.DS4_DRAFT_VRAM == '96,48,32'
           - strix_maya.server.env.DS4_DRAFT_DEV == '1,0,0'
+          - strix_maya.server.env.DS4_DECODE_TRIM == '15'
+          - strix_maya.server.args[:4] == ['--pack', strix_maya.pack, '--max-context', '524288']
+          - strix_maya.server.env.MAYA_DS4_SLOT_DIR == strix_paths.state + '/ds4-slots'
+          - strix_maya.server.env.MAYA_DS4_SLOT_KEEP == '1'
+          - strix_maya.server.env.MAYA_DS4_SLOT_DIR != strix_paths.state + '/slots'
           - strix_maya.server.lib_dirs[0] == strix_paths.release + '/rocblas/install/lib'
           - "'run-maya' in rendered_unit_text"
           - "'strix-drain-ttm-pool' in rendered_unit_text"

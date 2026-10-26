@@ -55,16 +55,16 @@
     - service_maya_config.changed
   changed_when: true
 
-- name: Create the GLM engine's folder for conversations kept on disk
+- name: Create the Maya engine's folder for conversations kept on disk
   ansible.builtin.file:
-    path: "{{ strix_maya.server.env.MAYA_GLM_SLOT_DIR }}"
+    path: >-
+      {{ strix_maya.server.env.MAYA_GLM_SLOT_DIR if (strix_maya.family | default('deepseek')) == 'glm'
+         else strix_maya.server.env.MAYA_DS4_SLOT_DIR }}
     state: directory
     owner: "{{ strix_service.user }}"
     group: "{{ strix_service.group }}"
     mode: "0700"
-  when:
-    - strix_system.engine == 'maya'
-    - (strix_maya.family | default('deepseek')) == 'glm'
+  when: strix_system.engine == 'maya'
 
 - name: Install the Maya runtime entry point and load-time pool drain
   ansible.builtin.template:

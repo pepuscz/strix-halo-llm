@@ -1,5 +1,5 @@
 ---
-strix_release_id: maya-ds4-dual-xtx-256k-v3
+strix_release_id: maya-ds4-dual-xtx-512k-v4
 strix_release_schema: 1
 strix_system:
   id: maya-ds4-dual-xtx
@@ -32,21 +32,21 @@ strix_paths:
   root: /opt/strix-halo
   source: /opt/strix-halo/src
   bin: /opt/strix-halo/bin
-  downloads: /opt/strix-halo/releases/maya-ds4-dual-xtx-256k-v3/downloads
-  release: /opt/strix-halo/releases/maya-ds4-dual-xtx-256k-v3
+  downloads: /opt/strix-halo/releases/maya-ds4-dual-xtx-512k-v4/downloads
+  release: /opt/strix-halo/releases/maya-ds4-dual-xtx-512k-v4
   models: /opt/strix-halo/models/deepseek-v41-flash-1017-maya
   state: /var/lib/strix-halo-inference
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
-  release_tag: maya-ds4-draftdev-dspark-256k-20261022
-  tag_object: 09de775459b45196e31450406608cc760f9ab511
+  release_tag: maya-ds4-q3-dspark-512k-20261025
+  tag_object: bf9bce11d81d032c4fb20f6ea4b713abb0cdf1db
   tag_object_type: tag
-  source_commit: ac95fc974d4bcc745e7fda15ee9081a1566ed27f
-  source_tree: 4725145af35c3b6ecc4bc67782b740c3a2650ca8
+  source_commit: 3d86762aa4fa20395174b5ff0df6cf6d530520c6
+  source_tree: 53ef06444db66090fdad1169e18386d793bb7a8b
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.21
   upstream_commit: 451f9cb6a21ea65673bdde2e57b4a670ae2b8859
-  server_sha256: 38f6705f337d2055acaa02cd226ae7682884aecf054891e6bd0d6039c3d44d21
+  server_sha256: ebb2b78ed3d11fc2d5762caf962db48dded8db28d1e68ab065f1533ca3cf8d93
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so a
     portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -170,7 +170,7 @@ strix_service:
   host: 127.0.0.1
   port: 18109
   alias: deepseek-v4.1-flash
-  context: 262144
+  context: 524288
   parallel_slots: 1
   memory_high: 118G
   memory_max: 120G
@@ -237,12 +237,12 @@ strix_maya:
     size: 66048
     sha256: f384b25188569368d420fa12c072f2cef8152b3bbd66f90154e896a66bb70d7a
   server:
-    exe: /opt/strix-halo/releases/maya-ds4-dual-xtx-256k-v3/source/build-hip/maya-ds4
+    exe: /opt/strix-halo/releases/maya-ds4-dual-xtx-512k-v4/source/build-hip/maya-ds4
     args:
       - --pack
       - /opt/strix-halo/models/deepseek-v41-flash-1017-maya/Maya-S/maya-ds4-dspark
       - --max-context
-      - '262144'
+      - '524288'
       - --tp
       - '2'
       - --vision
@@ -255,7 +255,9 @@ strix_maya:
       - 'on'
       - --expert-profile
       - /var/lib/strix-halo-inference/expert-profile.bin
-    cwd: /opt/strix-halo/releases/maya-ds4-dual-xtx-256k-v3/source
+      - --prefill-chunk
+      - '32768'
+    cwd: /opt/strix-halo/releases/maya-ds4-dual-xtx-512k-v4/source
     tokenizer: /opt/strix-halo/models/deepseek-v41-flash-1017-maya/Maya-S/maya-ds4-dspark/tokenizer
     backend: hip
     model_name: deepseek-v4.1-flash
@@ -265,8 +267,8 @@ strix_maya:
       top_p: 1.0
     reasoning_effort: high
     lib_dirs:
-      - /opt/strix-halo/releases/maya-ds4-dual-xtx-256k-v3/rocblas/install/lib
-      - /opt/strix-halo/releases/maya-ds4-dual-xtx-256k-v3/rocm/lib
+      - /opt/strix-halo/releases/maya-ds4-dual-xtx-512k-v4/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-ds4-dual-xtx-512k-v4/rocm/lib
     port: 18109
     log: /var/lib/strix-halo-inference/native.log
     installer:
@@ -275,7 +277,7 @@ strix_maya:
       quant: DeepSeek-V4.1-Flash-1017
       ds4_quant: maya-s
       model_dir: /opt/strix-halo/models/deepseek-v41-flash-1017-maya/Maya-S
-      written: '2026-10-22 00:00'
+      written: '2026-10-25 00:00'
       speed_calibration:
         skipped: true
         reason: The qualified release fixes DSpark itself; no startup calibration
@@ -283,7 +285,7 @@ strix_maya:
     env:
       DS4_COMMIT_CAP_GB: '145'
       ROCBLAS_USE_HIPBLASLT: '0'
-      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-dual-xtx-256k-v3/rocm/lib/rocblas/library
+      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-dual-xtx-512k-v4/rocm/lib/rocblas/library
       DS4_HELPER: '2'
       DS4_HELPER_GB: '95'
       DS4_WARM_CAP_GB: '14.9'
@@ -295,15 +297,29 @@ strix_maya:
       DS4_TP_GGUF_UNEVEN: '1'
       DS4_TP_CHECK: '1'
       DS4_FLOW_TP: '1'
-      DS4_ATTN_WMMA: '0'
+      DS4_ATTN_WMMA: '1'
       DS4_CHUNK_MIN: '512'
-      DS4_FLOW_STATS: '1'
-      DS4_HC_FUSE: '1'
-      DS4_ROUTE_FUSE: '1'
-      DS4_DRAFT_VRAM: 96,48,32
-      DS4_DRAFT_DEV: 1,0,0
+      DS4_HC_FUSE: '2'
+      DS4_ROUTE_FUSE: '2'
+      DS4_DRAFT_VRAM: '96,48,32'
+      DS4_DRAFT_DEV: '1,0,0'
+      DS4_FLOW_HELPER: '1'
+      DS4_FLOW_PUMP_WAIT: '0'
+      DS4_YOCO_TP: '1'
+      DS4_TP_BORROW: '1'
+      DS4_ATTN_SLAB_MB: '64'
+      DS4_W16_MB: '128'
+      DS4_AR2: '2'
+      DS4_FLOW_DOWN_SHARE: '1'
+      DS4_AR2_DECODE: '1'
+      DS4_FLOW_DOWN_PART: '1'
+      DS4_DECODE_TRIM: '15'
       DS4_LT_STORE: /var/lib/strix-halo-inference/lt-picks.txt
       DS4_LT_VERBOSE: '1'
+      MAYA_DS4_SLOT_KEEP: '1'
+      MAYA_DS4_SLOT_CAP: '16'
+      MAYA_DS4_SLOT_GB: '16'
+      MAYA_DS4_SLOT_DIR: /var/lib/strix-halo-inference/ds4-slots
 strix_qualification:
   answer_quality:
     coding: 10
@@ -313,18 +329,29 @@ strix_qualification:
     scoring: reviewed final answers; corrected math_08 reference is 20/3
     thinking: false
     math_10_output_cap: 4096
+    measured_before: four later changes that keep the results bit-identical - the fused decode launches (DS4_HC_FUSE and
+      DS4_ROUTE_FUSE at 2) and the decode trims (DS4_DECODE_TRIM), both checked against the old kernels every time the
+      engine loads; the one-launch decode all-reduce (DS4_AR2_DECODE), exact by construction; the per-card
+      down-projection reads (DS4_FLOW_DOWN_PART), covered by the tensor-parallel copy checks at load
+  retrieval_ladder:
+    allocation_tokens: 524288
+    points: 11
+    values: PENDING
+    largest_input_tokens: 491520
   long_context:
+    prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
+    allocation_tokens: 524288
     input_tokens: 130048
     output_tokens: 768
-    first_request_decode_tokens_per_second: 37.1
-    first_request_prefill_tokens_per_second: 155.4
-    reused_prompt_decode_tokens_per_second: 42.8
-  qualified_configuration: the same engine source, model, pack, expert profile and settings measured on the
-    dual RX 7900 XTX host; the from-scratch installer ran end to end at 131,072 tokens on the previous engine tag
-    maya-ds4-fd-dspark-128k-20261022 (this tag adds the drafter-placement commit and DS4_DRAFT_DEV; the service
-    differs only in --max-context), the 2K-240K retrieval ladder ran at 262,144 in the host's private service
-  retrieval_ladder:
-    allocation_tokens: 262144
-    points: 10
-    values: 50/50
-    largest_input_tokens: 245760
+    first_request_prefill_tokens_per_second: PENDING
+    first_request_decode_tokens_per_second: PENDING
+    reused_prompt_cached_tokens: 130047
+    reused_prompt_decode_tokens_per_second: PENDING
+  deep_needle:
+    allocation_tokens: 524288
+    input_tokens: 520000
+    values: 5/5
+    measured: on the qualified host's own service at this allocation, before the decode trims
+  qualified_configuration: the same engine source, model, pack, expert profile and settings as the dual RX 7900 XTX
+    host's own service; the from-scratch install, its verify role and the eleven-point retrieval ladder ran on this
+    release's installed service (PENDING)

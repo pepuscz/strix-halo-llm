@@ -89,8 +89,7 @@ def validate_manifest(path: Path, root: Path) -> dict:
              + ", ".join(pending) + missing)
 
     service = data["strix_service"]
-    required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 262144}[system["engine"]]
-    required_context = {"maya-glm-dual-xtx": 524288}.get(system["id"], required_context)
+    required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 524288}[system["engine"]]
     if service["context"] != required_context:
         fail(f"{system['name']} release must allocate exactly {required_context} tokens")
     if service["minimum_effective_non_cma_kib"] < 2 * 1024 * 1024:
@@ -297,7 +296,8 @@ def validate_maya(data: dict, root: Path) -> None:
 def validate_maya_deepseek(data: dict, root: Path) -> None:
     """Maya DS4 HIP Maya-S: tensor parallel over the two cards, DSpark drafting, the Radeon 8060S as the expert helper."""
     service, files = data["strix_service"], data["strix_target"]["files"]
-    rocblas, maya = data["strix_rocblas"], data["strix_maya"]
+    rocblas, maya, paths = data["strix_rocblas"], data["strix_maya"], data["strix_paths"]
+    release, state = paths["release"], paths["state"]
     if len(files) != 4 or service["parallel_slots"] != 1:
         fail("Maya DS4 dual RX 7900 XTX requires four Maya-S shards and one session")
     for extra in data["strix_extra_artifacts"]:
@@ -318,21 +318,81 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
                    *maya["pack_files"].values()):
         require_sha(digest, "pack")
     cfg = maya["server"]
-    args, env = cfg["args"], cfg["env"]
-    expected = {"--max-context": "262144", "--tp": "2", "--vision": "off", "--dspark": "on", "--threads": "on",
-                "--mmap-experts": "on", "--pack": maya["pack"]}
-    for flag, value in expected.items():
-        if flag not in args or args[args.index(flag) + 1] != value:
-            fail("qualified Maya option drifted: " + flag)
-    qualified_env = {"DS4_HELPER": "2", "DS4_HELPER_GB": "95", "DS4_WARM_CAP_GB": "14.9", "DS4_COMMIT_CAP_GB": "145",
-                     "DS4_HELPER_RECENT": "8", "DS4_Q8_BATCH": "1", "DS4_TP_GGUF_UNEVEN": "1", "DS4_FLOW_TP": "1",
-                     "DS4_HC_FUSE": "1", "DS4_ROUTE_FUSE": "1", "DS4_DRAFT_VRAM": "96,48,32", "DS4_DRAFT_DEV": "1,0,0",
-                     "ROCBLAS_USE_HIPBLASLT": "0"}
-    for key, value in qualified_env.items():
-        if env.get(key) != value:
-            fail("qualified Maya environment drifted: " + key)
+    expected_args = ["--pack", maya["pack"], "--max-context", "524288", "--tp", "2", "--vision", "off", "--dspark", "on",
+                     "--threads", "on", "--mmap-experts", "on", "--expert-profile", state + "/expert-profile.bin",
+                     "--prefill-chunk", "32768"]
+    if cfg["args"] != expected_args:
+        fail("qualified Maya DS4 arguments drifted")
+    expected_env = {
+        "DS4_COMMIT_CAP_GB": "145", "ROCBLAS_USE_HIPBLASLT": "0",
+        "ROCBLAS_TENSILE_LIBPATH": release + "/rocm/lib/rocblas/library",
+        # The Radeon 8060S as the expert helper, and the load checks the engine runs before it serves.
+        "DS4_HELPER": "2", "DS4_HELPER_GB": "95", "DS4_WARM_CAP_GB": "14.9", "DS4_HELPER_CHECK": "1",
+        "DS4_LANE_SPIN_US": "200", "DS4_HELPER_RECENT": "8", "DS4_Q8_BATCH": "1", "DS4_Q8_CHECK": "1",
+        "DS4_TP_GGUF_UNEVEN": "1", "DS4_TP_CHECK": "1", "DS4_FLOW_TP": "1", "DS4_ATTN_WMMA": "1", "DS4_CHUNK_MIN": "512",
+        "DS4_HC_FUSE": "2", "DS4_ROUTE_FUSE": "2", "DS4_DRAFT_VRAM": "96,48,32", "DS4_DRAFT_DEV": "1,0,0",
+        "DS4_FLOW_HELPER": "1", "DS4_FLOW_PUMP_WAIT": "0", "DS4_YOCO_TP": "1", "DS4_TP_BORROW": "1",
+        "DS4_ATTN_SLAB_MB": "64", "DS4_W16_MB": "128", "DS4_AR2": "2", "DS4_FLOW_DOWN_SHARE": "1",
+        "DS4_AR2_DECODE": "1", "DS4_FLOW_DOWN_PART": "1", "DS4_DECODE_TRIM": "15",
+        "DS4_LT_STORE": state + "/lt-picks.txt", "DS4_LT_VERBOSE": "1",
+        # Conversations kept on disk in their own folder: each engine removes slot files that are not its model's.
+        "MAYA_DS4_SLOT_KEEP": "1", "MAYA_DS4_SLOT_CAP": "16", "MAYA_DS4_SLOT_GB": "16",
+        "MAYA_DS4_SLOT_DIR": state + "/ds4-slots",
+    }
+    if cfg["env"] != expected_env:
+        drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
+        fail("qualified Maya DS4 environment drifted: " + ", ".join(drifted))
+    expected_identity = {
+        "exe": release + "/source/build-hip/maya-ds4", "cwd": release + "/source", "tokenizer": maya["pack"] + "/tokenizer",
+        "sampling": {"temperature": 1.0, "top_p": 1.0}, "reasoning_effort": "high", "backend": "hip",
+        "host": service["host"], "log": state + "/native.log",
+        "lib_dirs": [release + "/rocblas/install/lib", release + "/rocm/lib"],
+    }
+    for key, value in expected_identity.items():
+        if cfg.get(key) != value:
+            fail("qualified Maya DS4 server setting drifted: " + key)
     if service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
         fail("Maya requires the qualified 14 GiB non-CMA floor")
+    validate_deepseek_qualification(data["strix_qualification"], service["context"])
+
+
+def validate_deepseek_qualification(qualification: dict, context: int) -> None:
+    """The DeepSeek dual RX 7900 XTX qualification: answer quality, the eleven-point retrieval ladder and the real-code
+    prompt on the installed service at the release's allocation, and the deepest needle."""
+    if set(qualification) != {"answer_quality", "retrieval_ladder", "long_context", "deep_needle",
+                              "qualified_configuration"}:
+        fail("Maya DS4 qualification sections drifted")
+    quality = qualification["answer_quality"]
+    scores = [quality.get(key) for key in ("coding", "gsm8k", "math", "total")]
+    if not all(type(score) is int and 0 <= score <= 30 for score in scores) or sum(scores[:3]) != scores[3] or \
+            quality.get("thinking") is not False:
+        fail("Maya DS4 answer-quality scores must be integers that sum to the total, without thinking")
+    ladder = qualification["retrieval_ladder"]
+    found = re.fullmatch(r"(\d+)/(\d+)", str(ladder.get("values")))
+    if set(ladder) != {"allocation_tokens", "points", "values", "largest_input_tokens"} or \
+            ladder["allocation_tokens"] != context or ladder["points"] != 11 or \
+            not 0 < ladder["largest_input_tokens"] < context or not found or \
+            int(found.group(1)) > int(found.group(2)) or int(found.group(2)) != 5 * ladder["points"]:
+        fail("Maya DS4 retrieval ladder must hold eleven five-value points at the release's allocation")
+    long = qualification["long_context"]
+    numbers = ("input_tokens", "output_tokens", "first_request_prefill_tokens_per_second",
+               "first_request_decode_tokens_per_second", "reused_prompt_cached_tokens",
+               "reused_prompt_decode_tokens_per_second")
+    if set(long) != {"prompt_sha256", "allocation_tokens", *numbers}:
+        fail("Maya DS4 long-context record drifted")
+    require_sha(long["prompt_sha256"], "Maya DS4 long-context prompt")
+    if long["allocation_tokens"] != context or \
+            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers) or \
+            not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
+        fail("Maya DS4 long-context record must hold positive readings on the release's allocation, "
+             "with less than its input cached on reuse")
+    needle = qualification["deep_needle"]
+    if set(needle) != {"allocation_tokens", "input_tokens", "values", "measured"} or \
+            needle["allocation_tokens"] != context or not 0 < needle["input_tokens"] < context or \
+            not re.fullmatch(r"\d+/5", str(needle["values"])):
+        fail("Maya DS4 deep-needle record drifted")
+    if not isinstance(qualification["qualified_configuration"], str) or not qualification["qualified_configuration"]:
+        fail("Maya DS4 qualification must state its qualified_configuration")
 
 
 def validate_maya_glm(data: dict, root: Path) -> None:
@@ -476,8 +536,9 @@ def validate_benchmarks(root: Path) -> None:
     for path in sorted((root / "ansible/releases").glob("*.yml")):
         manifest = yaml.safe_load(path.read_text())
         identity = manifest["strix_system"]["id"]
-        if identity not in data["systems"] and pending_fields(manifest):
-            # A draft may have no published measurements yet; it is never the default.
+        if pending_fields(manifest):
+            # A draft has no published measurements of its own yet (the results may still hold its predecessor's);
+            # it is never the default.
             if manifest["strix_system"]["selected_default"]:
                 fail("a draft release cannot be the default: " + identity)
             continue
