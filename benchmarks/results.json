@@ -1085,10 +1085,10 @@
         "procedure": "Project Maya v1.1.28's maya.py --bench, DeepSeek on HIP: three 256-token answers (greedy, thinking off; decode is their mean) and 2,048- and 8,192-token prompts of its docs, the engine alone, both engines on identical token ids",
         "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
         "this_release": {
-          "decode_mean_tokens_per_second": 42.1,
+          "decode_mean_tokens_per_second": 41.9,
           "prefill_tokens_per_second": {
-            "2048": 175,
-            "8192": 473
+            "2048": 177,
+            "8192": 474
           }
         },
         "maya_v1_1_28": {
@@ -1106,14 +1106,14 @@
           }
         },
         "maya_v1_1_28_with_proposed_prs": {
-          "decode_mean_tokens_per_second": 41.4,
+          "decode_mean_tokens_per_second": 41.3,
           "prefill_tokens_per_second": {
-            "2048": 161,
-            "8192": 486
+            "2048": 180,
+            "8192": 482
           },
-          "source": "Maya v1.1.28 + the proposed pull-request series (32 commits), the release's settings without DS4_DRAFT_VRAM and kept conversations"
+          "source": "Maya v1.1.28 + the proposed pull-request series (35 commits), the release's settings without kept conversations, measured beside this_release"
         },
-        "cooling": "v1.1.28 rows: box fans held at full speed; this release's row: box fans under automatic control"
+        "cooling": "every row with the box fans held at full speed"
       },
       "maya_v1_1_28_context_scaling": [
         {

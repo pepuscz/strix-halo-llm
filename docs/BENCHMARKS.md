@@ -79,13 +79,13 @@ A 1,048,576-token allocation also works. Measured on the engine before its decod
 
 It measures much shorter prompts than the table above, so its prefill is far lower.
 
-This release's engine predates two upstream fixes to that test on HIP: it launched the wrong engine for a DeepSeek config, and it wrapped the questions in the wrong chat markers. So all three rows below ran Maya v1.1.28's procedure on identical token ids, the engine alone. Stock v1.1.28's own `maya.py --bench` agreed within 1 %. The v1.1.28 rows ran with the box's three fans held at full speed. This release's row ran with them under automatic control (the CPU reached 83 °C). That can only lower its numbers, and the pull-request row, measured like the v1.1.28 rows, is within 2 % of it.
+This release's engine predates two upstream fixes to that test on HIP: it launched the wrong engine for a DeepSeek config, and it wrapped the questions in the wrong chat markers. So all three rows below ran Maya v1.1.28's procedure on identical token ids, the engine alone. Stock v1.1.28's own `maya.py --bench` agreed within 1 %. Every row ran with the box's three fans held at full speed. The last two rows were measured in the same session: this release's engine source and settings, and the same settings on Maya v1.1.28 with the pull requests. At 32K, 128K and on the real-code prompt, the two also matched in prefill and in milliseconds per decode step.
 
 | `maya.py --bench`, tok/s | Decode (mean of 3) | Prefill 2,048 | Prefill 8,192 |
 |---|---:|---:|---:|
 | Maya v1.1.28, as released | 37.2 | 70 | 241 |
-| Maya v1.1.28 + our eight proposed pull requests (the same settings) | 41.4 | 161 | 486 |
-| **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | **42.1** | **175** | **473** |
+| Maya v1.1.28 + our nine proposed pull requests (the same settings) | 41.3 | 180 | 482 |
+| **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | **41.9** | **177** | **474** |
 
 ### Maya v1.1.28 on the same prompts
 

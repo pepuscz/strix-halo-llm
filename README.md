@@ -40,8 +40,8 @@ Project Maya's own speed test, `maya.py --bench`, is the benchmark its maintaine
 | `maya.py --bench` | Decode (mean of 3) | Prefill 2K | Prefill 8K |
 |---|---:|---:|---:|
 | Maya v1.1.28, as released | 37.2 | 70 | 241 |
-| Maya v1.1.28 + our eight proposed pull requests | 41.4 | 161 | 486 |
-| **This release** | **42.1** | **175** | **473** |
+| Maya v1.1.28 + our nine proposed pull requests | 41.3 | 180 | 482 |
+| **This release** | **41.9** | **177** | **474** |
 
 The same public five-phrase prompts as the GLM table, cold, at the 524,288-token allocation. Values are decode / prefill tokens per second; every point found five of five. Decode here is one cold 64-token answer, so it is noisy; `--bench` above is the steadier decode comparison.
 
