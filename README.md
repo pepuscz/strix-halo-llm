@@ -33,28 +33,29 @@ The model is about 178 GB, and the box has 48 GB of VRAM and 128 GiB of RAM, so 
 
 The DSpark drafter guesses the next few tokens, with its blocks split across the two cards.
 
-The release passed **30/30 quality cases**. It found all five phrases at every measured length, up to PENDING input tokens, and all five values in a 520,000-token deep-needle test.
+The release passed **30/30 quality cases**. It found all five phrases at every measured length, up to 491,520 input tokens, and all five values in a 520,000-token deep-needle test.
 
-Project Maya's own speed test, `maya.py --bench`, is the benchmark its maintainers compare setups with. It writes three 256-token answers and reads a 2,048- and an 8,192-token prompt. Both rows below ran on this box with the same model, inputs and context allocation; values are tokens per second.
+Project Maya's own speed test, `maya.py --bench`, is the benchmark its maintainers compare setups with. It writes three 256-token answers and reads a 2,048- and an 8,192-token prompt. All three rows ran on this box with the same model, inputs and context allocation; values are tokens per second.
 
 | `maya.py --bench` | Decode (mean of 3) | Prefill 2K | Prefill 8K |
 |---|---:|---:|---:|
-| Maya v1.1.28, as released | PENDING | PENDING | PENDING |
-| **This release** | **PENDING** | **PENDING** | **PENDING** |
+| Maya v1.1.28, as released | 37.2 | 70 | 241 |
+| Maya v1.1.28 + our eight proposed pull requests | 41.4 | 161 | 486 |
+| **This release** | **42.1** | **175** | **473** |
 
-The same public five-phrase prompts as the GLM table, cold, at the 524,288-token allocation. Values are decode / prefill tokens per second; every point found five of five.
+The same public five-phrase prompts as the GLM table, cold, at the 524,288-token allocation. Values are decode / prefill tokens per second; every point found five of five. Decode here is one cold 64-token answer, so it is noisy; `--bench` above is the steadier decode comparison.
 
 | Public prompt | Maya v1.1.28 decode / prefill | This release decode / prefill |
 |---|---:|---:|
-| 2K (2,040 input tokens) | PENDING | **PENDING** |
-| 32K (30,720) | PENDING | **PENDING** |
-| 128K (122,879) | PENDING | **PENDING** |
+| 2K (2,040 input tokens) | 39.1 / 87 | **29.7 / 212** |
+| 32K (30,720) | 32.4 / 524 | **31.7 / 1,053** |
+| 128K (122,879) | 31.7 / 750 | **31.8 / 1,514** |
 
 **The v1.1.28 rows are what that release can do here:**
 - `--tp 2` with the expert helper (merged upstream);
 - without the uneven split, `--tp 2` gives each card its own layers on Maya-S, so the drafter stays where v1.1.28 places it.
 
-This release runs the engine changes we are proposing upstream as [a pull-request series](PENDING).
+This release runs the engine changes we are proposing to Project Maya, ported to v1.1.28.
 
 A 1,048,576-token allocation also works on this box. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
 
