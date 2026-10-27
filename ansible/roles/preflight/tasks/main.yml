@@ -111,6 +111,13 @@
     - item.stat.size | int == item.item.size | int
     - item.item.name not in (strix_artifact_seed_paths | default({}))
 
+- name: Read the converted dense matrices an earlier install wrote beside the model (a release that converts them)
+  ansible.builtin.stat:
+    path: "{{ strix_paths.models }}/{{ strix_maya.model_subdirectory | default('Maya-S') }}/{{ strix_maya.dense_q8_0.file }}"
+    get_checksum: false
+  register: preflight_dense_side
+  when: strix_maya is defined and strix_maya.dense_q8_0 is defined
+
 - name: Measure the release folder an earlier install already wrote
   ansible.builtin.command:
     argv: [du, -sx, --block-size=1, "{{ strix_paths.release }}"]
@@ -120,8 +127,8 @@
   check_mode: false
 
 # The floor is the install's headroom: the model files and the release folder it writes. What is already there - files
-# adopted from verified local seeds (hard links use no space), files already in place at their pinned sizes, and the
-# release folder an earlier install wrote - is discounted, so `verify` and `update` after an install do not demand the
+# adopted from verified local seeds (hard links use no space), files already in place at their pinned sizes, the
+# converted dense matrices at their pinned size and the release folder an earlier install wrote - is discounted, so `verify` and `update` after an install do not demand the
 # space that install already used.
 - name: Discount what the host already holds of the release
   ansible.builtin.set_fact:
@@ -131,6 +138,9 @@
              | selectattr('name', 'in', (strix_artifact_seed_paths | default({})).keys() | list)
              | map(attribute='size') | map('int') | sum)
           - (preflight_present_bytes | default(0) | int)
+          - (strix_maya.dense_q8_0.size | int
+             if (preflight_dense_side.stat | default({})).size | default(-1) | int == strix_maya.dense_q8_0.size | default(-2) | int
+             else 0)
           - ((preflight_release_du.stdout | default('0')).split() | first | default('0') | int
              if preflight_release_du.rc | default(1) == 0 else 0)] | max }}
 
