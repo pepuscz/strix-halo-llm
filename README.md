@@ -96,7 +96,7 @@ bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek GSQ-RCO recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) about 370 GB (155 GB of shards, the 111 GB Engram file, the 8 GB drafter and an 8 GB file of its dense matrices converted to Q8_0 at install) and the [DeepSeek Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
+The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek GSQ-RCO recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) about 335 GB (155 GB of shards, the 111 GB Engram file, the 8 GB drafter, an 8 GB file of its dense matrices converted to Q8_0 at install, and the release folder) and the [DeepSeek Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
 
 ## BOSGAME M5 only
 

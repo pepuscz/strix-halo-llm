@@ -27,7 +27,7 @@ strix_platform:
   - name: AMD Radeon RX 7900 XTX
     pci_id: 1002:744c
     count: 2
-  minimum_free_bytes: 370000000000
+  minimum_free_bytes: 335000000000
 strix_paths:
   root: /opt/strix-halo
   source: /opt/strix-halo/src
