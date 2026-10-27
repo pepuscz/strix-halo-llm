@@ -53,8 +53,9 @@ jobs:
           test -f ansible/releases/rocm-rocmfpx-128k.yml
           test -f ansible/releases/strata-qwen-q4xl-4x256k.yml
           test -f ansible/releases/maya-ds4-dual-xtx-512k.yml
+          test -f ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml
           test -f ansible/releases/maya-glm-dual-xtx-512k.yml
-          test "$(find ansible/releases -maxdepth 1 -type f -name '*.yml' | wc -l)" -eq 5
+          test "$(find ansible/releases -maxdepth 1 -type f -name '*.yml' | wc -l)" -eq 6
       - name: Render and inspect every service contract
         shell: bash
         run: |

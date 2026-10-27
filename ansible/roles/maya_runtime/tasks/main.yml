@@ -31,6 +31,8 @@
         {'src': 'rocblas-stock-tensile.cmake', 'dest': 'rocblas-stock-tensile.cmake'}]
        + ([{'src': strix_maya.expert_profile.file, 'dest': strix_maya.expert_profile.file}]
           if maya_runtime_family == 'deepseek' else [])
+       + ([{'src': strix_maya.dense_q8_0.converter, 'dest': strix_maya.dense_q8_0.converter}]
+          if strix_maya.dense_q8_0 is defined else [])
        + [{'src': role_path + '/../../../patches/' + strix_rocblas.patch.name,
            'dest': 'patches/' + strix_rocblas.patch.name}] }}
   loop_control:

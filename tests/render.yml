@@ -191,7 +191,7 @@
           - "'run-maya' in rendered_unit_text"
           - "'strix-drain-ttm-pool' in rendered_unit_text"
           - "'RuntimeDirectory=strix-halo-inference-maya' in rendered_unit_text"
-          - "('ConditionPathExists=' + strix_paths.models + '/Maya-S/' + strix_target.files[0].name) in rendered_unit_text"
+          - "('ConditionPathExists=' + strix_paths.models + '/' + (strix_maya.model_subdirectory | default('Maya-S')) + '/' + strix_target.files[0].name) in rendered_unit_text"
           - "('ConditionPathExists=' + strix_paths.release + '/source/build-hip/maya-ds4') in rendered_unit_text"
           - "('ConditionPathExists=' + strix_maya.pack + '/ds4.txt') in rendered_unit_text"
           - "'--target maya-ds4 ' in (rendered_maya_build.content | b64decode)"

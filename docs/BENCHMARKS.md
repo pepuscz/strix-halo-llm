@@ -8,6 +8,24 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 ![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)
 
+**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** (production), measured the same way on its installed 512K release:
+
+| Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
+|---:|---:|---:|---:|
+| 2,040 | 235.4 | 52.9 | 5/5 |
+| 3,840 | 399.4 | 49.3 | 5/5 |
+| 7,680 | 616.7 | 49.3 | 5/5 |
+| 15,359 | 846.3 | 51.3 | 5/5 |
+| 30,720 | 1,097.8 | 50.8 | 5/5 |
+| 59,933 | 1,347.7 | 50.3 | 5/5 |
+| 122,879 | 1,534.6 | 50.5 | 5/5 |
+| 163,840 | 1,551.5 | 46.2 | 5/5 |
+| 212,992 | 1,483.9 | 47.7 | 5/5 |
+| 245,760 | 1,450.7 | 49.6 | 5/5 |
+| 491,520 | 1,170.4 | 47.8 | 5/5 |
+
+The 130,048-token real-code prompt read at 1,387.4 tok/s and wrote 768 tokens at 48.3 tok/s; with it cached, 55.6 tok/s. A 520,000-token deep needle found all five values (1,141.8 / 46.4 tok/s). `maya.py --bench` on the same inputs as the Maya-S rows below: 56.8 decode, 201 / 532 prefill. **Quality: 29/30** (math_10 reached its 4,096-token cap), perplexity 7.3715 against Maya-S's 7.2543 on 23 sequences of 2,048 tokens.
+
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
 - Each point is a fresh load of the installed service, from the release's frozen expert profile, with no conversation kept from an earlier point.
 - Thinking is off, with a 256-token cap and zero cached input.

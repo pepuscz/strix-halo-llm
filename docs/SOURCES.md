@@ -20,6 +20,21 @@ manifest.
 
 [`maya-glm-dual-xtx-512k.yml`](../ansible/releases/maya-glm-dual-xtx-512k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes, and its `compat-bf16.json`, which names the model shard it was packed from, against a digest with that path normalized.
 
+## Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX
+
+| Component | Pinned source |
+|---|---|
+| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya/tree/maya-ds4-gsq-512k-20261027), tag `maya-ds4-gsq-512k-20261027` (tag object `74226b3c2c21a20891b2a244f177a051422c0da7`), commit `739f65181860d9461e04531dea3361ca110bec17`, tree `58660fdf41880b7b718f377f8eea395fb400ce1d`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.28` (commit `6afa525bbabc3a8f5fd165f89e9bc72155d9bd39`) plus the dual-card changes proposed in [issue #510](https://github.com/mw00/project-maya/issues/510) (its nine pull requests, stacked) |
+| Pack tool | The same commit's `tools/ds4/pack_gguf.py` (SHA-256 pinned), then [`convert-dense-q8_0.py`](../ansible/roles/maya_runtime/files/convert-dense-q8_0.py) (SHA-256 pinned): the quant's 524 Q5_K dense matrices (the attention projections, the shared experts, `engram_wkv`, the embedding and the head, 5.3 GB) rewritten as Q8_0 into `dense-q8_0.bin` (8,236,072,960 bytes), since the engine reads dense matrices as BF16 or Q8_0 only; the routed experts and the Engram tables stay the downloaded files |
+| GGML | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d), commit `3cf03257f219afbe7334045ff7c6a06ac68c627d`, archive SHA-256 and tree fingerprint pinned |
+| ROCm, rocBLAS | The same ROCm 7.2.4 userspace and patched rocBLAS as the Maya-S recipe below |
+| Target | [`ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF`](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF), revision `653a9874aa38c356233c5f3cc8c96b19a43b57eb`, IQ2_XS (4 shards, 155 GB; MIT, as the base model). Made with GSQ (Gumbel-Softmax quantization) and RCO (Riemannian constrained optimization) by IST Austria's Distributed Algorithms and Systems Lab; its card asks that both papers be cited |
+| Engram | The same repository and revision, `DeepSeek-V4.1-Flash-Engram-IQ4_NL.gguf` (110.6 GB) |
+| Draft | `peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF`, revision `276e0badcfb4a6d8f6c2b9d4da1b468cd339c221`, DSpark (the same drafter as the Maya-S recipe) |
+| Expert profile | The Maya-S recipe's ([file](../ansible/roles/maya_runtime/files/expert-profile-maya-s.bin)): the same model's routing, so the same counts |
+
+[`maya-ds4-gsq-dual-xtx-512k.yml`](../ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) records every identity. The pack is checked against the qualified pack's hashes (its `tensors.txt` after the conversion included); the converted side file is checked at its pinned size and sealed with the pack by the digest the install produced.
+
 ## Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX
 
 | Component | Pinned source |

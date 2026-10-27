@@ -4,17 +4,20 @@
     that:
       - strix_release_schema | int == 1
       - strix_release_id | length > 0
-      - strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl', 'maya-ds4-dual-xtx', 'maya-glm-dual-xtx']
+      - >-
+        strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl', 'maya-ds4-dual-xtx',
+                            'maya-ds4-gsq-dual-xtx', 'maya-glm-dual-xtx']
       - >-
         strix_system.name in ['Strix Halo llama.cpp Vulkan IQ3_XXS', 'Lucebox ROCm ROCmFPX', 'Strata HIP UD-Q4_K_XL',
                               'Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX',
+                              'Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX',
                               'Maya HIP Maya-M IQ2_S dual RX 7900 XTX']
       - strix_system.engine in ['vulkan', 'rocm', 'strata', 'maya']
       # A Maya release builds one model family; a release without strix_maya.family is DeepSeek.
       - >-
         strix_system.engine != 'maya' or
         (strix_maya.family | default('deepseek')) ==
-        {'maya-ds4-dual-xtx': 'deepseek', 'maya-glm-dual-xtx': 'glm'}[strix_system.id]
+        {'maya-ds4-dual-xtx': 'deepseek', 'maya-ds4-gsq-dual-xtx': 'deepseek', 'maya-glm-dual-xtx': 'glm'}[strix_system.id]
       - >-
         (strix_system.engine == 'vulkan' and strix_service.context | int == 524288) or
         (strix_system.engine == 'rocm' and strix_service.context | int == 131072) or
@@ -87,13 +90,60 @@
   ansible.builtin.set_fact:
     preflight_root_mount: "{{ (ansible_facts.mounts | selectattr('mount', 'equalto', '/') | list | first) }}"
 
-- name: Discount model files adopted from verified local seeds (hard links use no space)
+- name: Read the model files already in place at their pinned sizes (an installed or partly installed release)
+  ansible.builtin.stat:
+    path: "{{ strix_paths.models }}/{{ (item.local_subdirectory + '/') if item.local_subdirectory is defined else '' }}{{ item.name }}"
+    get_checksum: false
+  loop: "{{ strix_target.files + (strix_extra_artifacts | default([])) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: preflight_present_artifacts
+
+- name: Count the files already in place at their pinned sizes (seeds are counted below)
+  ansible.builtin.set_fact:
+    preflight_present_bytes: "{{ (preflight_present_bytes | default(0) | int) + (item.item.size | int) }}"
+  loop: "{{ preflight_present_artifacts.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when:
+    - item.stat.exists
+    - item.stat.isreg | default(false)
+    - item.stat.size | int == item.item.size | int
+    - item.item.name not in (strix_artifact_seed_paths | default({}))
+
+- name: Read the converted dense matrices an earlier install wrote beside the model (a release that converts them)
+  ansible.builtin.stat:
+    path: "{{ strix_paths.models }}/{{ strix_maya.model_subdirectory | default('Maya-S') }}/{{ strix_maya.dense_q8_0.file }}"
+    get_checksum: false
+  register: preflight_dense_side
+  when: strix_maya is defined and strix_maya.dense_q8_0 is defined
+
+- name: Measure the release folder an earlier install already wrote
+  ansible.builtin.command:
+    argv: [du, -sx, --block-size=1, "{{ strix_paths.release }}"]
+  register: preflight_release_du
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+# The floor is the install's headroom: the model files and the release folder it writes. What is already there - files
+# adopted from verified local seeds (hard links use no space), files already in place at their pinned sizes, the
+# converted dense matrices at their pinned size and the release folder an earlier install wrote - is discounted, so
+# `verify` and `update` after an install do not demand the space that install already used.
+- name: Discount what the host already holds of the release
   ansible.builtin.set_fact:
     preflight_required_free_bytes: >-
-      {{ strix_platform.minimum_free_bytes | int
-         - ((strix_target.files + (strix_extra_artifacts | default([])))
-            | selectattr('name', 'in', (strix_artifact_seed_paths | default({})).keys() | list)
-            | map(attribute='size') | map('int') | sum) }}
+      {{ [0, strix_platform.minimum_free_bytes | int
+          - ((strix_target.files + (strix_extra_artifacts | default([])))
+             | selectattr('name', 'in', (strix_artifact_seed_paths | default({})).keys() | list)
+             | map(attribute='size') | map('int') | sum)
+          - (preflight_present_bytes | default(0) | int)
+          - (strix_maya.dense_q8_0.size | int
+             if (preflight_dense_side.stat | default({})).size | default(-1) | int
+                == strix_maya.dense_q8_0.size | default(-2) | int
+             else 0)
+          - ((preflight_release_du.stdout | default('0')).split() | first | default('0') | int
+             if preflight_release_du.rc | default(1) == 0 else 0)] | max }}
 
 - name: Validate immutable host requirements
   ansible.builtin.assert:

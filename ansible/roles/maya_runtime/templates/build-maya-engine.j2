@@ -134,13 +134,27 @@ fi
 [[ "$(sha256sum packtool/tools/ds4/pack_gguf.py | awk '{print $1}')" == {{ strix_maya.pack_tool.pack_gguf_sha256 | quote }} ]]
 [[ "$(sha256sum packtool/tools/ds4/chat_template.jinja | awk '{print $1}')" == {{ strix_maya.pack_tool.chat_template_sha256 | quote }} ]]
 [[ ! -e "$models/vision" ]] || fail "$models/vision must not exist while packing"
+{% set maya_model = strix_maya.model_subdirectory | default('Maya-S') %}
 if [[ ! -f "$pack/sources.json" ]]; then
     rm -rf "$pack"
-    python3 -I packtool/tools/ds4/pack_gguf.py --model "$models/Maya-S" --out "$pack" --drafter "$models/dspark/dspark.json"
-    python3 -I - "$models" "$pack" <<'PY'
+    python3 -I packtool/tools/ds4/pack_gguf.py --model "$models/{{ maya_model }}" --out "$pack" --drafter "$models/dspark/dspark.json"
+{% if strix_maya.dense_q8_0 is defined %}
+    # The quant keeps the matrices the engine reads as BF16 / Q8_0 in a K-quant: converted to Q8_0 into the model's
+    # folder (the engine's venv has numpy), their tensors.txt lines rewritten, the DSpark geometry the GGUF leaves
+    # out filled in - the release pins the plan (its tensors and bytes) and the converter's digest.
+    [[ "$(sha256sum "$root/{{ strix_maya.dense_q8_0.converter }}" | awk '{print $1}')" == {{ strix_maya.dense_q8_0.converter_sha256 | quote }} ]]
+    "$root/source/.venv/bin/python" -I "$root/{{ strix_maya.dense_q8_0.converter }}" "$pack" "$models/{{ maya_model }}" \
+        --file {{ strix_maya.dense_q8_0.file | quote }} --tensors {{ strix_maya.dense_q8_0.tensors }} \
+        --bytes {{ strix_maya.dense_q8_0.size }} --replace{% for key, value in (strix_maya.ds4_geometry | default({})).items() %} \
+        --ds4 {{ (key ~ '=' ~ value) | quote }}{% endfor %}
+
+{% endif %}
+    python3 -I - "$models" "$pack" "{{ maya_model }}" {{ (strix_maya.dense_q8_0.file if strix_maya.dense_q8_0 is defined else '') | quote }} <<'PY'
 import json, pathlib, sys
-models, pack = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-shards = sorted((models / 'Maya-S').glob('*.gguf')) + sorted((models / 'Engram').glob('*.gguf'))
+models, pack, sub, side = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), sys.argv[3], sys.argv[4]
+shards = sorted((models / sub).glob('*.gguf')) + sorted((models / 'Engram').glob('*.gguf'))
+if side:
+    shards.append(models / sub / side)
 files = [{'name': s.name, 'size': s.stat().st_size, 'mtime_ns': s.stat().st_mtime_ns} for s in shards]
 (pack / 'sources.json').write_text(json.dumps({'files': files}, indent=1), encoding='utf-8')
 PY
@@ -157,7 +171,13 @@ grep -qxF "  \"source\": \"$first_shard\"," "$pack/compat-bf16.json"
 {% else %}
 # ds4.txt names the model folder; everything else in it is checked against the qualified pack.
 [[ "$(sed 's#^model_dir .*#model_dir MODEL_DIR#' "$pack/ds4.txt" | sha256sum | awk '{print $1}')" == {{ strix_maya.pack_ds4_normalized_sha256 | quote }} ]]
-grep -qx "model_dir $models/Maya-S" "$pack/ds4.txt"
+grep -qx "model_dir $models/{{ maya_model }}" "$pack/ds4.txt"
+{% if strix_maya.dense_q8_0 is defined %}
+# The converted dense matrices: at the pinned size, and sealed with the pack by the digest this build produced.
+side="$models/{{ maya_model }}/{{ strix_maya.dense_q8_0.file }}"
+[[ "$(wc -c < "$side" | tr -d ' ')" == "{{ strix_maya.dense_q8_0.size }}" ]] || fail "$side is not {{ strix_maya.dense_q8_0.size }} bytes"
+sha256sum "$side" >> pack.sha256
+{% endif %}
 {% endif %}
 
 # 6. Seal.
