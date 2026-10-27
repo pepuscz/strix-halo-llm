@@ -18,15 +18,15 @@ strix_platform:
   strict_kernel: true
   secure_boot: disabled
   kernel_arguments:
-  - amd_pstate=active
-  - amd_iommu=off
-  - amdgpu.gttsize=126976
-  - ttm.pages_limit=32505856
-  - ttm.page_pool_size=32505856
+    - amd_pstate=active
+    - amd_iommu=off
+    - amdgpu.gttsize=126976
+    - ttm.pages_limit=32505856
+    - ttm.page_pool_size=32505856
   discrete_gpus:
-  - name: AMD Radeon RX 7900 XTX
-    pci_id: 1002:744c
-    count: 2
+    - name: AMD Radeon RX 7900 XTX
+      pci_id: 1002:744c
+      count: 2
   minimum_free_bytes: 335000000000
 strix_paths:
   root: /opt/strix-halo
@@ -67,14 +67,14 @@ strix_rocm724:
     bin/hipcc: 7e6614203ff9838f64581a4c9522dd4794834d7e91bad8074bb8c88d85618d09
     lib/libamdhip64.so.7.2.70204: f1043337461c8e54ee135e95fa979a7d0e4344676ad5b0554652f844f8f098ac
   compat_debs:
-  - file: libicu74_74.2-1ubuntu3.1_amd64.deb
-    url: https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu74_74.2-1ubuntu3.1_amd64.deb
-    size: 10860078
-    sha256: c9a70989678660eed9a1e904c74fa043da8bec8e2036856fc16e31ced79b04f8
-  - file: libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
-    url: https://launchpadlibrarian.net/865991952/libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
-    size: 763972
-    sha256: bfd07c01d6e5ab3e327f3ca5819409b1914bbfb3f1a016d53e4dabd5f96143bb
+    - file: libicu74_74.2-1ubuntu3.1_amd64.deb
+      url: https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu74_74.2-1ubuntu3.1_amd64.deb
+      size: 10860078
+      sha256: c9a70989678660eed9a1e904c74fa043da8bec8e2036856fc16e31ced79b04f8
+    - file: libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      url: https://launchpadlibrarian.net/865991952/libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      size: 763972
+      sha256: bfd07c01d6e5ab3e327f3ca5819409b1914bbfb3f1a016d53e4dabd5f96143bb
 strix_rocblas:
   repository: https://github.com/ROCm/rocm-libraries.git
   tag: rocm-7.2.4
@@ -91,12 +91,12 @@ strix_rocblas:
   gpu_targets: gfx1100;gfx1151
   build_jobs: 2
   deps:
-  - name: libmsgpack-cxx-dev
-    version: 7.0.0-2
-    sha256: 033efcbd18ea9eec440e2a4277366623834ec0553a136bfa7ece2a94dbfbcdb2
-  - name: libboost1.90-dev
-    version: 1.90.0-6ubuntu1
-    sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
+    - name: libmsgpack-cxx-dev
+      version: 7.0.0-2
+      sha256: 033efcbd18ea9eec440e2a4277366623834ec0553a136bfa7ece2a94dbfbcdb2
+    - name: libboost1.90-dev
+      version: 1.90.0-6ubuntu1
+      sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
   reference_library_sha256: d89e9ada0fb0d0d679e8d427d1ece26db3f424cca8b6e189bce785bd33212ee0
 strix_target:
   repository: ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF
@@ -105,51 +105,51 @@ strix_target:
   subdirectory: ''
   total_size: 155225835328
   files:
-  - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00001-of-00004.gguf
-    local_subdirectory: IQ2_XS
-    size: 39535788064
-    sha256: d9b949d55e27242b8afc7c2928749b888372d4c39682f9a131670d1c2555155e
-  - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00002-of-00004.gguf
-    local_subdirectory: IQ2_XS
-    size: 39494617536
-    sha256: 933461a974fcccee741bf2f9798201e72ab4aa3f8a952be56f849896ca6ea30e
-  - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00003-of-00004.gguf
-    local_subdirectory: IQ2_XS
-    size: 39423838496
-    sha256: bbf91fa346a85ebaf32dd4fd5c456b534d780d381e54f46ac90783a481373240
-  - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00004-of-00004.gguf
-    local_subdirectory: IQ2_XS
-    size: 36771591232
-    sha256: e5b2f8781fab688cd4bc3bc7a69651b5dbb90ed94965657c6bead8bb4774f3cf
+    - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00001-of-00004.gguf
+      local_subdirectory: IQ2_XS
+      size: 39535788064
+      sha256: d9b949d55e27242b8afc7c2928749b888372d4c39682f9a131670d1c2555155e
+    - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00002-of-00004.gguf
+      local_subdirectory: IQ2_XS
+      size: 39494617536
+      sha256: 933461a974fcccee741bf2f9798201e72ab4aa3f8a952be56f849896ca6ea30e
+    - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00003-of-00004.gguf
+      local_subdirectory: IQ2_XS
+      size: 39423838496
+      sha256: bbf91fa346a85ebaf32dd4fd5c456b534d780d381e54f46ac90783a481373240
+    - name: DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-00004-of-00004.gguf
+      local_subdirectory: IQ2_XS
+      size: 36771591232
+      sha256: e5b2f8781fab688cd4bc3bc7a69651b5dbb90ed94965657c6bead8bb4774f3cf
 strix_extra_artifacts:
-- name: DeepSeek-V4.1-Flash-Engram-IQ4_NL.gguf
-  repository: ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF
-  revision: 653a9874aa38c356233c5f3cc8c96b19a43b57eb
-  subdirectory: ''
-  local_subdirectory: Engram
-  owned_by_service: true
-  size: 110595290816
-  sha256: eb19f30d368d393784e1fc54fdfaffc427ebb2110bf3762fdf5a8fbb9a2d740a
-- name: dspark.bin
-  repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
-  revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
-  subdirectory: dspark
-  local_subdirectory: dspark
-  size: 7967616768
-  sha256: 42df65159f980a9189d80597e42b30012c7b10e0dd385a47051f3b2fd659bb7b
-- name: dspark.json
-  repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
-  revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
-  subdirectory: dspark
-  local_subdirectory: dspark
-  size: 96965
-  sha256: 639c3144bca8cfe4db59057047dca40411f0cc732796e2a9321feb98fee2295f
+  - name: DeepSeek-V4.1-Flash-Engram-IQ4_NL.gguf
+    repository: ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF
+    revision: 653a9874aa38c356233c5f3cc8c96b19a43b57eb
+    subdirectory: ''
+    local_subdirectory: Engram
+    owned_by_service: true
+    size: 110595290816
+    sha256: eb19f30d368d393784e1fc54fdfaffc427ebb2110bf3762fdf5a8fbb9a2d740a
+  - name: dspark.bin
+    repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
+    revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
+    subdirectory: dspark
+    local_subdirectory: dspark
+    size: 7967616768
+    sha256: 42df65159f980a9189d80597e42b30012c7b10e0dd385a47051f3b2fd659bb7b
+  - name: dspark.json
+    repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
+    revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
+    subdirectory: dspark
+    local_subdirectory: dspark
+    size: 96965
+    sha256: 639c3144bca8cfe4db59057047dca40411f0cc732796e2a9321feb98fee2295f
 strix_draft:
   repository: peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF
   revision: 276e0badcfb4a6d8f6c2b9d4da1b468cd339c221
   files:
-  - name: dspark.bin
-  - name: dspark.json
+    - name: dspark.bin
+    - name: dspark.json
 strix_ryzenadj:
   repository: https://github.com/FlyGoat/RyzenAdj.git
   commit: 5775fc3e6dbb25c7030ee2d100a1bdd6e8bf2d0a
@@ -182,11 +182,11 @@ strix_service:
   health_delay_seconds: 5
   auto_start: true
   conflicts:
-  - deepseek-v4-flash.service
-  - m5-deepseek.service
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
   retire_units:
-  - deepseek-v4-flash.service
-  - m5-deepseek.service
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
 strix_policy:
   cpu_governor: performance
   cpu_min_khz: 2000000
@@ -204,18 +204,18 @@ strix_maya:
   build_jobs: 4
   hip_architectures: gfx1100;gfx1151
   packages:
-  - build-essential
-  - cmake
-  - curl
-  - git
-  - ninja-build
-  - python3
-  - python3-venv
-  - python3-yaml
-  - python3-rich
-  - libdrm-amdgpu1
-  - libelf1t64
-  - libnuma1
+    - build-essential
+    - cmake
+    - curl
+    - git
+    - ninja-build
+    - python3
+    - python3-venv
+    - python3-yaml
+    - python3-rich
+    - libdrm-amdgpu1
+    - libelf1t64
+    - libnuma1
   requirements_sha256: abac03058b7d45744e8e197323dbf897ae8b035487056131f0809c9782c8e0a2
   pack: /opt/strix-halo/models/deepseek-v41-flash-1017-gsq-rco/IQ2_XS/maya-ds4-dspark
   pack_tool:
@@ -239,39 +239,39 @@ strix_maya:
   server:
     exe: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v1/source/build-hip/maya-ds4
     args:
-    - --pack
-    - /opt/strix-halo/models/deepseek-v41-flash-1017-gsq-rco/IQ2_XS/maya-ds4-dspark
-    - --max-context
-    - '524288'
-    - --tp
-    - '2'
-    - --vision
-    - 'off'
-    - --dspark
-    - 'on'
-    - --threads
-    - 'on'
-    - --mmap-experts
-    - 'on'
-    - --expert-profile
-    - /var/lib/strix-halo-inference/expert-profile.bin
-    - --prefill-chunk
-    - '32768'
+      - --pack
+      - /opt/strix-halo/models/deepseek-v41-flash-1017-gsq-rco/IQ2_XS/maya-ds4-dspark
+      - --max-context
+      - '524288'
+      - --tp
+      - '2'
+      - --vision
+      - 'off'
+      - --dspark
+      - 'on'
+      - --threads
+      - 'on'
+      - --mmap-experts
+      - 'on'
+      - --expert-profile
+      - /var/lib/strix-halo-inference/expert-profile.bin
+      - --prefill-chunk
+      - '32768'
     cwd: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v1/source
     tokenizer: /opt/strix-halo/models/deepseek-v41-flash-1017-gsq-rco/IQ2_XS/maya-ds4-dspark/tokenizer
     backend: hip
     model_name: deepseek-v4.1-flash
     gpu:
-    - 0
-    - 1
-    - 2
+      - 0
+      - 1
+      - 2
     sampling:
       temperature: 1.0
       top_p: 1.0
     reasoning_effort: high
     lib_dirs:
-    - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v1/rocblas/install/lib
-    - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v1/rocm/lib
+      - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v1/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v1/rocm/lib
     port: 18109
     log: /var/lib/strix-halo-inference/native.log
     installer:

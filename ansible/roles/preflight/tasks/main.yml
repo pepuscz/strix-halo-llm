@@ -128,8 +128,8 @@
 
 # The floor is the install's headroom: the model files and the release folder it writes. What is already there - files
 # adopted from verified local seeds (hard links use no space), files already in place at their pinned sizes, the
-# converted dense matrices at their pinned size and the release folder an earlier install wrote - is discounted, so `verify` and `update` after an install do not demand the
-# space that install already used.
+# converted dense matrices at their pinned size and the release folder an earlier install wrote - is discounted, so
+# `verify` and `update` after an install do not demand the space that install already used.
 - name: Discount what the host already holds of the release
   ansible.builtin.set_fact:
     preflight_required_free_bytes: >-
