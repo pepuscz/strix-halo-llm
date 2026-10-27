@@ -15,7 +15,7 @@ SERIES = [
     ('vulkan-iq3xxs', '#8957e5', 'DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS'),
     ('rocm-rocmfpx', '#bc4c00', 'DeepSeek · Lucebox ROCm ROCmFPX'),
 ]
-DUAL_SERIES = [('maya-ds4-dual-xtx', '#0969da'), ('maya-glm-dual-xtx', '#1a7f37')]
+DUAL_SERIES = [('maya-ds4-gsq-dual-xtx', '#8250df'), ('maya-ds4-dual-xtx', '#0969da'), ('maya-glm-dual-xtx', '#1a7f37')]
 
 
 def render(data, dual=False):
@@ -30,7 +30,7 @@ def render(data, dual=False):
              '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · Radeon 8060S · 128 GiB RAM · 120 W · reasoning mode disabled</text>']
     if dual:
         lines[1] = '<title id="title">Dual RX 7900 XTX throughput: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</title>'
-        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017: eleven fresh loads at 524288-token capacity, from 2040 to 491520 of its tokens. Every answer found all five phrases. Each horizontal tick doubles the input length.</desc>'
+        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017 on two quantizations, GSQ-RCO IQ2_XS and Maya-S IQ2_XXS: eleven fresh loads each at 524288-token capacity, from 2040 to 491520 of its tokens. Every answer found all five phrases. Each horizontal tick doubles the input length.</desc>'
         lines[-2] = '<text x="70" y="40" class="title">Dual RX 7900 XTX · DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</text>'
         lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>'
     for i, (sid, color, name) in enumerate(series):

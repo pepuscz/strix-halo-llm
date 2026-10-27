@@ -352,22 +352,23 @@ strix_qualification:
   retrieval_ladder:
     allocation_tokens: 524288
     points: 11
-    values: PENDING
+    values: "55/55"
     largest_input_tokens: 491520
   long_context:
     prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
     allocation_tokens: 524288
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: PENDING
-    first_request_decode_tokens_per_second: PENDING
+    first_request_prefill_tokens_per_second: 1387.4
+    first_request_decode_tokens_per_second: 48.3
     reused_prompt_cached_tokens: 130047
-    reused_prompt_decode_tokens_per_second: PENDING
+    reused_prompt_decode_tokens_per_second: 55.6
   deep_needle:
     allocation_tokens: 524288
     input_tokens: 520000
-    values: PENDING
+    values: "5/5"
     measured: on the qualified host's own service at this allocation, in the from-scratch install's test window
-  qualified_configuration: the same engine source, model, pack, expert profile and settings as the dual RX 7900 XTX host's
-    own service; the from-scratch install, its verify role and the eleven-point retrieval ladder ran on this release's installed
-    service (PENDING)
+  qualified_configuration: the same engine source, model, pack (its dense matrices converted the same way), expert
+    profile and settings as the dual RX 7900 XTX host's own service; the from-scratch install, its verify role, the
+    eleven-point retrieval ladder, the 520,000-token needle and the real-code prompt ran on this release's installed
+    service

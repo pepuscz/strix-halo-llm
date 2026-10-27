@@ -1,14 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 775" role="img" aria-labelledby="title desc">
 <title id="title">Dual RX 7900 XTX throughput: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</title>
-<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017: eleven fresh loads at 524288-token capacity, from 2040 to 491520 of its tokens. Every answer found all five phrases. Each horizontal tick doubles the input length.</desc>
+<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017 on two quantizations, GSQ-RCO IQ2_XS and Maya-S IQ2_XXS: eleven fresh loads each at 524288-token capacity, from 2040 to 491520 of its tokens. Every answer found all five phrases. Each horizontal tick doubles the input length.</desc>
 <style>text{font-family:Arial,sans-serif;fill:#24292f}.title{font-size:26px;font-weight:700}.sub{font-size:15px;fill:#57606a}.label{font-size:16px}.tick{font-size:13px;fill:#57606a}.panel{font-size:18px;font-weight:700}.grid{stroke:#d8dee4;stroke-dasharray:3 5}.value{font-size:14px;font-weight:700}</style>
 <rect width="1100" height="775" fill="white"/>
 <text x="70" y="40" class="title">Dual RX 7900 XTX · DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</text>
 <text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>
-<line x1="70" y1="99" x2="98" y2="99" stroke="#0969da" stroke-width="3"/>
-<text x="110" y="104" class="label" style="font-weight:700">DeepSeek-V4.1-Flash-1017 · Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX</text>
-<line x1="70" y1="123" x2="98" y2="123" stroke="#1a7f37" stroke-width="3"/>
-<text x="110" y="128" class="label" style="font-weight:700">GLM-5.3-Flash · Maya HIP Maya-M IQ2_S dual RX 7900 XTX</text>
+<line x1="70" y1="99" x2="98" y2="99" stroke="#8250df" stroke-width="3"/>
+<text x="110" y="104" class="label" style="font-weight:700">DeepSeek-V4.1-Flash-1017 · Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX</text>
+<line x1="70" y1="123" x2="98" y2="123" stroke="#0969da" stroke-width="3"/>
+<text x="110" y="128" class="label" style="font-weight:700">DeepSeek-V4.1-Flash-1017 · Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX</text>
+<line x1="70" y1="147" x2="98" y2="147" stroke="#1a7f37" stroke-width="3"/>
+<text x="110" y="152" class="label" style="font-weight:700">GLM-5.3-Flash · Maya HIP Maya-M IQ2_S dual RX 7900 XTX</text>
 <text x="80" y="215" class="panel">Reading the input (tokens/second) · higher is better</text>
 <line class="grid" x1="80" y1="400.00" x2="1020" y2="400.00"/>
 <text class="tick" x="68" y="404.00" text-anchor="end">0</text>
@@ -38,6 +40,19 @@
 <text class="tick" x="905.17" y="422" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="235" x2="1020.00" y2="400"/>
 <text class="tick" x="1020.00" y="422" text-anchor="middle">512K</text>
+<path d="M100.73 375.72 L205.52 358.81 L320.35 336.40 L435.16 312.73 L550.00 286.79 L660.71 261.02 L779.65 241.74 L827.31 240.00 L870.78 246.97 L894.48 250.40 L1009.31 279.30" fill="none" stroke="#8250df" stroke-width="2.7"/>
+<circle cx="100.73" cy="375.72" r="4" fill="#8250df"><title>2,040 tokens: 235.40</title></circle>
+<circle cx="205.52" cy="358.81" r="4" fill="#8250df"><title>3,840 tokens: 399.40</title></circle>
+<circle cx="320.35" cy="336.40" r="4" fill="#8250df"><title>7,680 tokens: 616.70</title></circle>
+<circle cx="435.16" cy="312.73" r="4" fill="#8250df"><title>15,359 tokens: 846.30</title></circle>
+<circle cx="550.00" cy="286.79" r="4" fill="#8250df"><title>30,720 tokens: 1097.80</title></circle>
+<circle cx="660.71" cy="261.02" r="4" fill="#8250df"><title>59,933 tokens: 1347.70</title></circle>
+<circle cx="779.65" cy="241.74" r="4" fill="#8250df"><title>122,879 tokens: 1534.60</title></circle>
+<circle cx="827.31" cy="240.00" r="4" fill="#8250df"><title>163,840 tokens: 1551.50</title></circle>
+<circle cx="870.78" cy="246.97" r="4" fill="#8250df"><title>212,992 tokens: 1483.90</title></circle>
+<circle cx="894.48" cy="250.40" r="4" fill="#8250df"><title>245,760 tokens: 1450.70</title></circle>
+<circle cx="1009.31" cy="279.30" r="4" fill="#8250df"><title>491,520 tokens: 1170.40</title></circle>
+<text class="value" x="1009.31" y="300.30" text-anchor="end" style="fill:#8250df">1170.4</text>
 <path d="M100.73 378.11 L205.52 364.02 L320.35 341.95 L435.16 313.92 L550.00 291.42 L660.71 262.66 L779.65 243.89 L827.31 243.78 L870.78 247.18 L894.48 252.28 L1009.31 279.98" fill="none" stroke="#0969da" stroke-width="2.7"/>
 <circle cx="100.73" cy="378.11" r="4" fill="#0969da"><title>2,040 tokens: 212.30</title></circle>
 <circle cx="205.52" cy="364.02" r="4" fill="#0969da"><title>3,840 tokens: 348.90</title></circle>
@@ -93,6 +108,19 @@
 <text class="tick" x="905.17" y="667" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="480" x2="1020.00" y2="645"/>
 <text class="tick" x="1020.00" y="667" text-anchor="middle">512K</text>
+<path d="M100.73 499.52 L205.52 509.43 L320.35 509.43 L435.16 503.93 L550.00 505.30 L660.71 506.68 L779.65 506.12 L827.31 517.95 L870.78 513.83 L894.48 508.60 L1009.31 513.55" fill="none" stroke="#8250df" stroke-width="2.7"/>
+<circle cx="100.73" cy="499.52" r="4" fill="#8250df"><title>2,040 tokens: 52.90</title></circle>
+<circle cx="205.52" cy="509.43" r="4" fill="#8250df"><title>3,840 tokens: 49.30</title></circle>
+<circle cx="320.35" cy="509.43" r="4" fill="#8250df"><title>7,680 tokens: 49.30</title></circle>
+<circle cx="435.16" cy="503.93" r="4" fill="#8250df"><title>15,359 tokens: 51.30</title></circle>
+<circle cx="550.00" cy="505.30" r="4" fill="#8250df"><title>30,720 tokens: 50.80</title></circle>
+<circle cx="660.71" cy="506.68" r="4" fill="#8250df"><title>59,933 tokens: 50.30</title></circle>
+<circle cx="779.65" cy="506.12" r="4" fill="#8250df"><title>122,879 tokens: 50.50</title></circle>
+<circle cx="827.31" cy="517.95" r="4" fill="#8250df"><title>163,840 tokens: 46.20</title></circle>
+<circle cx="870.78" cy="513.83" r="4" fill="#8250df"><title>212,992 tokens: 47.70</title></circle>
+<circle cx="894.48" cy="508.60" r="4" fill="#8250df"><title>245,760 tokens: 49.60</title></circle>
+<circle cx="1009.31" cy="513.55" r="4" fill="#8250df"><title>491,520 tokens: 47.80</title></circle>
+<text class="value" x="1009.31" y="534.55" text-anchor="end" style="fill:#8250df">47.8</text>
 <path d="M100.73 563.33 L205.52 558.65 L320.35 555.90 L435.16 552.88 L550.00 557.83 L660.71 555.90 L779.65 557.55 L827.31 559.75 L870.78 555.08 L894.48 561.12 L1009.31 562.77" fill="none" stroke="#0969da" stroke-width="2.7"/>
 <circle cx="100.73" cy="563.33" r="4" fill="#0969da"><title>2,040 tokens: 29.70</title></circle>
 <circle cx="205.52" cy="558.65" r="4" fill="#0969da"><title>3,840 tokens: 31.40</title></circle>
