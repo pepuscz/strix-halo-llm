@@ -81,7 +81,7 @@ Our chart retains the full cold five-phrase retrieval curves for DeepSeek and GL
 
 ### Install
 
-The two recipes use the same service name and port; install one at a time. Select DeepSeek below, or set `STRIX_SYSTEM=maya-glm-dual-xtx` for GLM.
+The recipes use the same service name and port; install one at a time. Select the DeepSeek GSQ-RCO recipe below, `STRIX_SYSTEM=maya-ds4-dual-xtx` for DeepSeek on the Maya-S quant, or `STRIX_SYSTEM=maya-glm-dual-xtx` for GLM.
 
 ```bash
 git clone https://github.com/pepuscz/strix-halo-llm.git
@@ -90,13 +90,13 @@ cp ansible/inventory/hosts.example.yml ansible/inventory/hosts.yml
 $EDITOR ansible/inventory/hosts.yml
 python3 -m venv .venv
 .venv/bin/pip install --require-hashes -r requirements.lock
-export STRIX_SYSTEM=maya-ds4-dual-xtx
+export STRIX_SYSTEM=maya-ds4-gsq-dual-xtx
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) needs about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
+The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek GSQ-RCO recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) about 370 GB (155 GB of shards, the 111 GB Engram file, the 8 GB drafter and an 8 GB file of its dense matrices converted to Q8_0 at install) and the [DeepSeek Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
 
 ## BOSGAME M5 only
 

@@ -22,6 +22,7 @@ SYSTEMS = {
     "vulkan-iq3xxs": ("Strix Halo llama.cpp Vulkan IQ3_XXS", "vulkan"),
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
     "maya-ds4-dual-xtx": ("Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX", "maya"),
+    "maya-ds4-gsq-dual-xtx": ("Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
 # A pin or result the qualified host has yet to supply. A manifest holding one, alone or in a sentence, is a draft:
@@ -29,7 +30,7 @@ SYSTEMS = {
 PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
-MAYA_FAMILIES = {"maya-ds4-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+MAYA_FAMILIES = {"maya-ds4-dual-xtx": "deepseek", "maya-ds4-gsq-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
 MAYA_FILES = Path("ansible/roles/maya_runtime/files")
 # compat-bf16.json is not here: it names the model shard it was packed from, so it is pinned normalized.
 GLM_PACK_FILES = {
@@ -299,7 +300,26 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     rocblas, maya, paths = data["strix_rocblas"], data["strix_maya"], data["strix_paths"]
     release, state = paths["release"], paths["state"]
     if len(files) != 4 or service["parallel_slots"] != 1:
-        fail("Maya DS4 dual RX 7900 XTX requires four Maya-S shards and one session")
+        fail("Maya DS4 dual RX 7900 XTX requires four target shards and one session")
+    # The quant's folder under strix_paths.models (Maya-S's release predates the key), and its pack inside it.
+    model_subdirectory = maya.get("model_subdirectory", "Maya-S")
+    if not isinstance(model_subdirectory, str) or not model_subdirectory or \
+            any(file.get("local_subdirectory") != model_subdirectory for file in files) or \
+            maya["pack"] != paths["models"] + "/" + model_subdirectory + "/maya-ds4-dspark":
+        fail("Maya DS4 target shards and pack must live in strix_maya.model_subdirectory under strix_paths.models")
+    geometry = maya.get("ds4_geometry", {})
+    if not isinstance(geometry, dict) or any(not isinstance(key, str) or not isinstance(value, str) or not value
+                                              for key, value in geometry.items()):
+        fail("strix_maya.ds4_geometry must map ds4.txt keys to their values as strings")
+    # A quant whose dense matrices the engine cannot read as packed: the converter the build runs after the pack tool,
+    # the side file it writes and the plan it must find (GSQ-RCO's Q5_K matrices).
+    dense = maya.get("dense_q8_0")
+    if dense is not None:
+        if set(dense) != {"file", "converter", "converter_sha256", "size", "tensors", "from"} or \
+                not all(isinstance(dense[key], int) and dense[key] > 0 for key in ("size", "tensors")) or \
+                dense["from"] != "Q5_K" or not re.fullmatch(r"[A-Za-z0-9._-]+", str(dense["file"])):
+            fail("strix_maya.dense_q8_0 drifted")
+        require_build_inputs(root, {dense["converter"]: dense["converter_sha256"]})
     for extra in data["strix_extra_artifacts"]:
         require_sha(extra["sha256"], extra["name"])
         require_sha(extra["revision"], extra["name"] + " revision", HEX40)

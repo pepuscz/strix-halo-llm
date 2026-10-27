@@ -4,17 +4,20 @@
     that:
       - strix_release_schema | int == 1
       - strix_release_id | length > 0
-      - strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl', 'maya-ds4-dual-xtx', 'maya-glm-dual-xtx']
+      - >-
+        strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl', 'maya-ds4-dual-xtx',
+                            'maya-ds4-gsq-dual-xtx', 'maya-glm-dual-xtx']
       - >-
         strix_system.name in ['Strix Halo llama.cpp Vulkan IQ3_XXS', 'Lucebox ROCm ROCmFPX', 'Strata HIP UD-Q4_K_XL',
                               'Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX',
+                              'Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX',
                               'Maya HIP Maya-M IQ2_S dual RX 7900 XTX']
       - strix_system.engine in ['vulkan', 'rocm', 'strata', 'maya']
       # A Maya release builds one model family; a release without strix_maya.family is DeepSeek.
       - >-
         strix_system.engine != 'maya' or
         (strix_maya.family | default('deepseek')) ==
-        {'maya-ds4-dual-xtx': 'deepseek', 'maya-glm-dual-xtx': 'glm'}[strix_system.id]
+        {'maya-ds4-dual-xtx': 'deepseek', 'maya-ds4-gsq-dual-xtx': 'deepseek', 'maya-glm-dual-xtx': 'glm'}[strix_system.id]
       - >-
         (strix_system.engine == 'vulkan' and strix_service.context | int == 524288) or
         (strix_system.engine == 'rocm' and strix_service.context | int == 131072) or

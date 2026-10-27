@@ -20,6 +20,7 @@ VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
 GLM = ROOT / "ansible/releases/maya-glm-dual-xtx-512k.yml"
 DS4 = ROOT / "ansible/releases/maya-ds4-dual-xtx-512k.yml"
+GSQ = ROOT / "ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml"
 DUMMY_HEX64 = "0123456789abcdef" * 4
 # Typed dummies where the validator requires a type other than a 64-hex digest.
 DUMMIES = {"tag_object": "0123456789abcdef0123456789abcdef01234567",
@@ -147,6 +148,36 @@ class ReleaseValidatorTest(unittest.TestCase):
              "long-context record must hold"),
             (lambda d: d["strix_qualification"].pop("deep_needle"), "qualification sections drifted"),
             (lambda d: d["strix_qualification"]["answer_quality"].update(total=29), "sum to the total"),
+        ):
+            broken = copy.deepcopy(data)
+            mutate(broken)
+            with self.subTest(expect=message):
+                self.assert_fails(broken, message)
+
+    def gsq(self) -> dict:
+        data = without_pending(yaml.safe_load(GSQ.read_text(encoding="utf-8")))
+        data["strix_qualification"]["deep_needle"]["values"] = "5/5"   # (the dummy "55/55" is the ladder's form)
+        return data
+
+    def test_gsq_validates_once_filled_and_rejects_drift(self) -> None:
+        data = self.gsq()
+        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v1")
+        maya = data["strix_maya"]
+        self.assertEqual((maya["model_subdirectory"], maya["dense_q8_0"]["tensors"], maya["dense_q8_0"]["size"]),
+                         ("IQ2_XS", 524, 8236072960))
+        self.assertEqual(maya["server"]["env"], yaml.safe_load(DS4.read_text(encoding="utf-8"))["strix_maya"]["server"]["env"]
+                         | {"ROCBLAS_TENSILE_LIBPATH": data["strix_paths"]["release"] + "/rocm/lib/rocblas/library",
+                            "DS4_LT_STORE": data["strix_paths"]["state"] + "/lt-picks.txt",
+                            "MAYA_DS4_SLOT_DIR": data["strix_paths"]["state"] + "/ds4-slots"})
+        for mutate, message in (
+            (lambda d: d["strix_maya"].update(model_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
+            (lambda d: d["strix_target"]["files"][1].update(local_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
+            (lambda d: d["strix_maya"]["dense_q8_0"].update(tensors=0), "dense_q8_0 drifted"),
+            (lambda d: d["strix_maya"]["dense_q8_0"].update(converter_sha256="0" * 64), "build input drifted"),
+            (lambda d: d["strix_maya"]["dense_q8_0"].pop("from"), "dense_q8_0 drifted"),
+            (lambda d: d["strix_maya"]["ds4_geometry"].update(dspark_block_size=5), "ds4_geometry"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_DECODE_TRIM="7"), "environment drifted: DS4_DECODE_TRIM"),
+            (lambda d: d["strix_qualification"]["answer_quality"].update(math=10), "sum to the total"),
         ):
             broken = copy.deepcopy(data)
             mutate(broken)
