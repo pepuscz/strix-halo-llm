@@ -90,13 +90,49 @@
   ansible.builtin.set_fact:
     preflight_root_mount: "{{ (ansible_facts.mounts | selectattr('mount', 'equalto', '/') | list | first) }}"
 
-- name: Discount model files adopted from verified local seeds (hard links use no space)
+- name: Read the model files already in place at their pinned sizes (an installed or partly installed release)
+  ansible.builtin.stat:
+    path: "{{ strix_paths.models }}/{{ (item.local_subdirectory + '/') if item.local_subdirectory is defined else '' }}{{ item.name }}"
+    get_checksum: false
+  loop: "{{ strix_target.files + (strix_extra_artifacts | default([])) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: preflight_present_artifacts
+
+- name: Count the files already in place at their pinned sizes (seeds are counted below)
+  ansible.builtin.set_fact:
+    preflight_present_bytes: "{{ (preflight_present_bytes | default(0) | int) + (item.item.size | int) }}"
+  loop: "{{ preflight_present_artifacts.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when:
+    - item.stat.exists
+    - item.stat.isreg | default(false)
+    - item.stat.size | int == item.item.size | int
+    - item.item.name not in (strix_artifact_seed_paths | default({}))
+
+- name: Measure the release folder an earlier install already wrote
+  ansible.builtin.command:
+    argv: [du, -sx, --block-size=1, "{{ strix_paths.release }}"]
+  register: preflight_release_du
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+# The floor is the install's headroom: the model files and the release folder it writes. What is already there - files
+# adopted from verified local seeds (hard links use no space), files already in place at their pinned sizes, and the
+# release folder an earlier install wrote - is discounted, so `verify` and `update` after an install do not demand the
+# space that install already used.
+- name: Discount what the host already holds of the release
   ansible.builtin.set_fact:
     preflight_required_free_bytes: >-
-      {{ strix_platform.minimum_free_bytes | int
-         - ((strix_target.files + (strix_extra_artifacts | default([])))
-            | selectattr('name', 'in', (strix_artifact_seed_paths | default({})).keys() | list)
-            | map(attribute='size') | map('int') | sum) }}
+      {{ [0, strix_platform.minimum_free_bytes | int
+          - ((strix_target.files + (strix_extra_artifacts | default([])))
+             | selectattr('name', 'in', (strix_artifact_seed_paths | default({})).keys() | list)
+             | map(attribute='size') | map('int') | sum)
+          - (preflight_present_bytes | default(0) | int)
+          - ((preflight_release_du.stdout | default('0')).split() | first | default('0') | int
+             if preflight_release_du.rc | default(1) == 0 else 0)] | max }}
 
 - name: Validate immutable host requirements
   ansible.builtin.assert:
