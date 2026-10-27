@@ -139,7 +139,8 @@
              | map(attribute='size') | map('int') | sum)
           - (preflight_present_bytes | default(0) | int)
           - (strix_maya.dense_q8_0.size | int
-             if (preflight_dense_side.stat | default({})).size | default(-1) | int == strix_maya.dense_q8_0.size | default(-2) | int
+             if (preflight_dense_side.stat | default({})).size | default(-1) | int
+                == strix_maya.dense_q8_0.size | default(-2) | int
              else 0)
           - ((preflight_release_du.stdout | default('0')).split() | first | default('0') | int
              if preflight_release_du.rc | default(1) == 0 else 0)] | max }}
