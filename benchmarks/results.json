@@ -1565,7 +1565,7 @@
           }
         }
       },
-      "manifest_sha256": "e3709f5cbae266c60f1790bc3c858a8eb71bae669c7a601aec1aae73d2d175f4",
+      "manifest_sha256": "144b7dc65595dff467ee290f55f7c7f55d2ec9eaa71bfbfdc5fb8f33ac0cef68",
       "qualification_note": "API ladder, 520K needle and code/cache pair: v1.1.37 with tail restore point off. Native benchmark/PPL and all 30 cold quality cases reused from the same engine: CLI bypasses restore points; each quality input is below1536 tokens so no default tail point exists. All other settings, pack and frozen profile are identical.",
       "cold_start_recheck": {
         "actual_input_tokens": 3840,

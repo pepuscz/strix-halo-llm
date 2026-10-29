@@ -97,7 +97,7 @@ strix_rocblas:
     - name: libboost1.90-dev
       version: 1.90.0-6ubuntu1
       sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
-  reference_library_sha256: d89e9ada0fb0d0d679e8d427d1ece26db3f424cca8b6e189bce785bd33212ee0
+  reference_library_sha256: 187a52fd7a34ea502a20e42a1489775881456c8751436e1b3e5d7af7c6006e56
 strix_target:
   repository: ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF
   revision: 653a9874aa38c356233c5f3cc8c96b19a43b57eb
