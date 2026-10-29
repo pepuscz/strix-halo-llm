@@ -8,25 +8,29 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 ![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)
 
-**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** (production), on the pinned v1.1.36 engine and hybrid pack at 512K (524,288 tokens allocated):
+**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** (production), on the pinned v1.1.37 engine and hybrid pack at 512K (524,288 tokens allocated):
 
 Each retrieval point is a fresh load from the frozen expert profile, thinking off, a 256-token cap and zero cached input. It uses the same prompt bytes and frozen benchmark driver as the comparison recipes.
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
-| 2,040 | 250.5 | 55.9 | 5/5 |
-| 3,840 | 406.3 | 55.0 | 5/5 |
-| 7,680 | 631.5 | 54.6 | 5/5 |
-| 15,359 | 889.2 | 53.5 | 5/5 |
-| 30,720 | 1,107.6 | 55.1 | 5/5 |
-| 59,933 | 1,353.6 | 53.4 | 5/5 |
-| 122,879 | 1,532.1 | 53.9 | 5/5 |
-| 163,840 | 1,570.9 | 53.2 | 5/5 |
-| 212,992 | 1,503.9 | 52.5 | 5/5 |
-| 245,760 | 1,477.1 | 50.0 | 5/5 |
-| 491,520 | 1,180.0 | 50.4 | 5/5 |
+| 2,040 | 254.2 | 53.0 | 5/5 |
+| 3,840 | 379.7 | 24.4 | 5/5 |
+| 7,680 | 639.4 | 54.4 | 5/5 |
+| 15,359 | 891.4 | 54.1 | 5/5 |
+| 30,720 | 1,108.9 | 55.0 | 5/5 |
+| 59,933 | 1,398.6 | 54.4 | 5/5 |
+| 122,879 | 1,567.4 | 53.6 | 5/5 |
+| 163,840 | 1,571.8 | 52.9 | 5/5 |
+| 212,992 | 1,513.8 | 51.4 | 5/5 |
+| 245,760 | 1,467.4 | 50.0 | 5/5 |
+| 491,520 | 1,183.9 | 51.1 | 5/5 |
 
-The 130,048-token real-code prompt read at 1,400.2 tok/s and wrote 768 tokens at 50.3 tok/s; with 130,047 input tokens cached, it wrote at 60.6 tok/s. A 520,000-token deep needle found all five values (1,147.7 / 50.4 tok/s, a short 64-token answer). `maya.py --bench` on the same pinned inputs as the Maya-S rows below: **58.8 decode**, **206 / 525 prefill**. **Quality: 30/30**, with the math_08 reference corrected to 20/3; teacher perplexity 7.3686 on 23 sequences of 2,048 tokens. Decode varies with generated text and drafting acceptance.
+The 130,048-token real-code prompt read at 1,389.9 tok/s and wrote 768 tokens at 53.1 tok/s; with 130,047 input tokens cached, it wrote at 60.8 tok/s. A 520,000-token deep needle found all five values (1,150.6 / 50.5 tok/s, a short 64-token answer). `maya.py --bench` on the same pinned inputs as the Maya-S rows below: **59.0 decode**, **203 / 535 prefill**. **Quality: 30/30**, with the math_08 reference corrected to 20/3; teacher perplexity 7.3686 on 23 sequences of 2,048 tokens. Decode varies with generated text and drafting acceptance.
+
+The original 3,840-token cold result is retained above. One fresh cold recheck measured 400.8 tok/s prefill and 54.1 tok/s decode, finding all five phrases. The original run spent unusually long in its first few generated tokens despite accepting every draft; the recheck did not reproduce the slowdown.
+
+The API measurements disable the last-512-token restore point; shared-prefix and turn checkpoints remain enabled. The native benchmark, perplexity and 30 short cold quality cases were measured on the same engine and reused: CLI tests bypass API restore points, and every quality prompt is too short to create a tail point.
 
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
 - Each point is a fresh load of the installed service, from the release's frozen expert profile, with no conversation kept from an earlier point.

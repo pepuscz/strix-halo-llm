@@ -1360,9 +1360,9 @@
       },
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-gsq-v1136-20261029",
-        "source_commit": "c87b26c96031f11b5ae1df126629aea200698a8c",
-        "upstream": "https://github.com/mw00/project-maya v1.1.36 native; Python usage-close, cancellation-drain and tool-order fixes"
+        "release_tag": "maya-ds4-gsq-v1137-20261029",
+        "source_commit": "5b85581f72b5b253b61e1996bf741c7c75e2cb79",
+        "upstream": "https://github.com/mw00/project-maya v1.1.37 native; Python usage-close and cancellation-drain fixes"
       },
       "power_watts": {
         "stapm": 120,
@@ -1406,18 +1406,18 @@
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 1400.2,
-        "decode_tokens_per_second": 50.3,
-        "request_seconds": 108.327,
+        "prefill_tokens_per_second": 1389.9,
+        "decode_tokens_per_second": 53.1,
+        "request_seconds": 108.222,
         "reused_prompt": {
           "cached_tokens": 130047,
-          "decode_tokens_per_second": 60.6,
-          "request_seconds": 12.838
+          "decode_tokens_per_second": 60.8,
+          "request_seconds": 12.863
         },
         "allocation_tokens": 524288
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "release_id": "maya-ds4-gsq-dual-xtx-512k-v2",
+      "release_id": "maya-ds4-gsq-dual-xtx-512k-v3",
       "selection": "added_hardware",
       "context_scaling": [
         {
@@ -1425,8 +1425,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 2040,
           "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 250.5,
-          "decode_tokens_per_second": 55.9,
+          "prefill_tokens_per_second": 254.2,
+          "decode_tokens_per_second": 53.0,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1436,8 +1436,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 3840,
           "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-          "prefill_tokens_per_second": 406.3,
-          "decode_tokens_per_second": 55.0,
+          "prefill_tokens_per_second": 379.7,
+          "decode_tokens_per_second": 24.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1447,8 +1447,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 7680,
           "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 631.5,
-          "decode_tokens_per_second": 54.6,
+          "prefill_tokens_per_second": 639.4,
+          "decode_tokens_per_second": 54.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1458,8 +1458,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 15359,
           "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-          "prefill_tokens_per_second": 889.2,
-          "decode_tokens_per_second": 53.5,
+          "prefill_tokens_per_second": 891.4,
+          "decode_tokens_per_second": 54.1,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1469,8 +1469,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 30720,
           "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 1107.6,
-          "decode_tokens_per_second": 55.1,
+          "prefill_tokens_per_second": 1108.9,
+          "decode_tokens_per_second": 55.0,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1480,8 +1480,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 59933,
           "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-          "prefill_tokens_per_second": 1353.6,
-          "decode_tokens_per_second": 53.4,
+          "prefill_tokens_per_second": 1398.6,
+          "decode_tokens_per_second": 54.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1491,8 +1491,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 122879,
           "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 1532.1,
-          "decode_tokens_per_second": 53.9,
+          "prefill_tokens_per_second": 1567.4,
+          "decode_tokens_per_second": 53.6,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1502,8 +1502,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 163840,
           "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-          "prefill_tokens_per_second": 1570.9,
-          "decode_tokens_per_second": 53.2,
+          "prefill_tokens_per_second": 1571.8,
+          "decode_tokens_per_second": 52.9,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1513,8 +1513,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 212992,
           "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-          "prefill_tokens_per_second": 1503.9,
-          "decode_tokens_per_second": 52.5,
+          "prefill_tokens_per_second": 1513.8,
+          "decode_tokens_per_second": 51.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1524,7 +1524,7 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 245760,
           "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-          "prefill_tokens_per_second": 1477.1,
+          "prefill_tokens_per_second": 1467.4,
           "decode_tokens_per_second": 50.0,
           "completion_tokens": 64,
           "cached_tokens": 0,
@@ -1535,8 +1535,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 491520,
           "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-          "prefill_tokens_per_second": 1180.0,
-          "decode_tokens_per_second": 50.4,
+          "prefill_tokens_per_second": 1183.9,
+          "decode_tokens_per_second": 51.1,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1548,8 +1548,8 @@
         "allocation_tokens": 524288,
         "actual_input_tokens": 520000,
         "prompt_sha256": "a66b924eb0fbeb6330383ac2aa21fc50a73fc06af10f18ff33b3293370a4adcd",
-        "prefill_tokens_per_second": 1147.7,
-        "decode_tokens_per_second": 50.4,
+        "prefill_tokens_per_second": 1150.6,
+        "decode_tokens_per_second": 50.5,
         "completion_tokens": 64,
         "cached_tokens": 0,
         "needle_passes": 5
@@ -1558,14 +1558,25 @@
         "procedure": "Project Maya v1.1.28's maya.py --bench, DeepSeek on HIP: three 256-token answers (greedy, thinking off; decode is their mean) and 2,048- and 8,192-token prompts of its docs, the engine alone, both engines on identical token ids",
         "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
         "this_release": {
-          "decode_mean_tokens_per_second": 58.8,
+          "decode_mean_tokens_per_second": 59.0,
           "prefill_tokens_per_second": {
-            "2048": 206,
-            "8192": 525
+            "2048": 203,
+            "8192": 535
           }
         }
       },
-      "manifest_sha256": "d25ba1f66501f727bb373344b51a314edbaa169da129602cd648039bcb1dab6c"
+      "manifest_sha256": "e3709f5cbae266c60f1790bc3c858a8eb71bae669c7a601aec1aae73d2d175f4",
+      "qualification_note": "API ladder, 520K needle and code/cache pair: v1.1.37 with tail restore point off. Native benchmark/PPL and all 30 cold quality cases reused from the same engine: CLI bypasses restore points; each quality input is below1536 tokens so no default tail point exists. All other settings, pack and frozen profile are identical.",
+      "cold_start_recheck": {
+        "actual_input_tokens": 3840,
+        "prefill_tokens_per_second": 400.8,
+        "decode_tokens_per_second": 54.1,
+        "completion_tokens": 64,
+        "cached_tokens": 0,
+        "needle_passes": 5,
+        "runs": 1,
+        "note": "One fresh cold recheck of the isolated first-round slowdown. The original 24.4 tok/s row is retained in the curve; no best-of selection."
+      }
     }
   },
   "winning_setups": {
