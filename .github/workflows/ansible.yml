@@ -40,6 +40,26 @@ jobs:
           done
       - name: Test the release validator
         run: python -m unittest tests/test_validate_release.py
+      - name: Test the qualified hybrid dense pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          lines = Path('ansible/roles/maya_runtime/files/requirements.lock').read_text().splitlines()
+          stanza, active = [], False
+          for line in lines:
+              if line.startswith('numpy=='):
+                  active = True
+              elif active and not line.startswith(' '):
+                  break
+              if active:
+                  stanza.append(line)
+          assert stanza, 'missing pinned numpy requirement'
+          Path('/tmp/maya-numpy.lock').write_text('\n'.join(stanza) + '\n')
+          PY
+          pip install --require-hashes --no-deps -r /tmp/maya-numpy.lock
+          python -m unittest tests/test_convert_dense_q8_0.py
       - name: Verify generated benchmark chart
         run: python scripts/render_benchmark.py --check
       - name: Test demand-based fan governor

@@ -305,19 +305,20 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     model_subdirectory = maya.get("model_subdirectory", "Maya-S")
     if not isinstance(model_subdirectory, str) or not model_subdirectory or \
             any(file.get("local_subdirectory") != model_subdirectory for file in files) or \
-            maya["pack"] != paths["models"] + "/" + model_subdirectory + "/maya-ds4-dspark":
+            maya["pack"] != paths["models"] + "/" + model_subdirectory + "/" + (
+                "maya-ds4-dspark-hybrid" if data["strix_system"]["id"] == "maya-ds4-gsq-dual-xtx" else "maya-ds4-dspark"):
         fail("Maya DS4 target shards and pack must live in strix_maya.model_subdirectory under strix_paths.models")
     geometry = maya.get("ds4_geometry", {})
     if not isinstance(geometry, dict) or any(not isinstance(key, str) or not isinstance(value, str) or not value
                                               for key, value in geometry.items()):
         fail("strix_maya.ds4_geometry must map ds4.txt keys to their values as strings")
-    # A quant whose dense matrices the engine cannot read as packed: the converter the build runs after the pack tool,
-    # the side file it writes and the plan it must find (GSQ-RCO's Q5_K matrices).
+    # GSQ's qualified hybrid selects embedding/head from the side file and preserves522 native Q5_K entries.
     dense = maya.get("dense_q8_0")
     if dense is not None:
-        if set(dense) != {"file", "converter", "converter_sha256", "size", "tensors", "from"} or \
+        if set(dense) != {"file", "converter", "converter_sha256", "size", "tensors", "from", "active_tensors"} or \
                 not all(isinstance(dense[key], int) and dense[key] > 0 for key in ("size", "tensors")) or \
-                dense["from"] != "Q5_K" or not re.fullmatch(r"[A-Za-z0-9._-]+", str(dense["file"])):
+                dense["from"] != "Q5_K" or dense["active_tensors"] != ["embed.weight", "head.weight"] or \
+                not re.fullmatch(r"[A-Za-z0-9._-]+", str(dense["file"])):
             fail("strix_maya.dense_q8_0 drifted")
         require_build_inputs(root, {dense["converter"]: dense["converter_sha256"]})
     for extra in data["strix_extra_artifacts"]:
@@ -341,6 +342,8 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     expected_args = ["--pack", maya["pack"], "--max-context", "524288", "--tp", "2", "--vision", "off", "--dspark", "on",
                      "--threads", "on", "--mmap-experts", "on", "--expert-profile", state + "/expert-profile.bin",
                      "--prefill-chunk", "32768"]
+    if data["strix_system"]["id"] == "maya-ds4-gsq-dual-xtx":
+        expected_args += ["--suffix-draft", "0"]
     if cfg["args"] != expected_args:
         fail("qualified Maya DS4 arguments drifted")
     expected_env = {
@@ -359,6 +362,8 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         "MAYA_DS4_SLOT_KEEP": "1", "MAYA_DS4_SLOT_CAP": "16", "MAYA_DS4_SLOT_GB": "16",
         "MAYA_DS4_SLOT_DIR": state + "/ds4-slots",
     }
+    if data["strix_system"]["id"] == "maya-ds4-gsq-dual-xtx":
+        expected_env["MAYA_DS4_DSPARK_CUM"] = "0.35"
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
         fail("qualified Maya DS4 environment drifted: " + ", ".join(drifted))
@@ -571,6 +576,36 @@ def validate_benchmarks(root: Path) -> None:
             defaults.append(identity)
     if defaults != [data["default_system"]] or defaults != ["strata-qwen-q4xl"]:
         fail("the release set must select Qwen / Strata as its single default")
+    gsq_manifest = yaml.safe_load((root / "ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml").read_text())
+    if not pending_fields(gsq_manifest):
+        gsq = data["systems"]["maya-ds4-gsq-dual-xtx"]
+        reference = data["systems"]["maya-ds4-dual-xtx"]
+        curve, baseline_curve = gsq["context_scaling"], reference["context_scaling"]
+        if len(curve) != 11 or len(baseline_curve) != 11:
+            fail("GSQ and Maya-S must retain the same eleven-point retrieval procedure")
+        for a, b in zip(curve, baseline_curve):
+            if any(a[k] != b[k] for k in ("actual_input_tokens", "prompt_sha256", "cached_tokens")):
+                fail("GSQ and Maya-S retrieval workload identities differ")
+            if a["cached_tokens"] != 0 or a["needle_passes"] != 5 or a["allocation_tokens"] != 524288:
+                fail("GSQ retrieval benchmark is not a cold five-value point at512K")
+        if gsq["maya_bench"]["inputs_sha256"] != reference["maya_bench"]["inputs_sha256"]:
+            fail("GSQ and Maya-S Maya benchmark inputs differ")
+        fixture = root / "benchmarks/maya-bench-inputs.json"
+        if hashlib.sha256(fixture.read_bytes()).hexdigest() != gsq["maya_bench"]["inputs_sha256"]:
+            fail("the published Maya benchmark inputs differ from the measurements")
+        q = gsq_manifest["strix_qualification"]
+        long = gsq["long_context"]
+        if long["cached_tokens"] != 0 or any(long[k] != q["long_context"][k]
+                                               for k in ("input_tokens", "output_tokens", "allocation_tokens")) or \
+                long["reused_prompt"]["cached_tokens"] != q["long_context"]["reused_prompt_cached_tokens"] or \
+                long["decode_tokens_per_second"] != q["long_context"]["first_request_decode_tokens_per_second"] or \
+                long["prefill_tokens_per_second"] != q["long_context"]["first_request_prefill_tokens_per_second"] or \
+                long["reused_prompt"]["decode_tokens_per_second"] != q["long_context"]["reused_prompt_decode_tokens_per_second"]:
+            fail("GSQ benchmark and release long-context readings differ")
+        if any(gsq["quality"][k] != q["answer_quality"][k] for k in ("coding", "gsm8k", "math", "total", "thinking")):
+            fail("GSQ benchmark and release quality readings differ")
+        if gsq["runtime"]["source_commit"] != gsq_manifest["strix_runtime"]["source_commit"]:
+            fail("GSQ benchmark engine differs from the release")
     baseline = data["systems"]["qwen-vulkan-q4xl"]["context_scaling"]
     strata = data["systems"]["strata-qwen-q4xl"]
     curve = strata["context_scaling"]

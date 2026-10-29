@@ -15,18 +15,18 @@ Each model runs one conversation with up to **512K tokens of context**. Values a
 
 ### DeepSeek-V4.1-Flash-1017 GSQ-RCO IQ2_XS (production)
 
-**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** runs [ISTA-DASLab's GSQ-RCO IQ2_XS quant](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF) (155 GB, MIT) with the Maya-S recipe's settings, on Maya v1.1.28 with the [issue #510](https://github.com/mw00/project-maya/issues/510) changes. Its dense matrices are converted from Q5_K to Q8_0 at install (8 GB), since the engine reads them as BF16 / Q8_0 only. The smaller experts leave about 20 GB fewer outside the cards, so answers are written about 50 % faster than with Maya-S at the same prompt reading speed.
+**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** runs [ISTA-DASLab's GSQ-RCO IQ2_XS quant](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF) (155 GB, MIT) on Maya v1.1.36's native engine with three Python serving fixes. The hybrid pack reads 522 dense tensors directly from their original Q5_K shards; only the embedding and head use Q8_0. DSpark uses confidence 0.35, suffix drafting is off, and the expert ring keeps its default size.
 
-It passed **29/30 quality cases** (math_10 ran into its 4,096-token cap) at a perplexity 1.6 % above Maya-S's, found all five phrases at every length up to 491,520 input tokens, and all five values in a 520,000-token deep-needle test. Measured on the installed release at 524,288 tokens:
+It passed **30/30 quality cases** (the math_08 reference is corrected to 20/3), with teacher perplexity **7.3686** on 23 sequences of 2,048 tokens. Quality covers 10 coding and 20 maths cases. Every point in the retrieval ladder found all five phrases, through 491,520 input tokens; a separate 520,000-token needle found 5/5. Measured at a 524,288-token allocation with the same benchmark procedure and pinned inputs as the comparison recipes:
 
 | Test | Decode | Prefill |
 |---|---:|---:|
-| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **56.8** | **201 / 532** |
-| Public five-phrase prompt, 2K (2,040 input tokens) | 52.9 | 235 |
-| 32K (30,720) | 50.8 | 1,098 |
-| 128K (122,879) | 50.5 | 1,535 |
-| 480K (491,520) | 47.8 | 1,170 |
-| Real code, 130,048 tokens: cold / prompt cached | **48.3 / 55.6** | **1,387** |
+| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **58.8** | **206 / 525** |
+| Public five-phrase prompt, 2K (2,040 input tokens) | 55.9 | 250 |
+| 32K (30,720) | 55.1 | 1,108 |
+| 128K (122,879) | 53.9 | 1,532 |
+| 480K (491,520) | 50.4 | 1,180 |
+| Real code, 130,048 tokens: cold / prompt cached | **50.3 / 60.6** | **1,400** |
 
 ### DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS (alternative)
 
@@ -111,7 +111,7 @@ bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek GSQ-RCO recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) about 335 GB (155 GB of shards, the 111 GB Engram file, the 8 GB drafter, an 8 GB file of its dense matrices converted to Q8_0 at install, and the release folder) and the [DeepSeek Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
+The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek GSQ-RCO recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) about 335 GB (155 GB of shards, the 111 GB Engram file, the 8 GB drafter, an 8 GB converted side file (only embedding and head select it), and the release folder) and the [DeepSeek Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
 
 ## BOSGAME M5 only
 
