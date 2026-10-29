@@ -60,7 +60,7 @@ jobs:
           PY
           pip install --require-hashes --no-deps -r /tmp/maya-numpy.lock
           python -m unittest tests/test_convert_dense_q8_0.py
-      - name: Verify generated benchmark chart
+      - name: Verify generated benchmark charts and README tables
         run: python scripts/render_benchmark.py --check
       - name: Test demand-based fan governor
         run: python -m unittest tests/test_fan_governor.py
