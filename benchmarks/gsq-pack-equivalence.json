@@ -1,0 +1,14 @@
+{
+  "verdict": "PASS",
+  "pack_tool_sha256": "a09849d1644b94b82c8c38fa6b69d39de443646fe5338d8e428e1c15635fb28b",
+  "qualified_tensor_manifest_sha256": "96f09ef01736d1e08250c79eaa90b350dc6a769dea92462a8a9c0cb87ce4a9ba",
+  "public_tensor_manifest_sha256": "0c29b76f711f4965fa16c05ae85236706d7b7e9755020194fc11ad744f9fec90",
+  "namespace_change": "The drafter uses the public model directory; all tensor types, offsets, byte counts and dimensions match the qualified hybrid pack.",
+  "original_q5_dense_tensors": 522,
+  "converted_active_tensors": [
+    "embed.weight",
+    "head.weight"
+  ],
+  "side_file_bytes": 8236072960,
+  "side_file_layout": "Same 524-tensor conversion layout as the qualified side file; only two entries select it."
+}

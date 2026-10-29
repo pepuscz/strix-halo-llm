@@ -139,13 +139,13 @@ if [[ ! -f "$pack/sources.json" ]]; then
     rm -rf "$pack"
     python3 -I packtool/tools/ds4/pack_gguf.py --model "$models/{{ maya_model }}" --out "$pack" --drafter "$models/dspark/dspark.json"
 {% if strix_maya.dense_q8_0 is defined %}
-    # The quant keeps the matrices the engine reads as BF16 / Q8_0 in a K-quant: converted to Q8_0 into the model's
-    # folder (the engine's venv has numpy), their tensors.txt lines rewritten, the DSpark geometry the GGUF leaves
-    # out filled in - the release pins the plan (its tensors and bytes) and the converter's digest.
+    # Reproduce the qualified side-file layout. The hybrid selects only embedding/head from it;
+    # all other dense entries retain their original Q5_K shard ranges. Geometry is checked before writing.
     [[ "$(sha256sum "$root/{{ strix_maya.dense_q8_0.converter }}" | awk '{print $1}')" == {{ strix_maya.dense_q8_0.converter_sha256 | quote }} ]]
     "$root/source/.venv/bin/python" -I "$root/{{ strix_maya.dense_q8_0.converter }}" "$pack" "$models/{{ maya_model }}" \
         --file {{ strix_maya.dense_q8_0.file | quote }} --tensors {{ strix_maya.dense_q8_0.tensors }} \
-        --bytes {{ strix_maya.dense_q8_0.size }} --replace{% for key, value in (strix_maya.ds4_geometry | default({})).items() %} \
+        --bytes {{ strix_maya.dense_q8_0.size }} --replace{% for name in (strix_maya.dense_q8_0.active_tensors | default([])) %} \
+        --active-tensor {{ name | quote }}{% endfor %}{% for key, value in (strix_maya.ds4_geometry | default({})).items() %} \
         --ds4 {{ (key ~ '=' ~ value) | quote }}{% endfor %}
 
 {% endif %}
@@ -182,6 +182,12 @@ sha256sum "$side" >> pack.sha256
 
 # 6. Seal.
 sha256sum source/build-hip/{{ maya_engine }} {% if maya_glm %}"$profile" {% endif %}rocblas/install/lib/librocblas.so.5.2 > runtime.sha256
+{% if strix_maya.dense_q8_0 is defined %}
+# The qualified serving fixes are Python-only: seal their actual source bytes along with the native engine.
+while IFS= read -r -d '' file; do
+    sha256sum "source/$file"
+done < <(git -C source ls-files -z -- '*.py') >> runtime.sha256
+{% endif %}
 cat rocm-identity.sha256 pack.sha256 >> runtime.sha256
 sha256sum --check --quiet runtime.sha256
 printf '%s\n' "$source_commit" > source.commit

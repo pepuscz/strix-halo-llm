@@ -35,7 +35,7 @@ def render(data, dual=False):
         lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>'
     for i, (sid, color, name) in enumerate(series):
         yy = 99 + i * 24
-        weight = 700 if dual or sid in data["winning_setups"].values() else 400
+        weight = 700 if sid in data["winning_setups"].values() else 400
         lines += [f'<line x1="70" y1="{yy}" x2="98" y2="{yy}" stroke="{color}" stroke-width="3"/>',
                   f'<text x="110" y="{yy+5}" class="label" style="font-weight:{weight}">{html.escape(name)}</text>']
     left, right, height = 80, 1020, 165
@@ -76,6 +76,10 @@ def render(data, dual=False):
                 lines.append(f'<circle cx="{xx:.2f}" cy="{yy:.2f}" r="4" fill="{color}"><title>{p["actual_input_tokens"]:,} tokens: {p[key]:.2f}</title></circle>')
             xx,yy=coords[-1];value=points[-1][key]
             offset=-12 if sid in ('strata-qwen-q4xl','vulkan-iq3xxs','maya-glm-dual-xtx') or (sid == 'qwen-vulkan-q4xl' and key != 'decode_tokens_per_second') else 21
+            if dual and sid == 'maya-ds4-gsq-dual-xtx' and key == 'prefill_tokens_per_second':
+                offset = -16
+            if dual and sid == 'maya-ds4-dual-xtx' and key == 'prefill_tokens_per_second':
+                offset = 34
             lines.append(f'<text class="value" x="{xx:.2f}" y="{yy+offset:.2f}" text-anchor="end" style="fill:{color}">{value:.1f}</text>')
     lines += ['<text x="550" y="700" text-anchor="middle" class="label">Input length (tokens; each tick doubles)</text>',
               '<text x="550" y="735" text-anchor="middle" class="label">Test: find five phrases hidden in a long text. Every run found all five correctly.</text>',

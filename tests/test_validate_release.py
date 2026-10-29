@@ -161,28 +161,51 @@ class ReleaseValidatorTest(unittest.TestCase):
 
     def test_gsq_validates_once_filled_and_rejects_drift(self) -> None:
         data = self.gsq()
-        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v1")
+        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v2")
         maya = data["strix_maya"]
         self.assertEqual((maya["model_subdirectory"], maya["dense_q8_0"]["tensors"], maya["dense_q8_0"]["size"]),
                          ("IQ2_XS", 524, 8236072960))
         self.assertEqual(maya["server"]["env"], yaml.safe_load(DS4.read_text(encoding="utf-8"))["strix_maya"]["server"]["env"]
                          | {"ROCBLAS_TENSILE_LIBPATH": data["strix_paths"]["release"] + "/rocm/lib/rocblas/library",
                             "DS4_LT_STORE": data["strix_paths"]["state"] + "/lt-picks.txt",
-                            "MAYA_DS4_SLOT_DIR": data["strix_paths"]["state"] + "/ds4-slots"})
+                            "MAYA_DS4_SLOT_DIR": data["strix_paths"]["state"] + "/ds4-slots",
+                            "MAYA_DS4_DSPARK_CUM": "0.35"})
         for mutate, message in (
             (lambda d: d["strix_maya"].update(model_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
             (lambda d: d["strix_target"]["files"][1].update(local_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
             (lambda d: d["strix_maya"]["dense_q8_0"].update(tensors=0), "dense_q8_0 drifted"),
             (lambda d: d["strix_maya"]["dense_q8_0"].update(converter_sha256="0" * 64), "build input drifted"),
             (lambda d: d["strix_maya"]["dense_q8_0"].pop("from"), "dense_q8_0 drifted"),
+            (lambda d: d["strix_maya"]["dense_q8_0"].update(active_tensors=["head.weight"]), "dense_q8_0 drifted"),
             (lambda d: d["strix_maya"]["ds4_geometry"].update(dspark_block_size=5), "ds4_geometry"),
             (lambda d: d["strix_maya"]["server"]["env"].update(DS4_DECODE_TRIM="7"), "environment drifted: DS4_DECODE_TRIM"),
-            (lambda d: d["strix_qualification"]["answer_quality"].update(math=10), "sum to the total"),
+            (lambda d: d["strix_qualification"]["answer_quality"].update(math=9), "sum to the total"),
         ):
             broken = copy.deepcopy(data)
             mutate(broken)
             with self.subTest(expect=message):
                 self.assert_fails(broken, message)
+
+    def test_gsq_reporting_rejects_other_prompts_or_cache_counts(self) -> None:
+        import json
+        for mutate, message in (
+            (lambda d: d["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"][0].update(prompt_sha256="0" * 64),
+             "retrieval workload identities differ"),
+            (lambda d: d["systems"]["maya-ds4-gsq-dual-xtx"]["long_context"]["reused_prompt"].update(cached_tokens=0),
+             "release long-context readings differ"),
+            (lambda d: d["systems"]["maya-ds4-gsq-dual-xtx"]["maya_bench"].update(inputs_sha256="0" * 64),
+             "Maya benchmark inputs differ"),
+        ):
+            with self.subTest(message=message), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                shutil.copytree(ROOT / "benchmarks", root / "benchmarks")
+                shutil.copytree(ROOT / "ansible/releases", root / "ansible/releases")
+                path = root / "benchmarks/results.json"
+                data = json.loads(path.read_text())
+                mutate(data)
+                path.write_text(json.dumps(data))
+                with self.assertRaisesRegex(SystemExit, message):
+                    VALIDATOR.validate_benchmarks(root)
 
     def test_a_draft_is_skipped_by_the_benchmark_check(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

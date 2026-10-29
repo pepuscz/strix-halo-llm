@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-"""The dense matrices of a Maya DS4 pack converted to Q8_0: a GGUF quant that keeps the matrices the engine reads as
-BF16 / Q8_0 (the attention projections, the shared experts, engram_wkv, the embedding, the head) in a K-quant - GSQ-RCO
-keeps them Q5_K - cannot load as packed. This rewrites those tensors into <model_dir>/<file> as Q8_0 (the Q5_K blocks to
-float, then ggml's Q8_0 rounding, in numpy) and points their tensors.txt lines there; every other tensor stays in the
-GGUFs. Q8_0 is finer than Q5_K, so the quant stays the GGUF's. It can also fill the DSpark geometry a GGUF leaves out
-of ds4.txt (--ds4 key=value: a key the GGUF set to 0 / empty, or left out, takes the value; one set otherwise refuses).
+"""Convert GSQ dense Q5_K matrices to the qualified Q8_0 side-file layout.
 
-    python3 -I convert-dense-q8_0.py <pack> <model_dir> --file dense-q8_0.bin --tensors 524 --bytes 8236072960
-                                     [--replace] [--ds4 dspark_block_size=5 ...]
-
-Refuses, before writing, a plan other than --tensors entries of --bytes in all, a K-quant it has no converter for
-(Q5_K only), a tensor not in whole 256-value blocks along its rows, or an existing side file without --replace. Prints
-one JSON line and exits 0 when the side file and tensors.txt are written. Checked against llama.cpp's gguf-py: the
-floats exact, the Q8_0 bytes equal but rounding ties (see tests/test_convert_dense_q8_0.py)."""
+The current hybrid pack selects only embed.weight and head.weight from this side file
+(--active-tensor twice). The other522 dense entries keep their original Q5_K shards,
+offsets and dimensions. The complete8.2GB side-file layout is retained for exact
+reproduction; most converted entries are unused. Without --active-tensor, every
+planned dense entry is selected. The numeric conversion and alignment are unchanged.
+DSpark geometry may be filled only when a key is absent, zero or already identical.
+Refuses a different tensor count/size, unsupported quant, partial row, unknown selected
+tensor or an existing side file without --replace, before writing any weights.
+"""
 import argparse
 import json
 import os
@@ -153,12 +150,30 @@ def patch_ds4(text, geometry):
     return '\n'.join(out) + '\n', changed
 
 
-def convert(pack, model, file, tensors, nbytes, replace=False, geometry=None):
+def rewrite_dense(files, entries, plan, file, active_names=None):
+    """Keep the qualified side-file layout; optionally use it for embedding/head only.
+
+    The other entries keep their original dtype, shard, byte range and dimensions.
+    This is metadata selection, with no second weight conversion.
+    """
+    selected = {item['entry']['name'] for item in plan} if active_names is None else set(active_names)
+    available = {item['entry']['name'] for item in plan}
+    if not selected or not selected <= available:
+        raise ValueError('active tensors must name existing Q5_K conversion entries')
+    files.append(file)
+    for item in plan:
+        if item['entry']['name'] in selected:
+            item['entry'].update(dtype='Q8_0', file=len(files) - 1, off=item['side_off'], bytes=item['side_bytes'])
+
+
+def convert(pack, model, file, tensors, nbytes, replace=False, geometry=None, active_names=None):
     pack, model = Path(pack), Path(model)
     files, entries = read_tensors(pack / 'tensors.txt')
     plan, total, why = convert_plan(files, entries)
     if (len(plan), total) != (tensors, nbytes):
         why.append(f'the plan is {len(plan)} tensors of {total} bytes, the release pins {tensors} of {nbytes}')
+    if active_names is not None and (not active_names or not set(active_names) <= {i['entry']['name'] for i in plan}):
+        why.append('active tensors must name existing Q5_K conversion entries')
     side = model / file
     if (side.exists() or side.is_symlink()) and not replace:
         why.append(f'{side}: already there (--replace rewrites it)')
@@ -180,12 +195,10 @@ def convert(pack, model, file, tensors, nbytes, replace=False, geometry=None):
     finally:
         if part.exists():
             part.unlink()
-    files.append(file)
-    for item in plan:
-        item['entry'].update(dtype='Q8_0', file=len(files) - 1, off=item['side_off'], bytes=item['side_bytes'])
+    rewrite_dense(files, entries, plan, file, active_names)
     write_tensors(pack / 'tensors.txt', files, entries)
     left = [e['name'] for e in entries if e['dtype'] in K_QUANTS and 'Engram' not in (files[e['file']] or '')]
-    assert not left, left
+    assert len(left) == len(plan) - (len(set(active_names)) if active_names is not None else len(plan)), left
     return {'file': str(side), 'bytes': total, 'tensors': len(plan), 'ds4_patched': changed}
 
 
@@ -198,9 +211,11 @@ def main(argv):
     ap.add_argument('--bytes', type=int, required=True)
     ap.add_argument('--replace', action='store_true')
     ap.add_argument('--ds4', action='append', default=[], metavar='KEY=VALUE')
+    ap.add_argument('--active-tensor', action='append', default=None, metavar='NAME',
+                    help='Use Q8_0 only for these tensors; preserve all other original Q5_K ranges')
     a = ap.parse_args(argv)
     geometry = dict(x.split('=', 1) for x in a.ds4)
-    res = convert(a.pack, a.model_dir, a.file, a.tensors, a.bytes, a.replace, geometry)
+    res = convert(a.pack, a.model_dir, a.file, a.tensors, a.bytes, a.replace, geometry, a.active_tensor)
     print(json.dumps(res))
     return 1 if 'reasons' in res else 0
 

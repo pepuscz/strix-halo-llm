@@ -8,23 +8,25 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 ![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)
 
-**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** (production), measured the same way on its installed 512K release:
+**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** (production), on the pinned v1.1.36 engine and hybrid pack at 512K (524,288 tokens allocated):
+
+Each retrieval point is a fresh load from the frozen expert profile, thinking off, a 256-token cap and zero cached input. It uses the same prompt bytes and frozen benchmark driver as the comparison recipes.
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
-| 2,040 | 235.4 | 52.9 | 5/5 |
-| 3,840 | 399.4 | 49.3 | 5/5 |
-| 7,680 | 616.7 | 49.3 | 5/5 |
-| 15,359 | 846.3 | 51.3 | 5/5 |
-| 30,720 | 1,097.8 | 50.8 | 5/5 |
-| 59,933 | 1,347.7 | 50.3 | 5/5 |
-| 122,879 | 1,534.6 | 50.5 | 5/5 |
-| 163,840 | 1,551.5 | 46.2 | 5/5 |
-| 212,992 | 1,483.9 | 47.7 | 5/5 |
-| 245,760 | 1,450.7 | 49.6 | 5/5 |
-| 491,520 | 1,170.4 | 47.8 | 5/5 |
+| 2,040 | 250.5 | 55.9 | 5/5 |
+| 3,840 | 406.3 | 55.0 | 5/5 |
+| 7,680 | 631.5 | 54.6 | 5/5 |
+| 15,359 | 889.2 | 53.5 | 5/5 |
+| 30,720 | 1,107.6 | 55.1 | 5/5 |
+| 59,933 | 1,353.6 | 53.4 | 5/5 |
+| 122,879 | 1,532.1 | 53.9 | 5/5 |
+| 163,840 | 1,570.9 | 53.2 | 5/5 |
+| 212,992 | 1,503.9 | 52.5 | 5/5 |
+| 245,760 | 1,477.1 | 50.0 | 5/5 |
+| 491,520 | 1,180.0 | 50.4 | 5/5 |
 
-The 130,048-token real-code prompt read at 1,387.4 tok/s and wrote 768 tokens at 48.3 tok/s; with it cached, 55.6 tok/s. A 520,000-token deep needle found all five values (1,141.8 / 46.4 tok/s). `maya.py --bench` on the same inputs as the Maya-S rows below: 56.8 decode, 201 / 532 prefill. **Quality: 29/30** (math_10 reached its 4,096-token cap), perplexity 7.3715 against Maya-S's 7.2543 on 23 sequences of 2,048 tokens.
+The 130,048-token real-code prompt read at 1,400.2 tok/s and wrote 768 tokens at 50.3 tok/s; with 130,047 input tokens cached, it wrote at 60.6 tok/s. A 520,000-token deep needle found all five values (1,147.7 / 50.4 tok/s, a short 64-token answer). `maya.py --bench` on the same pinned inputs as the Maya-S rows below: **58.8 decode**, **206 / 525 prefill**. **Quality: 30/30**, with the math_08 reference corrected to 20/3; teacher perplexity 7.3686 on 23 sequences of 2,048 tokens. Decode varies with generated text and drafting acceptance.
 
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
 - Each point is a fresh load of the installed service, from the release's frozen expert profile, with no conversation kept from an earlier point.
@@ -57,7 +59,7 @@ A 1,048,576-token allocation also works. Measured on the engine before its decod
 - it writes three 256-token answers (greedy, thinking off), and decode is their mean;
 - it reads a 2,048- and an 8,192-token prompt cut from Maya's own documentation.
 
-It measures much shorter prompts than the table above, so its prefill is far lower.
+It measures much shorter prompts than the table above, so its prefill is far lower. The [driver](../benchmarks/maya_bench.py) and [fixed token inputs](../benchmarks/maya-bench-inputs.json) publish the exact common workload. The input fixture records its public source commit and document hashes; the driver uses the explicit DeepSeek chat wrapper, without applying the pack’s Jinja template.
 
 This release's engine predates two upstream fixes to that test on HIP: it launched the wrong engine for a DeepSeek config, and it wrapped the questions in the wrong chat markers. So all three rows below ran Maya v1.1.28's procedure on identical token ids, the engine alone. Stock v1.1.28's own `maya.py --bench` agreed within 1 %. Every row ran with the box's three fans held at full speed. The last two rows were measured in the same session: this release's engine source and settings, and the same settings on Maya v1.1.28 with the pull requests. At 32K, 128K and on the real-code prompt they also matched in prefill. Their decode differed only by how many drafted tokens each answer accepted, not by the speed of a step.
 

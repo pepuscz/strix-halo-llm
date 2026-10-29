@@ -6,7 +6,7 @@ The current dual-card setup runs one recipe at a time. Each RX 7900 XTX has its 
 
 | Model | Stack | Context | Parallel work |
 |---|---|---:|---|
-| DeepSeek-V4.1-Flash-1017 GSQ-RCO IQ2_XS | **Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** | 1 × 512K | Tensor parallel across the cards; DSpark drafter split across them; the quant's dense matrices converted to Q8_0 at install |
+| DeepSeek-V4.1-Flash-1017 GSQ-RCO IQ2_XS | **Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** | 1 × 512K | Tensor parallel across the cards; DSpark drafter split across them; 522 native Q5_K dense tensors; embedding and head use Q8_0 |
 | DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS | **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | 1 × 512K | The same engine settings on the Maya-S quant |
 | GLM-5.3-Flash Maya-M IQ2_S | **Maya HIP Maya-M IQ2_S dual RX 7900 XTX** | 1 × 512K | Layers split across the cards; model MTP drafts tokens |
 

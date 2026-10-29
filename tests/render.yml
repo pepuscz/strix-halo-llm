@@ -200,6 +200,16 @@
         - strix_system.engine == 'maya'
         - (strix_maya.family | default('deepseek')) == 'deepseek'
 
+    - name: Assert GSQ hybrid selection and Python source sealing
+      ansible.builtin.assert:
+        that:
+          - strix_maya.dense_q8_0.active_tensors == ['embed.weight', 'head.weight']
+          - strix_maya.server.env.MAYA_DS4_DSPARK_CUM == '0.35'
+          - strix_maya.server.args[-2:] == ['--suffix-draft', '0']
+          - "(rendered_maya_build.content | b64decode).count('--active-tensor ') == 2"
+          - "'git -C source ls-files -z' in (rendered_maya_build.content | b64decode)"
+      when: strix_system.id == 'maya-ds4-gsq-dual-xtx'
+
     - name: Assert Maya HIP Maya-M IQ2_S dual RX 7900 XTX serving contract
       ansible.builtin.assert:
         that:

@@ -82,6 +82,36 @@ class ConverterTest(unittest.TestCase):
         self.assertEqual(CONVERT.convert(pack, model, "dense-q8_0.bin", 1, 4352, replace=True)["tensors"], 1)
         self.assertEqual((model / "dense-q8_0.bin").read_bytes(), Q8)
 
+    def test_hybrid_preserves_native_ranges_and_uses_only_embed_and_head(self) -> None:
+        model, pack = self.fake_pack()
+        path = pack / "tensors.txt"
+        path.write_text(path.read_text() +
+                        "t embed.weight Q5_K 2 64 2816 16 256\n"
+                        "t head.weight Q5_K 2 64 2816 16 256\n")
+        files, entries = CONVERT.read_tensors(path)
+        plan, total, why = CONVERT.convert_plan(files, entries)
+        self.assertEqual(why, [])
+        result = CONVERT.convert(pack, model, "dense-q8_0.bin", len(plan), total,
+                                 active_names=["embed.weight", "head.weight"])
+        self.assertNotIn("reasons", result)
+        after_files, after = CONVERT.read_tensors(path)
+        by = {e["name"]: e for e in after}
+        self.assertEqual(by["layers.0.ffn.shared_experts.w1.weight"], entries[1])
+        self.assertEqual(by["layers.0.ffn.shared_experts.w1.weight"]["dtype"], "Q5_K")
+        for name in ("embed.weight", "head.weight"):
+            self.assertEqual(by[name]["dtype"], "Q8_0")
+            self.assertEqual(after_files[by[name]["file"]], "dense-q8_0.bin")
+            side = (model / "dense-q8_0.bin").read_bytes()
+            self.assertEqual(side[by[name]["off"]:by[name]["off"] + by[name]["bytes"]], Q8)
+
+    def test_unknown_active_tensor_refuses_before_weight_writes(self) -> None:
+        model, pack = self.fake_pack()
+        before = (pack / "tensors.txt").read_bytes()
+        result = CONVERT.convert(pack, model, "dense-q8_0.bin", 1, 4352, active_names=["missing.weight"])
+        self.assertIn("active tensors", result["reasons"][0])
+        self.assertFalse((model / "dense-q8_0.bin").exists())
+        self.assertEqual((pack / "tensors.txt").read_bytes(), before)
+
     def test_the_refusals(self) -> None:
         model, pack = self.fake_pack()
         self.assertIn("the release pins 2 of 4352", CONVERT.convert(pack, model, "d.bin", 2, 4352)["reasons"][0])
