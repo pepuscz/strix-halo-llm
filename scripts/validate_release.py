@@ -589,6 +589,12 @@ def validate_benchmarks(root: Path) -> None:
                 fail("GSQ and Maya-S retrieval workload identities differ")
             if a["cached_tokens"] != 0 or a["needle_passes"] != 5 or a["allocation_tokens"] != 524288:
                 fail("GSQ retrieval benchmark is not a cold five-value point at512K")
+        recheck = gsq.get("cold_start_recheck")
+        if recheck:
+            initial = next((p for p in curve if p["actual_input_tokens"] == recheck["actual_input_tokens"]), None)
+            if initial is None or any(initial[k] != recheck[k] for k in
+                    ("prompt_sha256", "allocation_tokens", "workload", "completion_tokens", "cached_tokens", "needle_passes")):
+                fail("GSQ cold recheck workload identity differs from its initial run")
         if gsq["maya_bench"]["inputs_sha256"] != reference["maya_bench"]["inputs_sha256"]:
             fail("GSQ and Maya-S Maya benchmark inputs differ")
         fixture = root / "benchmarks/maya-bench-inputs.json"

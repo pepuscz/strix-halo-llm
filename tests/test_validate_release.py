@@ -191,6 +191,8 @@ class ReleaseValidatorTest(unittest.TestCase):
         for mutate, message in (
             (lambda d: d["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"][0].update(prompt_sha256="0" * 64),
              "retrieval workload identities differ"),
+            (lambda d: d["systems"]["maya-ds4-gsq-dual-xtx"]["cold_start_recheck"].update(prompt_sha256="0" * 64),
+             "cold recheck workload identity differs"),
             (lambda d: d["systems"]["maya-ds4-gsq-dual-xtx"]["long_context"]["reused_prompt"].update(cached_tokens=0),
              "release long-context readings differ"),
             (lambda d: d["systems"]["maya-ds4-gsq-dual-xtx"]["maya_bench"].update(inputs_sha256="0" * 64),

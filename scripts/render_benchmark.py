@@ -31,7 +31,7 @@ def render(data, dual=False):
              '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · Radeon 8060S · 128 GiB RAM · 120 W · reasoning mode disabled</text>']
     if dual:
         lines[1] = '<title id="title">Dual RX 7900 XTX throughput: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</title>'
-        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017 on two quantizations, GSQ-RCO IQ2_XS and Maya-S IQ2_XXS: eleven fresh loads each at 524288-token capacity, from 2040 to 491520 of its tokens. Every answer found all five phrases. Each horizontal tick doubles the input length.</desc>'
+        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017 on two quantizations, GSQ-RCO IQ2_XS and Maya-S IQ2_XXS: eleven fresh loads each at 524288-token capacity, from 2040 to 491520 of its tokens. Every answer found all five phrases. GSQ at 3840 tokens has two cold runs, both shown separately with a gap in the trend line. Each horizontal tick doubles the input length.</desc>'
         lines[-2] = '<text x="70" y="40" class="title">Dual RX 7900 XTX · DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</text>'
         lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>'
     for i, (sid, color, name) in enumerate(series):
@@ -71,10 +71,27 @@ def render(data, dual=False):
             if not points:
                 continue
             coords=[(x(p['actual_input_tokens']),y(p[key])) for p in points]
-            path=' '.join(('M' if i==0 else 'L')+f'{xx:.2f} {yy:.2f}' for i,(xx,yy) in enumerate(coords))
-            lines.append(f'<path d="{path}" fill="none" stroke="{color}" stroke-width="2.7"/>')
+            recheck = data['systems'][sid].get('cold_start_recheck')
+            path, start = [], True
+            for point, (xx, yy) in zip(points, coords):
+                if recheck and point['actual_input_tokens'] == recheck['actual_input_tokens']:
+                    start = True       # Two observations do not establish a reproducible dip in the trend.
+                    continue
+                path.append(('M' if start else 'L') + f'{xx:.2f} {yy:.2f}')
+                start = False
+            lines.append(f'<path d="{" ".join(path)}" fill="none" stroke="{color}" stroke-width="2.7"/>')
             for p,(xx,yy) in zip(points,coords):
-                lines.append(f'<circle cx="{xx:.2f}" cy="{yy:.2f}" r="4" fill="{color}"><title>{p["actual_input_tokens"]:,} tokens: {p[key]:.2f}</title></circle>')
+                if recheck and p['actual_input_tokens'] == recheck['actual_input_tokens']:
+                    ry = y(recheck[key])
+                    lines.append(f'<line x1="{xx:.2f}" y1="{yy:.2f}" x2="{xx:.2f}" y2="{ry:.2f}" stroke="{color}" stroke-dasharray="3 4"/>')
+                    lines.append(f'<circle cx="{xx:.2f}" cy="{yy:.2f}" r="4.5" fill="white" stroke="{color}" stroke-width="2"><title>{p["actual_input_tokens"]:,} tokens, initial cold run: {p[key]:.2f}</title></circle>')
+                    diamond = f'{xx:.2f},{ry-5:.2f} {xx+5:.2f},{ry:.2f} {xx:.2f},{ry+5:.2f} {xx-5:.2f},{ry:.2f}'
+                    lines.append(f'<polygon points="{diamond}" fill="{color}"><title>{p["actual_input_tokens"]:,} tokens, cold recheck: {recheck[key]:.2f}</title></polygon>')
+                    if key == 'decode_tokens_per_second':
+                        lines.append(f'<text x="{xx+12:.2f}" y="{yy+18:.2f}" class="tick" style="fill:{color}">{p[key]:.1f} initial</text>')
+                        lines.append(f'<text x="{xx+12:.2f}" y="{ry-10:.2f}" class="tick" style="fill:{color}">{recheck[key]:.1f} recheck</text>')
+                else:
+                    lines.append(f'<circle cx="{xx:.2f}" cy="{yy:.2f}" r="4" fill="{color}"><title>{p["actual_input_tokens"]:,} tokens: {p[key]:.2f}</title></circle>')
             xx,yy=coords[-1];value=points[-1][key]
             offset=-12 if sid in ('strata-qwen-q4xl','vulkan-iq3xxs','maya-glm-dual-xtx') or (sid == 'qwen-vulkan-q4xl' and key != 'decode_tokens_per_second') else 21
             if dual and sid == 'maya-ds4-gsq-dual-xtx' and key == 'prefill_tokens_per_second':
@@ -82,6 +99,8 @@ def render(data, dual=False):
             if dual and sid == 'maya-ds4-dual-xtx' and key == 'prefill_tokens_per_second':
                 offset = 34
             lines.append(f'<text class="value" x="{xx:.2f}" y="{yy+offset:.2f}" text-anchor="end" style="fill:{color}">{value:.1f}</text>')
+    if dual:
+        lines.append('<text x="550" y="760" text-anchor="middle" class="tick">GSQ 4K: open circle = initial cold run; diamond = cold recheck. Both shown; trend line interrupted.</text>')
     lines += ['<text x="550" y="700" text-anchor="middle" class="label">Input length (tokens; each tick doubles)</text>',
               '<text x="550" y="735" text-anchor="middle" class="label">Test: find five phrases hidden in a long text. Every run found all five correctly.</text>',
               '</svg>', '']

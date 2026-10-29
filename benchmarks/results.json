@@ -1575,7 +1575,10 @@
         "cached_tokens": 0,
         "needle_passes": 5,
         "runs": 1,
-        "note": "One fresh cold recheck of the isolated first-round slowdown. The original 24.4 tok/s row is retained in the curve; no best-of selection."
+        "note": "One fresh cold recheck of the isolated first-round slowdown. The original 24.4 tok/s row is retained in the curve; no best-of selection.",
+        "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
+        "allocation_tokens": 524288,
+        "workload": "deep_retrieval"
       }
     }
   },
