@@ -10,3 +10,4 @@ This public repository is the source for current qualified Strix Halo LLM setups
 - Explain the benchmark and capacity limits in plain language before presenting results. Define terms such as slots when needed; keep detailed build and test settings out of chart captions.
 - Publish current qualified settings and sanitized measurement aggregates. Exclude rejected experiments, raw logs, private host data, reasoning timelines, and casual system names.
 - Keep superseded configurations in Git releases or history, not the current setup path.
+- Keep README descriptions and performance tables current with the qualified manifests and result data. Replace stale values and claims in place; put change history in GitHub release notes. Run `scripts/render_benchmark.py` after changing benchmark data; its `--check` gate also verifies the README tables.

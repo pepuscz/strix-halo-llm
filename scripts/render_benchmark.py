@@ -4,6 +4,7 @@ import argparse
 import html
 import json
 import math
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -87,13 +88,51 @@ def render(data, dual=False):
     return '\n'.join(lines)
 
 
+def render_readme(data, text):
+    """Keep the current DeepSeek recipe tables bound to their own published measurements."""
+    for sid, quant in (('maya-ds4-gsq-dual-xtx', 'GSQ-RCO IQ2_XS'),
+                       ('maya-ds4-dual-xtx', 'Maya-S IQ2_XXS')):
+        system = data['systems'][sid]
+        bench = system['maya_bench']['this_release']
+        rows = {row['actual_input_tokens']: row for row in system['context_scaling']}
+        code = system['long_context']
+        table = ['| Test | Decode | Prefill |', '|---|---:|---:|',
+                 '| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | '
+                 f'**{bench["decode_mean_tokens_per_second"]:.1f}** | '
+                 f'**{bench["prefill_tokens_per_second"]["2048"]:,} / '
+                 f'{bench["prefill_tokens_per_second"]["8192"]:,}** |']
+        for label, count in (('Public five-phrase prompt, 2K (2,040 input tokens)', 2040),
+                             ('32K (30,720)', 30720), ('128K (122,879)', 122879), ('480K (491,520)', 491520)):
+            row = rows[count]
+            table.append(f'| {label} | {row["decode_tokens_per_second"]:.1f} | '
+                         f'{row["prefill_tokens_per_second"]:,.0f} |')
+        table.append('| Real code, 130,048 tokens: cold / prompt cached | '
+                     f'**{code["decode_tokens_per_second"]:.1f} / '
+                     f'{code["reused_prompt"]["decode_tokens_per_second"]:.1f}** | '
+                     f'**{code["prefill_tokens_per_second"]:,.0f}** |')
+        heading = re.escape('### DeepSeek-V4.1-Flash-1017 ' + quant)
+        section = re.compile(r'(' + heading + r'[^\n]*\n)(.*?)(?=\n### |\Z)', re.S)
+
+        def replace(match):
+            body, count = re.subn(r'^\| Test \| Decode \| Prefill \|\n(?:\|[^\n]*\n)+',
+                                 '\n'.join(table) + '\n', match[2], count=1, flags=re.M)
+            if count != 1:
+                raise ValueError('missing README performance table: ' + sid)
+            return match[1] + body
+        text, count = section.subn(replace, text, count=1)
+        if count != 1:
+            raise ValueError('missing README setup section: ' + sid)
+    return text
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--check',action='store_true')
     args=parser.parse_args()
-    for source, output, dual in ((DATA, OUTPUT, False),
-            (DATA, ROOT / 'docs/benchmark-dual-xtx.svg', True)):
-        expected=render(json.loads(source.read_text()), dual)
+    data = json.loads(DATA.read_text())
+    outputs = [(OUTPUT, render(data)), (ROOT / 'docs/benchmark-dual-xtx.svg', render(data, True)),
+               (ROOT / 'README.md', render_readme(data, (ROOT / 'README.md').read_text()))]
+    for output, expected in outputs:
         if args.check:
             if not output.exists() or output.read_text()!=expected:
                 raise SystemExit(f'{output.name} is stale; run scripts/render_benchmark.py')

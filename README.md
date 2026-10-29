@@ -35,22 +35,18 @@ It passed **30/30 quality cases** (the math_08 reference is corrected to 20/3), 
 - a 95 GB expert pool on the 8060S;
 - the DSpark drafter's blocks split across the cards.
 
-It passed **30/30 quality cases**, found all five phrases at every length up to 491,520 input tokens, and found all five values in a 520,000-token deep-needle test. Measured on the installed release at 524,288 tokens:
+It passed **30/30 quality cases**, found all five phrases at every length up to 491,520 input tokens, and found all five values in a 520,000-token deep-needle test. The figures below come from the [qualified Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml), which uses Maya v1.1.21 with the pinned engine changes, at a 524,288-token allocation:
 
 | Test | Decode | Prefill |
 |---|---:|---:|
-| `maya.py --bench`, Project Maya's speed test (three 256-token answers; 2K / 8K prompts) | **41.3** | **180 / 482** |
+| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **41.9** | **177 / 474** |
 | Public five-phrase prompt, 2K (2,040 input tokens) | 29.7 | 212 |
 | 32K (30,720) | 31.7 | 1,053 |
 | 128K (122,879) | 31.8 | 1,514 |
 | 480K (491,520) | 29.9 | 1,164 |
-| Real code, 130,048 tokens: cold / prompt cached | **36.2 / 46.1** | **1,291** |
+| Real code, 130,048 tokens: cold / prompt cached | **36.1 / 44.6** | **1,278** |
 
 Decode on the five-phrase prompts is one cold 64-token answer, so it is noisy; `--bench` and the real-code prompt are the steadier decode figures.
-
-The release's engine changes are proposed to Project Maya in [issue #510](https://github.com/mw00/project-maya/issues/510). The `--bench` and real-code rows are that issue's measurements, the changes ported to Maya v1.1.28. They matched the release's own engine within 2 % when the two ran side by side.
-
-A 1,048,576-token allocation also works. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
 
 ### GLM-5.3-Flash Maya-M IQ2_S
 
@@ -88,7 +84,7 @@ The two GPUs occupy M.2 connections through OCuLink; the external SSD connects o
 
 ### Our recorded dual-card measurements
 
-Our chart retains the full cold five-phrase retrieval curves for DeepSeek (both quantizations) and GLM. The models read the same text, but their tokenizers count different numbers of tokens; their speeds are **not** a matched model-to-model comparison. Comparisons with Project Maya's own releases are in [issue #510](https://github.com/mw00/project-maya/issues/510) (DeepSeek) and [issue #458](https://github.com/mw00/project-maya/issues/458) (GLM); the chart below records our installation and context-scaling runs, including a different context allocation for the 512K GLM service.
+The chart shows the full cold five-phrase retrieval curves for DeepSeek (both quantizations) and GLM. The models read the same text, but their tokenizers count different numbers of tokens; their speeds are **not** a matched model-to-model comparison. DeepSeek uses a 524,288-token allocation throughout. GLM's allocation rises from 131,072 to 524,288 tokens with prompt length; its installed 512K service measurement is listed separately in the table above.
 
 ![GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with two RX 7900 XTX cards and a Radeon 8060S helper](docs/benchmark-dual-xtx.svg)
 
@@ -111,7 +107,7 @@ bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
-The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek GSQ-RCO recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) about 335 GB (155 GB of shards, the 111 GB Engram file, the 8 GB drafter, an 8 GB converted side file (only embedding and head select it), and the release folder) and the [DeepSeek Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) about 470 GB. Both use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
+The [GLM recipe](ansible/releases/maya-glm-dual-xtx-512k.yml) needs about 240 GB free; the [DeepSeek GSQ-RCO recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) about 335 GB (155 GB of shards, the 111 GB Engram file, the 8 GB drafter, an 8 GB converted side file (only embedding and head select it), and the release folder) and the [DeepSeek Maya-S recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml) about 470 GB. All three use kernel `7.0.0-38-generic`, isolated ROCm 7.2.4 userspace, and a rocBLAS build with the [mixed-architecture Tensile fix](https://github.com/ROCm/rocm-libraries/pull/4781). The installer verifies the hardware and pinned artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`.
 
 ## BOSGAME M5 only
 
