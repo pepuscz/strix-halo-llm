@@ -40,9 +40,9 @@
 <text class="tick" x="905.17" y="422" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="235" x2="1020.00" y2="400"/>
 <text class="tick" x="1020.00" y="422" text-anchor="middle">512K</text>
-<path d="M100.73 373.79 L205.52 360.84 L320.35 334.06 L435.16 308.07 L550.00 285.64 L660.71 255.77 L779.65 238.36 L827.31 237.91 L870.78 243.89 L894.48 248.67 L1009.31 277.91" fill="none" stroke="#8250df" stroke-width="2.7"/>
+<path d="M100.73 373.79 L205.52 358.67 L320.35 334.06 L435.16 308.07 L550.00 285.64 L660.71 255.77 L779.65 238.36 L827.31 237.91 L870.78 243.89 L894.48 248.67 L1009.31 277.91" fill="none" stroke="#8250df" stroke-width="2.7"/>
 <circle cx="100.73" cy="373.79" r="4" fill="#8250df"><title>2,040 tokens: 254.20</title></circle>
-<circle cx="205.52" cy="360.84" r="4" fill="#8250df"><title>3,840 tokens: 379.70</title></circle>
+<circle cx="205.52" cy="358.67" r="4" fill="#8250df"><title>3,840 tokens: 400.80</title></circle>
 <circle cx="320.35" cy="334.06" r="4" fill="#8250df"><title>7,680 tokens: 639.40</title></circle>
 <circle cx="435.16" cy="308.07" r="4" fill="#8250df"><title>15,359 tokens: 891.40</title></circle>
 <circle cx="550.00" cy="285.64" r="4" fill="#8250df"><title>30,720 tokens: 1108.90</title></circle>
@@ -108,9 +108,9 @@
 <text class="tick" x="905.17" y="667" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="480" x2="1020.00" y2="645"/>
 <text class="tick" x="1020.00" y="667" text-anchor="middle">512K</text>
-<path d="M100.73 499.25 L205.52 577.90 L320.35 495.40 L435.16 496.23 L550.00 493.75 L660.71 495.40 L779.65 497.60 L827.31 499.52 L870.78 503.65 L894.48 507.50 L1009.31 504.48" fill="none" stroke="#8250df" stroke-width="2.7"/>
+<path d="M100.73 499.25 L205.52 496.23 L320.35 495.40 L435.16 496.23 L550.00 493.75 L660.71 495.40 L779.65 497.60 L827.31 499.52 L870.78 503.65 L894.48 507.50 L1009.31 504.48" fill="none" stroke="#8250df" stroke-width="2.7"/>
 <circle cx="100.73" cy="499.25" r="4" fill="#8250df"><title>2,040 tokens: 53.00</title></circle>
-<circle cx="205.52" cy="577.90" r="4" fill="#8250df"><title>3,840 tokens: 24.40</title></circle>
+<circle cx="205.52" cy="496.23" r="4" fill="#8250df"><title>3,840 tokens: 54.10</title></circle>
 <circle cx="320.35" cy="495.40" r="4" fill="#8250df"><title>7,680 tokens: 54.40</title></circle>
 <circle cx="435.16" cy="496.23" r="4" fill="#8250df"><title>15,359 tokens: 54.10</title></circle>
 <circle cx="550.00" cy="493.75" r="4" fill="#8250df"><title>30,720 tokens: 55.00</title></circle>
