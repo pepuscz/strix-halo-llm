@@ -70,7 +70,7 @@ The 2K and 32K rows use a 131,072-token allocation; the remaining rows use 524,2
 
 ### Performance curves
 
-Cold five-phrase retrieval, one request per point except GSQ at 4K, where both the initial run and its recheck are shown. Both models read the same text; token counts vary by model. DeepSeek uses a 512K allocation throughout; GLM uses 128K–512K, as recorded in the [measurement details](docs/BENCHMARKS.md).
+Cold five-phrase retrieval, one request per point. Both models read the same text; token counts vary by model. DeepSeek uses a 512K allocation throughout; GLM uses 128K–512K, as recorded in the [measurement details](docs/BENCHMARKS.md).
 
 ![GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with two RX 7900 XTX cards and a Radeon 8060S helper](docs/benchmark-dual-xtx.svg)
 

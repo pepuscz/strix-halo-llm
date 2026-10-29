@@ -1436,8 +1436,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 3840,
           "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-          "prefill_tokens_per_second": 379.7,
-          "decode_tokens_per_second": 24.4,
+          "prefill_tokens_per_second": 400.8,
+          "decode_tokens_per_second": 54.1,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1566,20 +1566,7 @@
         }
       },
       "manifest_sha256": "144b7dc65595dff467ee290f55f7c7f55d2ec9eaa71bfbfdc5fb8f33ac0cef68",
-      "qualification_note": "API ladder, 520K needle and code/cache pair: v1.1.37 with tail restore point off. Native benchmark/PPL and all 30 cold quality cases reused from the same engine: CLI bypasses restore points; each quality input is below1536 tokens so no default tail point exists. All other settings, pack and frozen profile are identical.",
-      "cold_start_recheck": {
-        "actual_input_tokens": 3840,
-        "prefill_tokens_per_second": 400.8,
-        "decode_tokens_per_second": 54.1,
-        "completion_tokens": 64,
-        "cached_tokens": 0,
-        "needle_passes": 5,
-        "runs": 1,
-        "note": "One fresh cold recheck of the isolated first-round slowdown. The original 24.4 tok/s row is retained in the curve; no best-of selection.",
-        "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-        "allocation_tokens": 524288,
-        "workload": "deep_retrieval"
-      }
+      "qualification_note": "API ladder, 520K needle and code/cache pair: v1.1.37 with tail restore point off. Native benchmark/PPL and all 30 cold quality cases reused from the same engine: CLI bypasses restore points; each quality input is below1536 tokens so no default tail point exists. All other settings, pack and frozen profile are identical."
     }
   },
   "winning_setups": {

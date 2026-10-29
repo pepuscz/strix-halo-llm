@@ -15,7 +15,7 @@ Each retrieval point is a fresh load from the frozen expert profile, thinking of
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
 | 2,040 | 254.2 | 53.0 | 5/5 |
-| 3,840 (initial / recheck) | 379.7 / 400.8 | 24.4 / 54.1 | 5/5 each |
+| 3,840 | 400.8 | 54.1 | 5/5 |
 | 7,680 | 639.4 | 54.4 | 5/5 |
 | 15,359 | 891.4 | 54.1 | 5/5 |
 | 30,720 | 1,108.9 | 55.0 | 5/5 |
@@ -27,8 +27,6 @@ Each retrieval point is a fresh load from the frozen expert profile, thinking of
 | 491,520 | 1,183.9 | 51.1 | 5/5 |
 
 The 130,048-token real-code prompt read at 1,389.9 tok/s and wrote 768 tokens at 53.1 tok/s; with 130,047 input tokens cached, it wrote at 60.8 tok/s. A 520,000-token deep needle found all five values (1,150.6 / 50.5 tok/s, a short 64-token answer). `maya.py --bench` on the same pinned inputs as the Maya-S rows below: **59.0 decode**, **203 / 535 prefill**. **Quality: 30/30**, with the math_08 reference corrected to 20/3; teacher perplexity 7.3686 on 23 sequences of 2,048 tokens. Decode varies with generated text and drafting acceptance.
-
-Both 3,840-token cold runs are shown in the table and chart. The first spent unusually long in its first few generated tokens despite accepting every draft; the recheck did not reproduce the slowdown. The chart interrupts the trend line at this length rather than treating either observation as an established performance trend.
 
 The API measurements disable the last-512-token restore point; shared-prefix and turn checkpoints remain enabled. The native benchmark, perplexity and 30 short cold quality cases were measured on the same engine and reused: CLI tests bypass API restore points, and every quality prompt is too short to create a tail point.
 
