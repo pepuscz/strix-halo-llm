@@ -12,18 +12,18 @@ Each setup supports **one conversation at up to 512K context**. Speeds are token
 
 ### DeepSeek-V4.1-Flash-1017 GSQ-RCO IQ2_XS (production)
 
-**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** uses [ISTA-DASLab's GSQ-RCO quant](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF) and Maya v1.1.36 with serving fixes. [Ansible recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml).
+**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** uses [ISTA-DASLab's GSQ-RCO quant](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF) and Maya v1.1.37 with serving fixes. [Ansible recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml).
 
 **Quality: 30/30. Perplexity: 7.3686** (23 × 2,048 tokens). **520K needle: 5/5.** All rows use a 524,288-token allocation.
 
 | Test | Decode | Prefill |
 |---|---:|---:|
-| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **58.8** | **206 / 525** |
-| Public five-phrase prompt, 2K (2,040 input tokens) | 55.9 | 250 |
-| 32K (30,720) | 55.1 | 1,108 |
-| 128K (122,879) | 53.9 | 1,532 |
-| 480K (491,520) | 50.4 | 1,180 |
-| Real code, 130,048 tokens: cold / prompt cached | **50.3 / 60.6** | **1,400** |
+| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **59.0** | **203 / 535** |
+| Public five-phrase prompt, 2K (2,040 input tokens) | 53.0 | 254 |
+| 32K (30,720) | 55.0 | 1,109 |
+| 128K (122,879) | 53.6 | 1,567 |
+| 480K (491,520) | 51.1 | 1,184 |
+| Real code, 130,048 tokens: cold / prompt cached | **53.1 / 60.8** | **1,390** |
 
 ### DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS (alternative)
 

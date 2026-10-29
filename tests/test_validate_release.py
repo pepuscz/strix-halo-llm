@@ -161,7 +161,7 @@ class ReleaseValidatorTest(unittest.TestCase):
 
     def test_gsq_validates_once_filled_and_rejects_drift(self) -> None:
         data = self.gsq()
-        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v2")
+        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v3")
         maya = data["strix_maya"]
         self.assertEqual((maya["model_subdirectory"], maya["dense_q8_0"]["tensors"], maya["dense_q8_0"]["size"]),
                          ("IQ2_XS", 524, 8236072960))
@@ -169,7 +169,7 @@ class ReleaseValidatorTest(unittest.TestCase):
                          | {"ROCBLAS_TENSILE_LIBPATH": data["strix_paths"]["release"] + "/rocm/lib/rocblas/library",
                             "DS4_LT_STORE": data["strix_paths"]["state"] + "/lt-picks.txt",
                             "MAYA_DS4_SLOT_DIR": data["strix_paths"]["state"] + "/ds4-slots",
-                            "MAYA_DS4_DSPARK_CUM": "0.35"})
+                            "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0"})
         for mutate, message in (
             (lambda d: d["strix_maya"].update(model_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
             (lambda d: d["strix_target"]["files"][1].update(local_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),

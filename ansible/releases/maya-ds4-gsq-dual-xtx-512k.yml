@@ -1,5 +1,5 @@
 ---
-strix_release_id: maya-ds4-gsq-dual-xtx-512k-v2
+strix_release_id: maya-ds4-gsq-dual-xtx-512k-v3
 strix_release_schema: 1
 strix_system:
   id: maya-ds4-gsq-dual-xtx
@@ -32,21 +32,21 @@ strix_paths:
   root: /opt/strix-halo
   source: /opt/strix-halo/src
   bin: /opt/strix-halo/bin
-  downloads: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v2/downloads
-  release: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v2
+  downloads: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v3/downloads
+  release: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v3
   models: /opt/strix-halo/models/deepseek-v41-flash-1017-gsq-rco
   state: /var/lib/strix-halo-inference
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
-  release_tag: maya-ds4-gsq-v1136-20261029
-  tag_object: 425afce8d85e50c260fd5fa8beb5725dd6514a68
+  release_tag: maya-ds4-gsq-v1137-20261029
+  tag_object: 7e5ca553b9abce1370f73b59a27bb332d4aae177
   tag_object_type: tag
-  source_commit: c87b26c96031f11b5ae1df126629aea200698a8c
-  source_tree: 5b49073821feb82a4937b70345821396517c85ac
+  source_commit: 5b85581f72b5b253b61e1996bf741c7c75e2cb79
+  source_tree: e37326d2cb32f921d0d28f50a09b56d95f727038
   upstream_repository: https://github.com/mw00/project-maya
-  upstream_tag: v1.1.36
-  upstream_commit: f031a23b9682551e744e29d0e9f8d527df49f282
-  server_sha256: 0e97cc16a7555726e6424115bbbaba79740efbe1f2bd81553c10ab01a4984e55
+  upstream_tag: v1.1.37
+  upstream_commit: 7ee8f2777c754229605a8c19ca985cbb68540419
+  server_sha256: 7f91d2c5f35f9b4597c2ce92a4be879c5c84ab025fa83f5652efdd617319cf0c
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -97,7 +97,7 @@ strix_rocblas:
     - name: libboost1.90-dev
       version: 1.90.0-6ubuntu1
       sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
-  reference_library_sha256: d89e9ada0fb0d0d679e8d427d1ece26db3f424cca8b6e189bce785bd33212ee0
+  reference_library_sha256: 187a52fd7a34ea502a20e42a1489775881456c8751436e1b3e5d7af7c6006e56
 strix_target:
   repository: ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF
   revision: 653a9874aa38c356233c5f3cc8c96b19a43b57eb
@@ -237,7 +237,7 @@ strix_maya:
     size: 66048
     sha256: f384b25188569368d420fa12c072f2cef8152b3bbd66f90154e896a66bb70d7a
   server:
-    exe: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v2/source/build-hip/maya-ds4
+    exe: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v3/source/build-hip/maya-ds4
     args:
       - --pack
       - /opt/strix-halo/models/deepseek-v41-flash-1017-gsq-rco/IQ2_XS/maya-ds4-dspark-hybrid
@@ -259,7 +259,7 @@ strix_maya:
       - '32768'
       - --suffix-draft
       - '0'
-    cwd: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v2/source
+    cwd: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v3/source
     tokenizer: /opt/strix-halo/models/deepseek-v41-flash-1017-gsq-rco/IQ2_XS/maya-ds4-dspark-hybrid/tokenizer
     backend: hip
     model_name: deepseek-v4.1-flash
@@ -272,8 +272,8 @@ strix_maya:
       top_p: 1.0
     reasoning_effort: high
     lib_dirs:
-      - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v2/rocblas/install/lib
-      - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v2/rocm/lib
+      - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v3/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v3/rocm/lib
     port: 18109
     log: /var/lib/strix-halo-inference/native.log
     installer:
@@ -290,7 +290,7 @@ strix_maya:
     env:
       DS4_COMMIT_CAP_GB: '145'
       ROCBLAS_USE_HIPBLASLT: '0'
-      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v2/rocm/lib/rocblas/library
+      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v3/rocm/lib/rocblas/library
       DS4_HELPER: '2'
       DS4_HELPER_GB: '95'
       DS4_WARM_CAP_GB: '14.9'
@@ -326,6 +326,7 @@ strix_maya:
       MAYA_DS4_SLOT_GB: '16'
       MAYA_DS4_SLOT_DIR: /var/lib/strix-halo-inference/ds4-slots
       MAYA_DS4_DSPARK_CUM: '0.35'
+      MAYA_DS4_RESTORE_TAIL: '0'
   model_subdirectory: IQ2_XS
   ds4_geometry:
     dspark_block_size: '5'
@@ -353,8 +354,9 @@ strix_qualification:
     scoring: Reviewed final answers; math_08 reference corrected to 20/3.
     thinking: false
     math_10_output_cap: 4096
-    measured_before: The same native v1.1.36 engine, hybrid pack, frozen profile and settings; 30 cold cases, persistent
-      slots disabled, math_10 cap 4096. Teacher perplexity 7.3686 on 23 sequences of 2048 tokens.
+    measured_before: Same native v1.1.37 engine, hybrid pack, frozen profile and settings. All 30 scored requests
+      had zero cached tokens and fewer than 1536 input tokens, so disabling the last-512-token restore point
+      changes none of their prefill marks. Native teacher perplexity bypasses API restore points.
     perplexity: 7.3686
   retrieval_ladder:
     allocation_tokens: 524288
@@ -366,17 +368,17 @@ strix_qualification:
     allocation_tokens: 524288
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1400.2
-    first_request_decode_tokens_per_second: 50.3
+    first_request_prefill_tokens_per_second: 1389.9
+    first_request_decode_tokens_per_second: 53.1
     reused_prompt_cached_tokens: 130047
-    reused_prompt_decode_tokens_per_second: 60.6
+    reused_prompt_decode_tokens_per_second: 60.8
   deep_needle:
     allocation_tokens: 524288
     input_tokens: 520000
     values: 5/5
     measured: A fresh cold 520,000-token retrieval request on this engine and pack at the 524,288-token allocation;
       64 output tokens.
-  qualified_configuration: The qualified v1.1.36 native engine with Python serving fixes, the hybrid GSQ pack and
-    frozen expert profile, at the current release settings. The existing eleven-point cold retrieval ladder, separate
-    520K needle, real-code pair and fixed-input Maya bench ran on that engine. Public Ansible paths are remapped;
-    metadata equivalence is verified separately.
+  qualified_configuration: The pinned v1.1.37 native engine with two Python serving fixes, unchanged hybrid
+    GSQ pack and frozen expert profile; tail restore point disabled, system/shared/turn checkpoints retained.
+    The complete cold retrieval ladder, 520K needle and real-code pair ran with this setting. Native benchmark,
+    perplexity and short cold quality requests use identical effective paths and are reused from the same engine.

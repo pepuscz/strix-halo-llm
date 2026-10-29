@@ -364,6 +364,7 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     }
     if data["strix_system"]["id"] == "maya-ds4-gsq-dual-xtx":
         expected_env["MAYA_DS4_DSPARK_CUM"] = "0.35"
+        expected_env["MAYA_DS4_RESTORE_TAIL"] = "0"
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
         fail("qualified Maya DS4 environment drifted: " + ", ".join(drifted))
