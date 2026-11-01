@@ -161,7 +161,7 @@ class ReleaseValidatorTest(unittest.TestCase):
 
     def test_gsq_validates_once_filled_and_rejects_drift(self) -> None:
         data = self.gsq()
-        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v3")
+        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v4")
         maya = data["strix_maya"]
         self.assertEqual((maya["model_subdirectory"], maya["dense_q8_0"]["tensors"], maya["dense_q8_0"]["size"]),
                          ("IQ2_XS", 524, 8236072960))
