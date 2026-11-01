@@ -19,7 +19,7 @@ Each setup supports **one conversation at up to 512K context**. Speeds are token
 | Test | Decode | Prefill |
 |---|---:|---:|
 | `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **60.4** | **212 / 533** |
-| Public five-phrase prompt, 2K (2,040 input tokens) | 32.6 | 248 |
+| Public five-phrase prompt, 2K (2,040 input tokens) | 57.0 | 250 |
 | 32K (30,720) | 55.9 | 1,121 |
 | 128K (122,879) | 55.9 | 1,561 |
 | 480K (491,520) | 52.3 | 1,184 |

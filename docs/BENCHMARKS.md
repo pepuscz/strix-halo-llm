@@ -14,7 +14,7 @@ Each retrieval point is a fresh load from the frozen expert profile, thinking of
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
-| 2,040 | 247.6 | 32.6 | 5/5 |
+| 2,040 | 249.6 | 57.0 | 5/5 |
 | 3,840 | 406.7 | 58.0 | 5/5 |
 | 7,680 | 588.7 | 57.0 | 5/5 |
 | 15,359 | 894.3 | 57.7 | 5/5 |
@@ -28,7 +28,7 @@ Each retrieval point is a fresh load from the frozen expert profile, thinking of
 
 The 130,048-token real-code prompt read at 1,388.2 tok/s and wrote 768 tokens at 54.8 tok/s. With 130,047 tokens cached, decode averaged **60.6 tok/s** across three consecutive 768-token answers. The 520,000-token needle found 5/5 values (1,150.4 prefill / 50.1 decode, 64 output tokens). Fixed-input native benchmark: **60.4 decode**, **212 / 533 prefill**. Quality **30/30**; teacher perplexity **7.3704** over 47,081 scored tokens in 23 sequences. Decode varies with generated text and draft acceptance.
 
-All readings use the same stock engine, 32K chunk setting, GSQ hybrid pack and frozen expert profile. The API retains shared-prefix and turn checkpoints, with the tail restore point disabled. Quality cases are cold; their frozen scorer's known final-answer corrections are reviewed separately.
+All readings use the same stock engine, 32K chunk setting, GSQ hybrid pack and frozen expert profile. The API retains shared-prefix and turn checkpoints, with the tail restore point disabled. Quality cases are cold. The reviewed references use20/3 for math_08 and the final$64 for gsm_06; its parser selected an intermediate8.
 
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
 - Each point is a fresh load of the installed service, from the release's frozen expert profile, with no conversation kept from an earlier point.
