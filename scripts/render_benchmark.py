@@ -188,7 +188,7 @@ def xs_summary(data, detailed=False):
                 f"the same counter recorded {disk['cold']:.1f} MB per generated token cold and "
                 + ' / '.join(reading(x) for x in disk['cached']) + ' MB for the three cached answers. ')
     if fastest:
-        note += 'It decodes fastest of the three' if detailed else 'It is fastest of the three for decode' 
+        note += 'It decodes fastest of the three' if detailed else 'It is fastest of the three for decode'
     else:
         note += 'Its perplexity is'
     xp = xs['quality']['perplexity']['value']
