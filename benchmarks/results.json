@@ -1364,7 +1364,8 @@
         "source_commit": "8463e3c9c1e843dc13aeca5fea6c71374d26c6a6",
         "source_tree": "435d7df008729debc4c4da71f6b27a4334ffc673",
         "upstream": "https://github.com/mw00/project-maya v1.1.48 plus RDNA 3 indexer v3 (DS4_INDEX_TC=1)",
-        "benchmark_binary_sha256": "85a0c949e730e1f36e63496b803cb7761245fb8b5c1ade1a86d8b1a34bec009a"
+        "benchmark_binary_sha256": "85a0c949e730e1f36e63496b803cb7761245fb8b5c1ade1a86d8b1a34bec009a",
+        "installed_binary_sha256": "589dc713153f9fbca094ace920727759d1034fb17817470e33a58670a08d5d00"
       },
       "power_watts": {
         "stapm": 120,
