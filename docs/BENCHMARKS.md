@@ -30,62 +30,61 @@ The 130,048-token real-code prompt read at **1,464.1 tok/s** and wrote 768 token
 
 The curve is one full run. All readings use the same pinned engine, 32K chunks, GSQ hybrid pack and frozen profile. Indexer scores can change the answer text and draft acceptance, so cold and cached decode changes do not isolate kernel speed. The API retains shared-prefix and turn checkpoints, with tail restore disabled. Quality cases are cold.
 
-**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
-- Each point is a fresh load of the installed service, from the release's frozen expert profile, with no conversation kept from an earlier point.
-- Thinking is off, with a 256-token cap and zero cached input.
-- This setup adds two cards and runs a newer model release and quantization, so it is not a matched comparison with the single-box DeepSeek rows.
+### Other quants on the same engine (benchmark only)
+
+Maya-S IQ2_XXS and Maya-XS v2 IQ1_S use the production engine source and environment, changing the pack, its drafter and its own frozen expert profile. Each has one full run, with fresh loads and zero cached input for the same five-phrase prompts (including 491,520 tokens). Both allocate 524,288 tokens. These comparisons have no installer; [the exact data](../benchmarks/results.json) pin the model files and packing inputs.
+
+#### Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
-| 2,040 | 212.3 | 29.7 | 5/5 |
-| 3,840 | 348.9 | 31.4 | 5/5 |
-| 7,680 | 562.9 | 32.4 | 5/5 |
-| 15,359 | 834.7 | 33.5 | 5/5 |
-| 30,720 | 1,052.9 | 31.7 | 5/5 |
-| 59,933 | 1,331.8 | 32.4 | 5/5 |
-| 122,879 | 1,513.8 | 31.8 | 5/5 |
-| 163,840 | 1,514.9 | 31.0 | 5/5 |
-| 212,992 | 1,481.9 | 32.7 | 5/5 |
-| 245,760 | 1,432.4 | 30.5 | 5/5 |
-| 491,520 | 1,163.8 | 29.9 | 5/5 |
+| 2,040 | 216.6 | 41.7 | 5/5 |
+| 3,840 | 367.1 | 41.0 | 5/5 |
+| 7,680 | 596.4 | 40.7 | 5/5 |
+| 15,359 | 896.4 | 32.3 | 5/5 |
+| 30,720 | 1,182.0 | 37.9 | 5/5 |
+| 59,933 | 1,478.6 | 26.2 | 5/5 |
+| 122,879 | 1,669.2 | 26.3 | 5/5 |
+| 163,840 | 1,692.9 | 36.8 | 5/5 |
+| 212,992 | 1,665.0 | 26.0 | 5/5 |
+| 245,760 | 1,654.6 | 31.5 | 5/5 |
+| 491,520 | 1,423.0 | 33.2 | 5/5 |
 
-The model does not fit in the box's RAM, so experts stream from the NVMe while a prompt is read. The test text routes to few experts and reads faster than real documents. A 130,048-token real-code prompt read at 1,278.5 tok/s and wrote 768 tokens at 36.1 tok/s. With that input already cached (130,047 tokens reused), it wrote at 44.6 tok/s. The same changes ported to Maya v1.1.28 ([issue #510](https://github.com/mw00/project-maya/issues/510)), run side by side with the release's engine later the same day: 1,291 tok/s prefill, 36.2 / 46.1 tok/s decode.
+Real code (130,048 input tokens, 768 output): **1,378.1 prefill / 37.3 decode tok/s**; with 130,047 input tokens cached, **49.4 tok/s** (mean of three answers). The 520,000-token needle found 5/5: 1,388.3 prefill / 26.0 decode. Quality **30/30**; teacher perplexity **7.2498** on 23 × 2,048 tokens.
 
-**Quality: 30/30** with the same coding and maths questions. It was measured before four later changes that keep every result bit-identical, each checked by the engine at load: the fused decode launches, the decode trims, the one-launch decode all-reduce, and each card reading only its own part of the down projection. A deep-needle test found all five values in a 520,000-token prompt at this allocation (before the decode trims).
+#### Maya DS4 HIP Maya-XS v2 IQ1_S dual RX 7900 XTX
 
-A 1,048,576-token allocation also works. Measured on the engine before its decode trims, it found five of five values in a 1,040,000-token prompt and read it at 779 tok/s. Answers there are about 7 % slower than at 524,288, so 512K is the qualified setting.
+| Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
+|---:|---:|---:|---:|
+| 2,040 | 342.8 | 99.0 | 5/5 |
+| 3,840 | 535.1 | 98.0 | 5/5 |
+| 7,680 | 809.2 | 99.0 | 5/5 |
+| 15,359 | 1,100.9 | 98.4 | 5/5 |
+| 30,720 | 1,320.4 | 98.5 | 5/5 |
+| 59,933 | 1,595.6 | 98.0 | 5/5 |
+| 122,879 | 1,762.3 | 95.9 | 5/5 |
+| 163,840 | 1,778.5 | 95.2 | 5/5 |
+| 212,992 | 1,727.3 | 94.1 | 5/5 |
+| 245,760 | 1,703.0 | 94.2 | 5/5 |
+| 491,520 | 1,447.3 | 90.1 | 5/5 |
+
+Real code (130,048 input tokens, 768 output): **1,587.3 prefill / 66.2 decode tok/s**; with 130,047 input tokens cached, **68.0 tok/s** (mean of three answers). The 520,000-token needle found 5/5: 1,413.4 prefill / 89.6 decode. Quality **30/30**; teacher perplexity **7.9435** on 23 × 2,048 tokens.
+
+Maya-S's 178 GB of model weights exceed the combined 48 GB VRAM and 128 GiB RAM available to experts. Uncached experts stream from the NVMe: the engine's `maya:engine_disk_mb` counter recorded 32.1 MB per generated token cold and 14–20 MB with the prompt cached. Decode also depends on the experts each answer selects (26–42 tok/s across this curve). The retrieval filler routes to few experts and reads faster than real text.
+
+Maya-XS v2 (117 GB) almost fits in VRAM + RAM: 0.6 MB read per generated token cold and about 0 cached. It is fastest of the three for decode, with higher perplexity (7.94 vs GSQ 7.37). Maya-XS v2 disk reads per generated token: 0.6 MB cold; 0.1 / 0.0 / 0.0 MB for the three cached answers. These are engine counters, not whole-drive traffic.
 
 ### Maya's own benchmark
 
-`maya.py --bench` is Project Maya's public speed test:
-- it writes three 256-token answers (greedy, thinking off), and decode is their mean;
-- it reads a 2,048- and an 8,192-token prompt cut from Maya's own documentation.
+`maya.py --bench` writes three 256-token answers (greedy, thinking off; decode is their mean) and reads 2,048- and 8,192-token prompts from Maya's documentation. The [driver](../benchmarks/maya_bench.py) and [fixed token inputs](../benchmarks/maya-bench-inputs.json) publish the common workload. The fixture pins its public source and document hashes; the driver uses DeepSeek's explicit chat wrapper.
 
-It measures much shorter prompts than the table above, so its prefill is far lower. The [driver](../benchmarks/maya_bench.py) and [fixed token inputs](../benchmarks/maya-bench-inputs.json) publish the exact common workload. The input fixture records its public source commit and document hashes; the driver uses the explicit DeepSeek chat wrapper, without applying the pack’s Jinja template.
+| Quant | Decode mean | Three questions | Prefill 2,048 / 8,192 |
+|---|---:|---|---:|
+| **GSQ-RCO IQ2_XS** | 60.9 | 62.5 / 50.2 / 70.1 | 210 / 537 |
+| Maya-S IQ2_XXS | 41.7 | 47.0 / 35.1 / 43.0 | 169 / 478 |
+| Maya-XS v2 IQ1_S | 80.7 | 86.4 / 64.5 / 91.2 | 286 / 661 |
 
-The Maya-S comparison engine predates two upstream fixes to that test on HIP: it launched the wrong engine for a DeepSeek config, and it wrapped the questions in the wrong chat markers. So all three rows below ran Maya v1.1.28's procedure on identical token ids, the engine alone. Stock v1.1.28's own `maya.py --bench` agreed within 1 %. Every row ran with the box's three fans held at full speed. The last two rows were measured in the same session: this release's engine source and settings, and the same settings on Maya v1.1.28 with the pull requests. At 32K, 128K and on the real-code prompt they also matched in prefill. Their decode differed only by how many drafted tokens each answer accepted, not by the speed of a step.
-
-| `maya.py --bench`, tok/s | Decode (mean of 3) | Prefill 2,048 | Prefill 8,192 |
-|---|---:|---:|---:|
-| Maya v1.1.28, as released | 37.2 | 70 | 241 |
-| Maya v1.1.28 + our nine proposed pull requests (the same settings) | 41.3 | 180 | 482 |
-| **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** | **41.9** | **177** | **474** |
-
-### Maya v1.1.28 on the same prompts
-
-Maya v1.1.28's setup cannot choose this box (two cards and an integrated helper), so its row uses setup's own form with the pieces upstream has merged:
-- `--tp 2`, which v1.1.28 turns into one card a layer on Maya-S, since its 256-value blocks don't halve the experts' 2,304 columns without the uneven split;
-- the Radeon 8060S as the expert helper, with the same 95 GB pool;
-- the drafter where v1.1.28 places it, since its drafter-placement setting only applies to a tensor-parallel group;
-- the same allocation and frozen profile, and an empty learned store.
-
-Each point is a fresh load. Values are decode / prefill tok/s.
-
-| Input tokens | Maya v1.1.28 | **This release** |
-|---:|---:|---:|
-| 2,040 | 39.1 / 87 | 29.7 / 212 |
-| 30,720 | 32.4 / 524 | 31.7 / 1,053 |
-| 122,879 | 31.7 / 750 | 31.8 / 1,514 |
+GSQ reports the median of three per-load decode means and prefill from that median load. Maya-S and Maya-XS v2 each report one load. Generated text and draft acceptance differ; these decode rates do not isolate kernel speed.
 
 ## Dual RX 7900 XTX: GLM-5.3-Flash
 

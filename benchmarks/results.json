@@ -899,259 +899,6 @@
       "release_id": "strata-qwen-q4xl-4x256k-v1",
       "selection": "winning_setup"
     },
-    "maya-ds4-dual-xtx": {
-      "name": "Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX",
-      "manifest": "ansible/releases/maya-ds4-dual-xtx-512k.yml",
-      "hardware": {
-        "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
-        "helper_gpu": "AMD Radeon 8060S (1002:1586) serves routed experts beside the two cards"
-      },
-      "runtime": {
-        "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-q3-dspark-512k-20261025",
-        "source_commit": "3d86762aa4fa20395174b5ff0df6cf6d530520c6",
-        "upstream": "https://github.com/mw00/project-maya v1.1.21"
-      },
-      "power_watts": {
-        "stapm": 120,
-        "fast": 120,
-        "slow": 120
-      },
-      "cpu": {
-        "governor": "performance",
-        "minimum_khz": 2000000,
-        "boost": true
-      },
-      "gpu_dpm": "high",
-      "context_allocation": 524288,
-      "target": {
-        "quantization": "Maya-S IQ2_XXS + Unsloth UD-Q8_K_XL Engram",
-        "bytes": 380951187664
-      },
-      "draft": {
-        "type": "DSpark",
-        "bytes": 7967713733,
-        "placement": "blocks split across the two cards: block 0 on the second card, blocks 1 and 2 on the lead (DS4_DRAFT_DEV=1,0,0)"
-      },
-      "quality": {
-        "coding": 10,
-        "gsm8k": 10,
-        "math": 10,
-        "total": 30,
-        "thinking": false
-      },
-      "long_context": {
-        "input_tokens": 130048,
-        "output_tokens": 768,
-        "cached_tokens": 0,
-        "prefill_tokens_per_second": 1278.5,
-        "decode_tokens_per_second": 36.1,
-        "request_seconds": 123.2,
-        "reused_prompt": {
-          "cached_tokens": 130047,
-          "decode_tokens_per_second": 44.6,
-          "request_seconds": 17.4
-        },
-        "allocation_tokens": 524288
-      },
-      "model": "DeepSeek-V4.1-Flash-1017",
-      "release_id": "maya-ds4-dual-xtx-512k-v4",
-      "selection": "added_hardware",
-      "context_scaling": [
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 2040,
-          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 212.3,
-          "decode_tokens_per_second": 29.7,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 3840,
-          "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-          "prefill_tokens_per_second": 348.9,
-          "decode_tokens_per_second": 31.4,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 7680,
-          "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 562.9,
-          "decode_tokens_per_second": 32.4,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 15359,
-          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-          "prefill_tokens_per_second": 834.7,
-          "decode_tokens_per_second": 33.5,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 30720,
-          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 1052.9,
-          "decode_tokens_per_second": 31.7,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 59933,
-          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-          "prefill_tokens_per_second": 1331.8,
-          "decode_tokens_per_second": 32.4,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 122879,
-          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 1513.8,
-          "decode_tokens_per_second": 31.8,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 163840,
-          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-          "prefill_tokens_per_second": 1514.9,
-          "decode_tokens_per_second": 31.0,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 212992,
-          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-          "prefill_tokens_per_second": 1481.9,
-          "decode_tokens_per_second": 32.7,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 245760,
-          "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-          "prefill_tokens_per_second": 1432.4,
-          "decode_tokens_per_second": 30.5,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 491520,
-          "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-          "prefill_tokens_per_second": 1163.8,
-          "decode_tokens_per_second": 29.9,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        }
-      ],
-      "context_scaling_note": "Each point: a fresh load of the installed release from its frozen expert profile, no conversation kept from an earlier point, thinking off, 256-token cap, zero cached input, at the 524,288-token allocation.",
-      "maya_bench": {
-        "procedure": "Project Maya v1.1.28's maya.py --bench, DeepSeek on HIP: three 256-token answers (greedy, thinking off; decode is their mean) and 2,048- and 8,192-token prompts of its docs, the engine alone, both engines on identical token ids",
-        "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
-        "this_release": {
-          "decode_mean_tokens_per_second": 41.9,
-          "prefill_tokens_per_second": {
-            "2048": 177,
-            "8192": 474
-          }
-        },
-        "maya_v1_1_28": {
-          "decode_mean_tokens_per_second": 37.2,
-          "prefill_tokens_per_second": {
-            "2048": 70,
-            "8192": 241
-          }
-        },
-        "maya_v1_1_28_own_bench": {
-          "decode_mean_tokens_per_second": 36.9,
-          "prefill_tokens_per_second": {
-            "2048": 70,
-            "8192": 240
-          }
-        },
-        "maya_v1_1_28_with_proposed_prs": {
-          "decode_mean_tokens_per_second": 41.3,
-          "prefill_tokens_per_second": {
-            "2048": 180,
-            "8192": 482
-          },
-          "source": "Maya v1.1.28 + the proposed pull-request series (35 commits), the release's settings without kept conversations, measured beside this_release"
-        },
-        "cooling": "every row with the box fans held at full speed"
-      },
-      "maya_v1_1_28_context_scaling": [
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 2040,
-          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 86.7,
-          "decode_tokens_per_second": 39.1,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 30720,
-          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 524.5,
-          "decode_tokens_per_second": 32.4,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        },
-        {
-          "workload": "deep_retrieval",
-          "allocation_tokens": 524288,
-          "actual_input_tokens": 122879,
-          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 750.5,
-          "decode_tokens_per_second": 31.7,
-          "completion_tokens": 64,
-          "cached_tokens": 0,
-          "needle_passes": 5
-        }
-      ],
-      "manifest_sha256": "4aa5ff8116bae92db281a3392ff402df65ef92dbc764e1efcaa16914e2172045"
-    },
     "maya-glm-dual-xtx": {
       "name": "Maya HIP Maya-M IQ2_S dual RX 7900 XTX",
       "manifest": "ansible/releases/maya-glm-dual-xtx-512k.yml",
@@ -1383,7 +1130,8 @@
         "quantization": "ISTA-DASLab GSQ-RCO IQ2_XS + IQ4_NL Engram; 522 original Q5_K dense tensors, embedding/head Q8_0",
         "bytes": 265821126144,
         "converted_dense_bytes": 8236072960,
-        "active_converted_dense_tensors": 2
+        "active_converted_dense_tensors": 2,
+        "model_bytes": 155225835328
       },
       "draft": {
         "type": "DSpark",
@@ -1568,12 +1316,624 @@
           "prefill_tokens_per_second": {
             "2048": 210,
             "8192": 537
-          }
+          },
+          "decode_question_tokens_per_second": [
+            62.481694815971885,
+            50.19607843137255,
+            70.12930089853167
+          ]
         },
         "aggregation": "median of three per-load decode means; prefill from the load with that median decode mean"
       },
       "manifest_sha256": "9a89d9afa5f8edf74b43819d1e086bc7d5c7ec2dbbde4a7aac6e7f11d963f508",
       "qualification_note": "Pinned v1.1.48 plus RDNA 3 indexer v3 (DS4_INDEX_TC=1), explicit 32768 chunks. One complete retrieval curve, 30 cold reviewed quality cases and PPL on this exact recipe. Real-code and native speed medians from three loads, cached speed the median of three per-load three-answer means. Same pinned GSQ pack, frozen profile, drafter, 512K allocation and memory/power settings. Indexer scores change generated text; cold and cached decode are not stream-matched causal comparisons."
+    },
+    "maya-ds4-maya-s-dual-xtx": {
+      "name": "Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX",
+      "hardware": {
+        "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
+        "helper_gpu": "AMD Radeon 8060S (1002:1586) serves routed experts beside the two cards"
+      },
+      "runtime": {
+        "repository": "https://github.com/pepuscz/project-maya",
+        "release_tag": "maya-ds4-gsq-idxtc-512k-20261102",
+        "source_commit": "8463e3c9c1e843dc13aeca5fea6c71374d26c6a6",
+        "source_tree": "435d7df008729debc4c4da71f6b27a4334ffc673",
+        "upstream": "https://github.com/mw00/project-maya v1.1.48 plus RDNA 3 indexer v3 (DS4_INDEX_TC=1)",
+        "benchmark_binary_sha256": "85a0c949e730e1f36e63496b803cb7761245fb8b5c1ade1a86d8b1a34bec009a"
+      },
+      "power_watts": {
+        "stapm": 120,
+        "fast": 120,
+        "slow": 120
+      },
+      "cpu": {
+        "governor": "performance",
+        "minimum_khz": 2000000,
+        "boost": true
+      },
+      "gpu_dpm": "high",
+      "context_allocation": 524288,
+      "target": {
+        "repository": "peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF",
+        "revision": "c33d87b8c7a3b7d55e71324dc82395587a870b0b",
+        "quantization": "Maya-S IQ2_XXS",
+        "bytes": 178193155104,
+        "files": [
+          {
+            "name": "Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+            "size": 47887697312,
+            "sha256": "1f3437f57042e69f94c141ffbcba0d5610dab63feb07244fb468be4940d6763f"
+          },
+          {
+            "name": "Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+            "size": 47669578400,
+            "sha256": "66501fee8702ffd54e6f065323ab54bb3150d20b10b01922c589e7462c7b5ba6"
+          },
+          {
+            "name": "Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+            "size": 47103347360,
+            "sha256": "3195b23f33337c46a07c48583946d99147c3635412bc4adc6acdc4cf42bf30ad"
+          },
+          {
+            "name": "Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+            "size": 35532532032,
+            "sha256": "d60dba35fac9601cd5c6026439dd980c457a5bb1c009192ea539b220108ea0db"
+          }
+        ],
+        "engram": {
+          "repository": "peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF",
+          "revision": "c33d87b8c7a3b7d55e71324dc82395587a870b0b",
+          "files": [
+            {
+              "name": "Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf",
+              "size": 80641295472,
+              "sha256": "0d93315942c523d82f6dbc0a6e0e1751548e309f3963f96b82f92e8f9bc52e36"
+            },
+            {
+              "name": "Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf",
+              "size": 80643503412,
+              "sha256": "39bbc8cde8b17604fed9a7ba7fc6bc9c5e72e34733657943ac049b4b9ca2d340"
+            }
+          ]
+        },
+        "pack": {
+          "source_commit": "465a981579ff5e91b19ff023721c6661f3c6030b",
+          "argv": [
+            "python3",
+            "tools/ds4/pack_gguf.py",
+            "--model",
+            "Maya-S",
+            "--out",
+            "pack",
+            "--vision",
+            "vision",
+            "--engram",
+            "Engram-Q6_K",
+            "--drafter",
+            "dspark/dspark.json",
+            "--shards",
+            "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+            "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+            "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+            "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+            "--without",
+            "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+            "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf"
+          ],
+          "llama_cpp_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+          "tools_fingerprint": "4cc23a1faf4595ca",
+          "files_sha256": {
+            "tools/ds4/pack_gguf.py": "f45c5c16cbd59d5aa1ad5b22d07f082818d4d806cfa9254b66bc173d9a458859",
+            "tools/ds4/chat_template.jinja": "e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa"
+          }
+        },
+        "model_bytes": 178193155104
+      },
+      "draft": {
+        "type": "DSpark",
+        "repository": "peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF",
+        "revision": "c33d87b8c7a3b7d55e71324dc82395587a870b0b",
+        "file": "dspark/dspark.bin",
+        "bytes": 7967616768,
+        "sha256": "42df65159f980a9189d80597e42b30012c7b10e0dd385a47051f3b2fd659bb7b",
+        "placement": "blocks split across the two cards: block 0 on the second card, blocks 1 and 2 on the lead (DS4_DRAFT_DEV=1,0,0)"
+      },
+      "quality": {
+        "coding": 10,
+        "gsm8k": 10,
+        "math": 10,
+        "total": 30,
+        "thinking": false,
+        "scoring": "Coding execution and reviewed final answers; frozen math_08 reference20/3.",
+        "math_10_output_cap": 4096,
+        "perplexity": {
+          "value": 7.2498,
+          "sequences": 23,
+          "tokens_per_sequence": 2048,
+          "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
+        }
+      },
+      "long_context": {
+        "input_tokens": 130048,
+        "output_tokens": 768,
+        "cached_tokens": 0,
+        "allocation_tokens": 524288,
+        "prefill_tokens_per_second": 1378.1,
+        "decode_tokens_per_second": 37.3,
+        "reused_prompt": {
+          "cached_tokens": 130047,
+          "decode_tokens_per_second": 49.43333333333333,
+          "samples": 3,
+          "loads": 1,
+          "answers_per_load": 3
+        },
+        "aggregation": "one load"
+      },
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "selection": "comparison_baseline",
+      "context_scaling": [
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 2040,
+          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+          "prefill_tokens_per_second": 216.6,
+          "decode_tokens_per_second": 41.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 3840,
+          "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
+          "prefill_tokens_per_second": 367.1,
+          "decode_tokens_per_second": 41.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 7680,
+          "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
+          "prefill_tokens_per_second": 596.4,
+          "decode_tokens_per_second": 40.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 15359,
+          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
+          "prefill_tokens_per_second": 896.4,
+          "decode_tokens_per_second": 32.3,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 1182.0,
+          "decode_tokens_per_second": 37.9,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 59933,
+          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
+          "prefill_tokens_per_second": 1478.6,
+          "decode_tokens_per_second": 26.2,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 1669.2,
+          "decode_tokens_per_second": 26.3,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 163840,
+          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
+          "prefill_tokens_per_second": 1692.9,
+          "decode_tokens_per_second": 36.8,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 212992,
+          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
+          "prefill_tokens_per_second": 1665.0,
+          "decode_tokens_per_second": 26.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 245760,
+          "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
+          "prefill_tokens_per_second": 1654.6,
+          "decode_tokens_per_second": 31.5,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 491520,
+          "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
+          "prefill_tokens_per_second": 1423.0,
+          "decode_tokens_per_second": 33.2,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        }
+      ],
+      "context_scaling_note": "Each point is one fresh load from this quantization\u2019s frozen expert profile, thinking off, 256-token cap and zero cached input at 524,288-token allocation. Identical prompt bytes and benchmark driver across the three DeepSeek quantizations.",
+      "deep_needle": {
+        "workload": "deep_retrieval",
+        "allocation_tokens": 524288,
+        "actual_input_tokens": 520000,
+        "prompt_sha256": "a66b924eb0fbeb6330383ac2aa21fc50a73fc06af10f18ff33b3293370a4adcd",
+        "prefill_tokens_per_second": 1388.3,
+        "decode_tokens_per_second": 26.0,
+        "completion_tokens": 64,
+        "cached_tokens": 0,
+        "needle_passes": 5
+      },
+      "maya_bench": {
+        "procedure": "Project Maya v1.1.28's maya.py --bench, DeepSeek on HIP: three 256-token answers (greedy, thinking off; decode is their mean) and 2,048- and 8,192-token prompts of its docs, the engine alone, both engines on identical token ids",
+        "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
+        "this_release": {
+          "decode_mean_tokens_per_second": 41.703995625568524,
+          "decode_question_tokens_per_second": [
+            47.01906476141498,
+            35.10311540149188,
+            42.98980671379872
+          ],
+          "prefill_tokens_per_second": {
+            "2048": 169.17091383682606,
+            "8192": 478.4990829546383
+          }
+        },
+        "aggregation": "one load"
+      },
+      "benchmark_only": true,
+      "measurement_note": "Production v6 engine source and environment; only the pack, its drafter and its own frozen expert profile differ. One full run: curve, 520K needle, 30 cold quality cases, PPL, one real-code load, one --bench load. Measured binary 85a0c949; the separately installed v6 build is 589dc713.",
+      "disk_read_mb_per_token": {
+        "counter": "maya:engine_disk_mb",
+        "cold": 32.146,
+        "cached": [
+          20.124,
+          14.059,
+          13.89
+        ]
+      }
+    },
+    "maya-ds4-maya-xs-dual-xtx": {
+      "name": "Maya DS4 HIP Maya-XS v2 IQ1_S dual RX 7900 XTX",
+      "hardware": {
+        "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
+        "helper_gpu": "AMD Radeon 8060S (1002:1586) serves routed experts beside the two cards"
+      },
+      "runtime": {
+        "repository": "https://github.com/pepuscz/project-maya",
+        "release_tag": "maya-ds4-gsq-idxtc-512k-20261102",
+        "source_commit": "8463e3c9c1e843dc13aeca5fea6c71374d26c6a6",
+        "source_tree": "435d7df008729debc4c4da71f6b27a4334ffc673",
+        "upstream": "https://github.com/mw00/project-maya v1.1.48 plus RDNA 3 indexer v3 (DS4_INDEX_TC=1)",
+        "benchmark_binary_sha256": "85a0c949e730e1f36e63496b803cb7761245fb8b5c1ade1a86d8b1a34bec009a"
+      },
+      "power_watts": {
+        "stapm": 120,
+        "fast": 120,
+        "slow": 120
+      },
+      "cpu": {
+        "governor": "performance",
+        "minimum_khz": 2000000,
+        "boost": true
+      },
+      "gpu_dpm": "high",
+      "context_allocation": 524288,
+      "target": {
+        "repository": "peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF",
+        "revision": "c33d87b8c7a3b7d55e71324dc82395587a870b0b",
+        "quantization": "Maya-XS v2 IQ1_S",
+        "bytes": 116838698912,
+        "files": [
+          {
+            "name": "Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00001-of-00003.gguf",
+            "size": 47993866016,
+            "sha256": "9d92dd13d4603dbf07720845419963693f4c07ae098e55a5aae2f207dd44d04d"
+          },
+          {
+            "name": "Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00002-of-00003.gguf",
+            "size": 47421853600,
+            "sha256": "b7f26bae6d6fccfb256c911f645289c0aec8459766ef83f6a04d7ed47c7e06c8"
+          },
+          {
+            "name": "Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00003-of-00003.gguf",
+            "size": 21422979296,
+            "sha256": "62b98172562543126204fa2ff18f7d72d75353445ff93f4135d037355b409f35"
+          }
+        ],
+        "engram": {
+          "repository": "peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF",
+          "revision": "c33d87b8c7a3b7d55e71324dc82395587a870b0b",
+          "files": [
+            {
+              "name": "Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf",
+              "size": 80641295472,
+              "sha256": "0d93315942c523d82f6dbc0a6e0e1751548e309f3963f96b82f92e8f9bc52e36"
+            },
+            {
+              "name": "Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf",
+              "size": 80643503412,
+              "sha256": "39bbc8cde8b17604fed9a7ba7fc6bc9c5e72e34733657943ac049b4b9ca2d340"
+            }
+          ]
+        },
+        "pack": {
+          "source_commit": "465a981579ff5e91b19ff023721c6661f3c6030b",
+          "argv": [
+            "python3",
+            "tools/ds4/pack_gguf.py",
+            "--model",
+            "Maya-XS-v2",
+            "--out",
+            "pack",
+            "--vision",
+            "vision",
+            "--engram",
+            "Engram-Q6_K",
+            "--drafter",
+            "dspark/dspark-xs2.json",
+            "--shards",
+            "DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00001-of-00003.gguf",
+            "DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00002-of-00003.gguf",
+            "DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00003-of-00003.gguf"
+          ],
+          "llama_cpp_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+          "tools_fingerprint": "4cc23a1faf4595ca",
+          "files_sha256": {
+            "tools/ds4/pack_gguf.py": "f45c5c16cbd59d5aa1ad5b22d07f082818d4d806cfa9254b66bc173d9a458859",
+            "tools/ds4/chat_template.jinja": "e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa"
+          }
+        },
+        "model_bytes": 116838698912
+      },
+      "draft": {
+        "type": "DSpark",
+        "repository": "peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF",
+        "revision": "c33d87b8c7a3b7d55e71324dc82395587a870b0b",
+        "file": "dspark/dspark-xs2.bin",
+        "bytes": 4251725568,
+        "sha256": "8dfe21082a6cb320f334fddb454630c241c6d44e0463eef4f8b0b07334511779",
+        "placement": "blocks split across the two cards: block 0 on the second card, blocks 1 and 2 on the lead (DS4_DRAFT_DEV=1,0,0)"
+      },
+      "quality": {
+        "coding": 10,
+        "gsm8k": 10,
+        "math": 10,
+        "total": 30,
+        "thinking": false,
+        "scoring": "Coding execution and reviewed final answers; interval whitespace normalized and frozen math_08 reference20/3.",
+        "math_10_output_cap": 4096,
+        "perplexity": {
+          "value": 7.9435,
+          "sequences": 23,
+          "tokens_per_sequence": 2048,
+          "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
+        }
+      },
+      "long_context": {
+        "input_tokens": 130048,
+        "output_tokens": 768,
+        "cached_tokens": 0,
+        "allocation_tokens": 524288,
+        "prefill_tokens_per_second": 1587.3,
+        "decode_tokens_per_second": 66.2,
+        "reused_prompt": {
+          "cached_tokens": 130047,
+          "decode_tokens_per_second": 68.03333333333333,
+          "samples": 3,
+          "loads": 1,
+          "answers_per_load": 3
+        },
+        "aggregation": "one load"
+      },
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "selection": "comparison_baseline",
+      "context_scaling": [
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 2040,
+          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+          "prefill_tokens_per_second": 342.8,
+          "decode_tokens_per_second": 99.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 3840,
+          "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
+          "prefill_tokens_per_second": 535.1,
+          "decode_tokens_per_second": 98.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 7680,
+          "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
+          "prefill_tokens_per_second": 809.2,
+          "decode_tokens_per_second": 99.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 15359,
+          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
+          "prefill_tokens_per_second": 1100.9,
+          "decode_tokens_per_second": 98.4,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 1320.4,
+          "decode_tokens_per_second": 98.5,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 59933,
+          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
+          "prefill_tokens_per_second": 1595.6,
+          "decode_tokens_per_second": 98.0,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 1762.3,
+          "decode_tokens_per_second": 95.9,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 163840,
+          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
+          "prefill_tokens_per_second": 1778.5,
+          "decode_tokens_per_second": 95.2,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 212992,
+          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
+          "prefill_tokens_per_second": 1727.3,
+          "decode_tokens_per_second": 94.1,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 245760,
+          "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
+          "prefill_tokens_per_second": 1703.0,
+          "decode_tokens_per_second": 94.2,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 524288,
+          "actual_input_tokens": 491520,
+          "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
+          "prefill_tokens_per_second": 1447.3,
+          "decode_tokens_per_second": 90.1,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5
+        }
+      ],
+      "context_scaling_note": "Each point is one fresh load from this quantization\u2019s frozen expert profile, thinking off, 256-token cap and zero cached input at 524,288-token allocation. Identical prompt bytes and benchmark driver across the three DeepSeek quantizations.",
+      "deep_needle": {
+        "workload": "deep_retrieval",
+        "allocation_tokens": 524288,
+        "actual_input_tokens": 520000,
+        "prompt_sha256": "a66b924eb0fbeb6330383ac2aa21fc50a73fc06af10f18ff33b3293370a4adcd",
+        "prefill_tokens_per_second": 1413.4,
+        "decode_tokens_per_second": 89.6,
+        "completion_tokens": 64,
+        "cached_tokens": 0,
+        "needle_passes": 5
+      },
+      "maya_bench": {
+        "procedure": "Project Maya v1.1.28's maya.py --bench, DeepSeek on HIP: three 256-token answers (greedy, thinking off; decode is their mean) and 2,048- and 8,192-token prompts of its docs, the engine alone, both engines on identical token ids",
+        "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
+        "this_release": {
+          "decode_mean_tokens_per_second": 80.6961290314776,
+          "decode_question_tokens_per_second": [
+            86.38142799298151,
+            64.47063564017326,
+            91.23632346127802
+          ],
+          "prefill_tokens_per_second": {
+            "2048": 286.1694100550541,
+            "8192": 661.461319208378
+          }
+        },
+        "aggregation": "one load"
+      },
+      "benchmark_only": true,
+      "measurement_note": "Production v6 engine source and environment; only the pack, its drafter and its own frozen expert profile differ. One full run: curve, 520K needle, 30 cold quality cases, PPL, one real-code load, one --bench load. Measured binary 85a0c949; the separately installed v6 build is 589dc713.",
+      "disk_read_mb_per_token": {
+        "counter": "maya:engine_disk_mb",
+        "cold": 0.643,
+        "cached": [
+          0.134,
+          0.0,
+          0.0
+        ]
+      }
     }
   },
   "winning_setups": {

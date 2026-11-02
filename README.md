@@ -27,20 +27,29 @@ Each setup supports **one conversation at up to 512K context**. Speeds are token
 
 Real-code and native speeds are medians of three loads. Cached decode uses each load’s three-answer mean.
 
-### DeepSeek-V4.1-Flash-1017 Maya-S IQ2_XXS (alternative)
+### DeepSeek-V4.1-Flash-1017: other quants on the same engine
 
-**Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX** uses the 178 GB Maya-S quant and Maya v1.1.21 with engine patches. [Ansible recipe](ansible/releases/maya-ds4-dual-xtx-512k.yml).
+Maya-S IQ2_XXS and Maya-XS v2 IQ1_S ran on the production engine and settings with their own packs, drafters and frozen profiles. These are benchmark-only comparisons; [measurement details](docs/BENCHMARKS.md#other-quants-on-the-same-engine-benchmark-only) pin their files. Maya-S has the lowest perplexity and streams uncached experts from the NVMe.
 
-**Quality: 30/30. 520K needle: 5/5.** All rows use a 524,288-token allocation.
+<!-- quant-comparison-note -->
+Maya-XS v2 (117 GB) almost fits in VRAM + RAM: 0.6 MB read per generated token cold and about 0 cached. It is fastest of the three for decode, with higher perplexity (7.94 vs GSQ 7.37).
+<!-- /quant-comparison-note -->
 
-| Test | Decode | Prefill |
-|---|---:|---:|
-| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **41.9** | **177 / 474** |
-| Public five-phrase prompt, 2K (2,040 input tokens) | 29.7 | 212 |
-| 32K (30,720) | 31.7 | 1,053 |
-| 128K (122,879) | 31.8 | 1,514 |
-| 480K (491,520) | 29.9 | 1,164 |
-| Real code, 130,048 tokens: cold / prompt cached | **36.1 / 44.6** | **1,278** |
+<!-- quant-comparison-table -->
+| | **GSQ-RCO IQ2_XS** | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
+|---|---:|---:|---:|
+| Model weights, without the Engram tables | 155 GB | 178 GB | 117 GB |
+| Perplexity (23 × 2,048 tokens; lower is better) | 7.3695 | 7.2498 | 7.9435 |
+| Quality · 520K needle | 30/30 · 5/5 | 30/30 · 5/5 | 30/30 · 5/5 |
+| `maya.py --bench` decode | 60.9 | 41.7 | 80.7 |
+| `maya.py --bench` prefill, 2K / 8K | 210 / 537 | 169 / 478 | 286 / 661 |
+| 128K five-phrase (122,879): decode / prefill | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
+| 480K five-phrase (491,520): decode / prefill | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
+| Real code, 130,048 tokens: prefill | 1,464 | 1,378 | 1,587 |
+| Real code: decode cold / prompt cached | 52.5 / 65.7 | 37.3 / 49.4 | 66.2 / 68.0 |
+<!-- /quant-comparison-table -->
+
+GSQ's `--bench` and real-code values are medians of three loads; the other two are one load each.
 
 ### GLM-5.3-Flash Maya-M IQ2_S
 
@@ -72,7 +81,7 @@ The 2K and 32K rows use a 131,072-token allocation; the remaining rows use 524,2
 
 ### Performance curves
 
-Cold five-phrase retrieval, one request per point. Both models read the same text; token counts vary by model. DeepSeek uses a 512K allocation throughout; GLM uses 128K–512K, as recorded in the [measurement details](docs/BENCHMARKS.md).
+Cold five-phrase retrieval, one request per point. Both models read the same text; token counts vary by model. DeepSeek runs three quants at a 512K allocation throughout; GLM uses 128K–512K, as recorded in the [measurement details](docs/BENCHMARKS.md).
 
 ![GLM-5.3-Flash and DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with two RX 7900 XTX cards and a Radeon 8060S helper](docs/benchmark-dual-xtx.svg)
 
@@ -98,7 +107,6 @@ bin/strixctl verify
 | Setup | `STRIX_SYSTEM` | Free disk needed |
 |---|---|---:|
 | **DeepSeek GSQ-RCO** | `maya-ds4-gsq-dual-xtx` | ~335 GB |
-| DeepSeek Maya-S | `maya-ds4-dual-xtx` | ~470 GB |
 | GLM Maya-M | `maya-glm-dual-xtx` | ~240 GB |
 
 The installer verifies the hardware and artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`. Dual-card recipes use ROCm 7.2.4; pinned build details are in [SOURCES.md](docs/SOURCES.md).
