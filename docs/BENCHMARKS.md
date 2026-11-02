@@ -28,6 +28,8 @@ Each retrieval point is a fresh load from the frozen expert profile, thinking of
 
 The 130,048-token real-code prompt read at **1,464.1 tok/s** and wrote 768 tokens at **52.5 tok/s**. With 130,047 tokens cached, decode was **65.7 tok/s**. These are medians of three fresh loads; cached speed is the median of each load's three-answer mean. Fixed-input native decode was **60.9 tok/s**, the median of three per-load means; **210 / 537 tok/s** prefill comes from the load with that median. The 520,000-token needle found 5/5 values (**1,402.2 prefill / 53.4 decode**). Quality **30/30**; teacher perplexity **7.3695** over 47,081 scored tokens in 23 sequences.
 
+Against stock v1.1.48 with the same pack, prompt reading on the curve is 7.5% faster at 128K, 12.5% at 240K and 21% at 480K; 8K reads 6% slower (587 versus 625 tok/s). The paired 130K real-code median improves 5.8%. Native decode is essentially flat (60.9 versus 61.4 tok/s).
+
 The curve is one full run. All readings use the same pinned engine, 32K chunks, GSQ hybrid pack and frozen profile. Indexer scores can change the answer text and draft acceptance, so cold and cached decode changes do not isolate kernel speed. The API retains shared-prefix and turn checkpoints, with tail restore disabled. Quality cases are cold.
 
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
