@@ -8,27 +8,27 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 ![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)
 
-**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** (production), on the pinned, unmodified v1.1.46 engine with 32K prompt chunks and hybrid pack at 512K (524,288 tokens allocated):
+**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** (production), on the pinned, unmodified v1.1.48 engine with 32K prompt chunks and hybrid pack at 512K (524,288 tokens allocated):
 
 Each retrieval point is a fresh load from the frozen expert profile, thinking off, a 256-token cap and zero cached input. It uses the same prompt bytes and frozen benchmark driver as the comparison recipes.
 
 | Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |
 |---:|---:|---:|---:|
-| 2,040 | 249.6 | 57.0 | 5/5 |
-| 3,840 | 406.7 | 58.0 | 5/5 |
-| 7,680 | 588.7 | 57.0 | 5/5 |
-| 15,359 | 894.3 | 57.7 | 5/5 |
-| 30,720 | 1,120.7 | 55.9 | 5/5 |
-| 59,933 | 1,376.3 | 56.3 | 5/5 |
-| 122,879 | 1,561.0 | 55.9 | 5/5 |
-| 163,840 | 1,564.9 | 53.3 | 5/5 |
-| 212,992 | 1,508.7 | 51.7 | 5/5 |
-| 245,760 | 1,475.8 | 53.7 | 5/5 |
-| 491,520 | 1,184.5 | 52.3 | 5/5 |
+| 2,040 | 255.9 | 58.7 | 5/5 |
+| 3,840 | 407.6 | 58.0 | 5/5 |
+| 7,680 | 624.6 | 56.6 | 5/5 |
+| 15,359 | 901.0 | 55.7 | 5/5 |
+| 30,720 | 1,119.0 | 56.1 | 5/5 |
+| 59,933 | 1,384.4 | 57.4 | 5/5 |
+| 122,879 | 1,556.5 | 52.6 | 5/5 |
+| 163,840 | 1,562.0 | 53.3 | 5/5 |
+| 212,992 | 1,518.7 | 51.8 | 5/5 |
+| 245,760 | 1,481.7 | 55.2 | 5/5 |
+| 491,520 | 1,183.3 | 52.0 | 5/5 |
 
-The 130,048-token real-code prompt read at 1,388.2 tok/s and wrote 768 tokens at 54.8 tok/s. With 130,047 tokens cached, decode averaged **60.6 tok/s** across three consecutive 768-token answers. The 520,000-token needle found 5/5 values (1,150.4 prefill / 50.1 decode, 64 output tokens). Fixed-input native benchmark: **60.4 decode**, **212 / 533 prefill**. Quality **30/30**; teacher perplexity **7.3704** over 47,081 scored tokens in 23 sequences. Decode varies with generated text and draft acceptance.
+The 130,048-token real-code prompt read at 1,380.0 tok/s and wrote 768 tokens at 56.7 tok/s. With 130,047 tokens cached, decode averaged **60.2 tok/s** across three consecutive 768-token answers. The 520,000-token needle found 5/5 values (1,149.4 prefill / 50.3 decode). Fixed-input native benchmark: **61.4 decode**, **210 / 534 prefill**. Quality **30/30**; teacher perplexity **7.3638** over 47,081 scored tokens in 23 sequences. Decode varies with generated text and draft acceptance.
 
-All readings use the same stock engine, 32K chunk setting, GSQ hybrid pack and frozen expert profile. The API retains shared-prefix and turn checkpoints, with the tail restore point disabled. Quality cases are cold. The reviewed references use20/3 for math_08 and the final$64 for gsm_06; its parser selected an intermediate8.
+All readings use the same stock engine, 32K chunks, GSQ hybrid pack and frozen profile. The API retains shared-prefix and turn checkpoints, with tail restore disabled. Quality cases are cold.
 
 **Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX**, measured on the installed 512K release (a 524,288-token allocation). It uses the same five-phrase prompts as the single-box DeepSeek rows below (identical bytes, pinned by SHA-256), plus one of 491,520 tokens.
 - Each point is a fresh load of the installed service, from the release's frozen expert profile, with no conversation kept from an earlier point.

@@ -1,6 +1,6 @@
 {
   "schema": 11,
-  "published_at": "2026-11-01T19:37:07.619407+00:00",
+  "published_at": "2026-11-02T05:15:01.278380+00:00",
   "default_system": "strata-qwen-q4xl",
   "hardware": {
     "system": "BOSGAME M5 / Sixunited AXB35-02",
@@ -1360,12 +1360,12 @@
       },
       "runtime": {
         "repository": "https://github.com/mw00/project-maya",
-        "release_tag": "v1.1.46",
-        "source_commit": "3589d6f12a3f77e813b184b51a586f8fc3de2185",
-        "source_tree": "ccac9fe20e1b19de44c85000de41b9c88278a73a",
-        "upstream": "https://github.com/mw00/project-maya v1.1.46, unmodified",
-        "benchmark_binary_sha256": "c1bc4b05a79d93dba4b293214ae2206cd202c0d8087876ebd43d615d0ea77cb8",
-        "installed_binary_sha256": "29c2c5fb230eb6001aea1cf0c3e47d9340b97b1c42d1c5973c7da4628da3cf5c"
+        "release_tag": "v1.1.48",
+        "source_commit": "465a981579ff5e91b19ff023721c6661f3c6030b",
+        "source_tree": "9c34346c31e056397a214c2e3a8c145fc0e9eff0",
+        "upstream": "https://github.com/mw00/project-maya v1.1.48, unmodified",
+        "benchmark_binary_sha256": "5232e657a45ba5fbb3c8e314c50a5df5d0ea8b5e66c33a1006afb6496af66d79",
+        "installed_binary_sha256": "443017a14dceec580ad0bfd4da1210c97f6160d26b3c6f672b6ab4c0ea63eb86"
       },
       "power_watts": {
         "stapm": 120,
@@ -1396,10 +1396,10 @@
         "math": 10,
         "total": 30,
         "thinking": false,
-        "scoring": "Coding execution and reviewed final answers; math_08 reference20/3, gsm_06 final64.",
+        "scoring": "Coding execution and reviewed final answers; frozen math_08 reference20/3.",
         "math_10_output_cap": 4096,
         "perplexity": {
-          "value": 7.3704,
+          "value": 7.3638,
           "sequences": 23,
           "tokens_per_sequence": 2048,
           "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
@@ -1409,20 +1409,20 @@
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 1388.2,
-        "decode_tokens_per_second": 54.8,
-        "request_seconds": 107.883,
+        "prefill_tokens_per_second": 1380.0,
+        "decode_tokens_per_second": 56.7,
+        "request_seconds": 107.972,
         "reused_prompt": {
           "cached_tokens": 130047,
-          "decode_tokens_per_second": 60.6,
-          "request_seconds": 12.86,
+          "decode_tokens_per_second": 60.2,
+          "request_seconds": 12.94,
           "samples": 3,
           "aggregation": "arithmetic mean of three consecutive cached answers"
         },
         "allocation_tokens": 524288
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "release_id": "maya-ds4-gsq-dual-xtx-512k-v4",
+      "release_id": "maya-ds4-gsq-dual-xtx-512k-v5",
       "selection": "added_hardware",
       "context_scaling": [
         {
@@ -1430,8 +1430,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 2040,
           "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 249.6,
-          "decode_tokens_per_second": 57.0,
+          "prefill_tokens_per_second": 255.9,
+          "decode_tokens_per_second": 58.7,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1441,7 +1441,7 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 3840,
           "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-          "prefill_tokens_per_second": 406.7,
+          "prefill_tokens_per_second": 407.6,
           "decode_tokens_per_second": 58.0,
           "completion_tokens": 64,
           "cached_tokens": 0,
@@ -1452,8 +1452,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 7680,
           "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 588.7,
-          "decode_tokens_per_second": 57.0,
+          "prefill_tokens_per_second": 624.6,
+          "decode_tokens_per_second": 56.6,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1463,8 +1463,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 15359,
           "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-          "prefill_tokens_per_second": 894.3,
-          "decode_tokens_per_second": 57.7,
+          "prefill_tokens_per_second": 901.0,
+          "decode_tokens_per_second": 55.7,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1474,8 +1474,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 30720,
           "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 1120.7,
-          "decode_tokens_per_second": 55.9,
+          "prefill_tokens_per_second": 1119.0,
+          "decode_tokens_per_second": 56.1,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1485,8 +1485,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 59933,
           "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-          "prefill_tokens_per_second": 1376.3,
-          "decode_tokens_per_second": 56.3,
+          "prefill_tokens_per_second": 1384.4,
+          "decode_tokens_per_second": 57.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1496,8 +1496,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 122879,
           "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 1561.0,
-          "decode_tokens_per_second": 55.9,
+          "prefill_tokens_per_second": 1556.5,
+          "decode_tokens_per_second": 52.6,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1507,7 +1507,7 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 163840,
           "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-          "prefill_tokens_per_second": 1564.9,
+          "prefill_tokens_per_second": 1562.0,
           "decode_tokens_per_second": 53.3,
           "completion_tokens": 64,
           "cached_tokens": 0,
@@ -1518,8 +1518,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 212992,
           "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-          "prefill_tokens_per_second": 1508.7,
-          "decode_tokens_per_second": 51.7,
+          "prefill_tokens_per_second": 1518.7,
+          "decode_tokens_per_second": 51.8,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1529,8 +1529,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 245760,
           "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-          "prefill_tokens_per_second": 1475.8,
-          "decode_tokens_per_second": 53.7,
+          "prefill_tokens_per_second": 1481.7,
+          "decode_tokens_per_second": 55.2,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1540,8 +1540,8 @@
           "allocation_tokens": 524288,
           "actual_input_tokens": 491520,
           "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-          "prefill_tokens_per_second": 1184.5,
-          "decode_tokens_per_second": 52.3,
+          "prefill_tokens_per_second": 1183.3,
+          "decode_tokens_per_second": 52.0,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5
@@ -1553,8 +1553,8 @@
         "allocation_tokens": 524288,
         "actual_input_tokens": 520000,
         "prompt_sha256": "a66b924eb0fbeb6330383ac2aa21fc50a73fc06af10f18ff33b3293370a4adcd",
-        "prefill_tokens_per_second": 1150.4,
-        "decode_tokens_per_second": 50.1,
+        "prefill_tokens_per_second": 1149.4,
+        "decode_tokens_per_second": 50.3,
         "completion_tokens": 64,
         "cached_tokens": 0,
         "needle_passes": 5
@@ -1563,15 +1563,15 @@
         "procedure": "Project Maya v1.1.28's maya.py --bench, DeepSeek on HIP: three 256-token answers (greedy, thinking off; decode is their mean) and 2,048- and 8,192-token prompts of its docs, the engine alone, both engines on identical token ids",
         "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
         "this_release": {
-          "decode_mean_tokens_per_second": 60.4,
+          "decode_mean_tokens_per_second": 61.4,
           "prefill_tokens_per_second": {
-            "2048": 212,
-            "8192": 533
+            "2048": 210,
+            "8192": 534
           }
         }
       },
-      "manifest_sha256": "aa393c2c26f93412c51b2ffb015d38ad7b1266c49669929ad9267d6bea1d3cfd",
-      "qualification_note": "Stock v1.1.46 with explicit32768 chunks throughout. All 12 cold retrieval/needle points, 30 quality cases and PPL measured on this engine/recipe. Real-code cold plus three cached answers and fixed-input native benchmark on the identical engine/recipe; cached decode is the arithmetic mean of the three consecutive reads. Same pinned GSQ pack, frozen profile, drafter, 512K allocation and memory/power settings."
+      "manifest_sha256": "75d12a40fdb90649f74dd1afcdcb9ae692629a83d5539a31a1c36c139b6962f9",
+      "qualification_note": "Stock v1.1.48 with explicit32768 chunks throughout. All 12 cold retrieval/needle points, 30 quality cases and PPL measured on this engine/recipe. Real-code cold plus three cached answers and fixed-input native benchmark on the identical engine/recipe; cached decode is the arithmetic mean of the three consecutive reads. Same pinned GSQ pack, frozen profile, drafter, 512K allocation and memory/power settings."
     }
   },
   "winning_setups": {
