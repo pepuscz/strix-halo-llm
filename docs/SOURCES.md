@@ -24,7 +24,7 @@ manifest.
 
 | Component | Pinned source |
 |---|---|
-| Runtime | [mw00/project-maya v1.1.48](https://github.com/mw00/project-maya/tree/v1.1.48), lightweight tag and commit `465a981579ff5e91b19ff023721c6661f3c6030b`, tree `9c34346c31e056397a214c2e3a8c145fc0e9eff0`; unmodified source. Explicit 32,768-token prefill chunks |
+| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-gsq-idxtc-512k-20261102), annotated tag `maya-ds4-gsq-idxtc-512k-20261102` (object `1c2025b2e909d136a179cca27d2db4b90e676d7e`), commit `8463e3c9c1e843dc13aeca5fea6c71374d26c6a6`, tree `435d7df008729debc4c4da71f6b27a4334ffc673`: [upstream v1.1.48](https://github.com/mw00/project-maya/tree/v1.1.48) plus the RDNA 3 indexer. `DS4_INDEX_TC=1`; explicit 32,768-token prefill chunks |
 | Pack tool | Commit `c87b26c96031f11b5ae1df126629aea200698a8c`’s `tools/ds4/pack_gguf.py` (the unchanged v1.1.36 pack tool), then [`convert-dense-q8_0.py`](../ansible/roles/maya_runtime/files/convert-dense-q8_0.py), both SHA-256 pinned. The hybrid retains 522 original Q5_K dense tensors and uses Q8_0 only for `embed.weight` and `head.weight`. The complete qualified side-file layout (8,236,072,960 bytes) is reproduced; the other converted entries are unused. Routed experts and Engram tables stay in the downloaded files. [Pack metadata equivalence](../benchmarks/gsq-pack-equivalence.json) |
 | GGML | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d), commit `3cf03257f219afbe7334045ff7c6a06ac68c627d`, archive SHA-256 and tree fingerprint pinned |
 | ROCm, rocBLAS | The same ROCm 7.2.4 userspace and patched rocBLAS as the Maya-S recipe below |

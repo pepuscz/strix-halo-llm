@@ -161,7 +161,7 @@ class ReleaseValidatorTest(unittest.TestCase):
 
     def test_gsq_validates_once_filled_and_rejects_drift(self) -> None:
         data = self.gsq()
-        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v5")
+        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v6")
         maya = data["strix_maya"]
         self.assertEqual((maya["model_subdirectory"], maya["dense_q8_0"]["tensors"], maya["dense_q8_0"]["size"]),
                          ("IQ2_XS", 524, 8236072960))
@@ -169,7 +169,7 @@ class ReleaseValidatorTest(unittest.TestCase):
                          | {"ROCBLAS_TENSILE_LIBPATH": data["strix_paths"]["release"] + "/rocm/lib/rocblas/library",
                             "DS4_LT_STORE": data["strix_paths"]["state"] + "/lt-picks.txt",
                             "MAYA_DS4_SLOT_DIR": data["strix_paths"]["state"] + "/ds4-slots",
-                            "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0"})
+                            "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0", "DS4_INDEX_TC": "1"})
         for mutate, message in (
             (lambda d: d["strix_maya"].update(model_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
             (lambda d: d["strix_target"]["files"][1].update(local_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
@@ -179,6 +179,7 @@ class ReleaseValidatorTest(unittest.TestCase):
             (lambda d: d["strix_maya"]["dense_q8_0"].update(active_tensors=["head.weight"]), "dense_q8_0 drifted"),
             (lambda d: d["strix_maya"]["ds4_geometry"].update(dspark_block_size=5), "ds4_geometry"),
             (lambda d: d["strix_maya"]["server"]["env"].update(DS4_DECODE_TRIM="7"), "environment drifted: DS4_DECODE_TRIM"),
+            (lambda d: d["strix_maya"]["server"]["env"].pop("DS4_INDEX_TC"), "environment drifted: DS4_INDEX_TC"),
             (lambda d: d["strix_qualification"]["answer_quality"].update(math=9), "sum to the total"),
         ):
             broken = copy.deepcopy(data)
