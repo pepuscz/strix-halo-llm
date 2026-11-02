@@ -12,7 +12,7 @@ Each setup supports **one conversation at up to 512K context**. Speeds are token
 
 ### DeepSeek-V4.1-Flash-1017 GSQ-RCO IQ2_XS (production)
 
-**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** uses [ISTA-DASLab's GSQ-RCO quant](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF) and Maya v1.1.48 with the RDNA 3 indexer (+21% prompt reading at 480K versus stock), using 32K prompt chunks. [Ansible recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml).
+**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** uses [ISTA-DASLab's GSQ-RCO quant](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF) and Maya v1.1.48 with the RDNA 3 indexer, using 32K prompt chunks. [Ansible recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml).
 
 **Quality: 30/30. Perplexity: 7.3695** (23 × 2,048 tokens). **520K needle: 5/5.** All rows use a 524,288-token allocation.
 
