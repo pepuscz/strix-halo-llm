@@ -72,7 +72,7 @@ Real code (130,048 input tokens, 768 output): **1,587.3 prefill / 66.2 decode to
 
 Maya-S's 178 GB of model weights exceed the combined 48 GB VRAM and 128 GiB RAM available to experts. Uncached experts stream from the NVMe: the engine's `maya:engine_disk_mb` counter recorded 32.1 MB per generated token cold and 14–20 MB with the prompt cached. Decode also depends on the experts each answer selects (26–42 tok/s across this curve). The retrieval filler routes to few experts and reads faster than real text.
 
-Maya-XS v2 (117 GB) almost fits in VRAM + RAM: 0.6 MB read per generated token cold and about 0 cached. It is fastest of the three for decode, with higher perplexity (7.94 vs GSQ 7.37). Maya-XS v2 disk reads per generated token: 0.6 MB cold; 0.1 / 0.0 / 0.0 MB for the three cached answers. These are engine counters, not whole-drive traffic.
+Maya-XS v2 (117 GB) almost fits in VRAM + RAM: the same counter recorded 0.6 MB per generated token cold and 0.1 / 0.0 / 0.0 MB for the three cached answers. It decodes fastest of the three, at a higher perplexity (7.94 vs GSQ 7.37). These are engine counters, not whole-drive traffic.
 
 ### Maya's own benchmark
 

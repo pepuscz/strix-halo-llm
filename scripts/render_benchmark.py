@@ -169,7 +169,7 @@ def render_comparison_readme(data, text):
     return before + start + '\n' + note + '\n' + end + after
 
 
-def xs_summary(data):
+def xs_summary(data, detailed=False):
     xs = data['systems'][COMPARISONS[2]]
     others = [data['systems'][sid] for sid in COMPARISONS[:2]]
     disk = xs['disk_read_mb_per_token']
@@ -183,14 +183,18 @@ def xs_summary(data):
                   for other in others)
     note = (f"Maya-XS v2 ({xs['target']['model_bytes']/1e9:.0f} GB) almost fits in VRAM + RAM: "
             f"{disk['cold']:.1f} MB read per generated token cold and about {round(cached,1):g} cached. ")
+    if detailed:
+        note = (f"Maya-XS v2 ({xs['target']['model_bytes']/1e9:.0f} GB) almost fits in VRAM + RAM: "
+                f"the same counter recorded {disk['cold']:.1f} MB per generated token cold and "
+                + ' / '.join(reading(x) for x in disk['cached']) + ' MB for the three cached answers. ')
     if fastest:
-        note += 'It is fastest of the three for decode'
+        note += 'It decodes fastest of the three' if detailed else 'It is fastest of the three for decode' 
     else:
         note += 'Its perplexity is'
     xp = xs['quality']['perplexity']['value']
     gp = others[0]['quality']['perplexity']['value']
     if fastest:
-        note += ', with higher perplexity' if xp > gp else ', with perplexity'
+        note += (', at a higher perplexity' if detailed else ', with higher perplexity') if xp > gp else ', with perplexity'
     note += f" ({xp:.2f} vs GSQ {gp:.2f})."
     return note
 
@@ -208,7 +212,7 @@ def render_quant_details(data, text):
     sd = maya_s['disk_read_mb_per_token']
     speeds = [row['decode_tokens_per_second'] for row in maya_s['context_scaling']]
     lines += [f"Maya-S's {maya_s['target']['model_bytes']/1e9:.0f} GB of model weights exceed the combined 48 GB VRAM and 128 GiB RAM available to experts. Uncached experts stream from the NVMe: the engine's `maya:engine_disk_mb` counter recorded {reading(sd['cold'])} MB per generated token cold and {reading(min(sd['cached']),0)}–{reading(max(sd['cached']),0)} MB with the prompt cached. Decode also depends on the experts each answer selects ({reading(min(speeds),0)}–{reading(max(speeds),0)} tok/s across this curve). The retrieval filler routes to few experts and reads faster than real text.",'',
-              xs_summary(data) + ' Maya-XS v2 disk reads per generated token: '+reading(disk['cold'])+' MB cold; '+ ' / '.join(reading(x) for x in disk['cached'])+' MB for the three cached answers. These are engine counters, not whole-drive traffic.','',
+              xs_summary(data, detailed=True) + ' These are engine counters, not whole-drive traffic.','',
               "### Maya's own benchmark",'',
               "`maya.py --bench` writes three 256-token answers (greedy, thinking off; decode is their mean) and reads 2,048- and 8,192-token prompts from Maya's documentation. The [driver](../benchmarks/maya_bench.py) and [fixed token inputs](../benchmarks/maya-bench-inputs.json) publish the common workload. The fixture pins its public source and document hashes; the driver uses DeepSeek's explicit chat wrapper.",'',
               '| Quant | Decode mean | Three questions | Prefill 2,048 / 8,192 |','|---|---:|---|---:|']
