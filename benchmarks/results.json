@@ -1,6 +1,6 @@
 {
   "schema": 11,
-  "published_at": "2026-11-02T04:55:12.166476+00:00",
+  "published_at": "2026-11-02T05:15:01.278380+00:00",
   "default_system": "strata-qwen-q4xl",
   "hardware": {
     "system": "BOSGAME M5 / Sixunited AXB35-02",
@@ -1364,7 +1364,8 @@
         "source_commit": "465a981579ff5e91b19ff023721c6661f3c6030b",
         "source_tree": "9c34346c31e056397a214c2e3a8c145fc0e9eff0",
         "upstream": "https://github.com/mw00/project-maya v1.1.48, unmodified",
-        "benchmark_binary_sha256": "5232e657a45ba5fbb3c8e314c50a5df5d0ea8b5e66c33a1006afb6496af66d79"
+        "benchmark_binary_sha256": "5232e657a45ba5fbb3c8e314c50a5df5d0ea8b5e66c33a1006afb6496af66d79",
+        "installed_binary_sha256": "443017a14dceec580ad0bfd4da1210c97f6160d26b3c6f672b6ab4c0ea63eb86"
       },
       "power_watts": {
         "stapm": 120,
