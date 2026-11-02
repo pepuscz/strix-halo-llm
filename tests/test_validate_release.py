@@ -19,7 +19,6 @@ assert SPEC is not None and SPEC.loader is not None
 VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
 GLM = ROOT / "ansible/releases/maya-glm-dual-xtx-512k.yml"
-DS4 = ROOT / "ansible/releases/maya-ds4-dual-xtx-512k.yml"
 GSQ = ROOT / "ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml"
 DUMMY_HEX64 = "0123456789abcdef" * 4
 # Typed dummies where the validator requires a type other than a 64-hex digest.
@@ -120,18 +119,19 @@ class ReleaseValidatorTest(unittest.TestCase):
                 self.assert_fails(broken, message)
 
 
-    def ds4(self) -> dict:
-        return yaml.safe_load(DS4.read_text(encoding="utf-8"))
+    def gsq(self) -> dict:
+        data = without_pending(yaml.safe_load(GSQ.read_text(encoding="utf-8")))
+        data["strix_qualification"]["deep_needle"]["values"] = "5/5"   # (the dummy "55/55" is the ladder's form)
+        return data
 
-    def test_ds4_validates_once_filled_and_rejects_drift(self) -> None:
-        data = without_pending(self.ds4())
-        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-dual-xtx-512k-v4")
-        env = data["strix_maya"]["server"]["env"]
-        self.assertEqual((env["MAYA_DS4_SLOT_DIR"], env["DS4_DECODE_TRIM"]),
-                         (data["strix_paths"]["state"] + "/ds4-slots", "15"))
+    def test_gsq_validates_once_filled_and_rejects_drift(self) -> None:
+        data = self.gsq()
+        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v6")
+        maya = data["strix_maya"]
+        self.assertEqual((maya["model_subdirectory"], maya["dense_q8_0"]["tensors"], maya["dense_q8_0"]["size"]),
+                         ("IQ2_XS", 524, 8236072960))
+        self.assertEqual(maya["server"]["env"], {'DS4_INDEX_TC': '1', 'DS4_COMMIT_CAP_GB': '145', 'ROCBLAS_USE_HIPBLASLT': '0', 'ROCBLAS_TENSILE_LIBPATH': '/opt/strix-halo/releases/maya-ds4-gsq-dual-xtx-512k-v6/rocm/lib/rocblas/library', 'DS4_HELPER': '2', 'DS4_HELPER_GB': '95', 'DS4_WARM_CAP_GB': '14.9', 'DS4_HELPER_CHECK': '1', 'DS4_LANE_SPIN_US': '200', 'DS4_HELPER_RECENT': '8', 'DS4_Q8_BATCH': '1', 'DS4_Q8_CHECK': '1', 'DS4_TP_GGUF_UNEVEN': '1', 'DS4_TP_CHECK': '1', 'DS4_FLOW_TP': '1', 'DS4_ATTN_WMMA': '1', 'DS4_CHUNK_MIN': '512', 'DS4_HC_FUSE': '2', 'DS4_ROUTE_FUSE': '2', 'DS4_DRAFT_VRAM': '96,48,32', 'DS4_DRAFT_DEV': '1,0,0', 'DS4_FLOW_HELPER': '1', 'DS4_FLOW_PUMP_WAIT': '0', 'DS4_YOCO_TP': '1', 'DS4_TP_BORROW': '1', 'DS4_ATTN_SLAB_MB': '64', 'DS4_W16_MB': '128', 'DS4_AR2': '2', 'DS4_FLOW_DOWN_SHARE': '1', 'DS4_AR2_DECODE': '1', 'DS4_FLOW_DOWN_PART': '1', 'DS4_DECODE_TRIM': '15', 'DS4_LT_STORE': '/var/lib/strix-halo-inference/lt-picks.txt', 'DS4_LT_VERBOSE': '1', 'MAYA_DS4_SLOT_KEEP': '1', 'MAYA_DS4_SLOT_CAP': '16', 'MAYA_DS4_SLOT_GB': '16', 'MAYA_DS4_SLOT_DIR': '/var/lib/strix-halo-inference/ds4-slots', 'MAYA_DS4_DSPARK_CUM': '0.35', 'MAYA_DS4_RESTORE_TAIL': '0'})
         for mutate, message in (
-            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_DECODE_TRIM="7"), "environment drifted: DS4_DECODE_TRIM"),
-            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_FLOW_STATS="1"), "environment drifted: DS4_FLOW_STATS"),
             (lambda d: d["strix_maya"]["server"]["env"].pop("MAYA_DS4_SLOT_KEEP"), "MAYA_DS4_SLOT_KEEP"),
             (lambda d: d["strix_maya"]["server"]["env"].update(
                 MAYA_DS4_SLOT_DIR=d["strix_paths"]["state"] + "/slots"), "MAYA_DS4_SLOT_DIR"),
@@ -147,30 +147,6 @@ class ReleaseValidatorTest(unittest.TestCase):
             (lambda d: d["strix_qualification"]["long_context"].update(reused_prompt_cached_tokens=130048),
              "long-context record must hold"),
             (lambda d: d["strix_qualification"].pop("deep_needle"), "qualification sections drifted"),
-            (lambda d: d["strix_qualification"]["answer_quality"].update(total=29), "sum to the total"),
-        ):
-            broken = copy.deepcopy(data)
-            mutate(broken)
-            with self.subTest(expect=message):
-                self.assert_fails(broken, message)
-
-    def gsq(self) -> dict:
-        data = without_pending(yaml.safe_load(GSQ.read_text(encoding="utf-8")))
-        data["strix_qualification"]["deep_needle"]["values"] = "5/5"   # (the dummy "55/55" is the ladder's form)
-        return data
-
-    def test_gsq_validates_once_filled_and_rejects_drift(self) -> None:
-        data = self.gsq()
-        self.assertEqual(self.validate(data)["strix_release_id"], "maya-ds4-gsq-dual-xtx-512k-v6")
-        maya = data["strix_maya"]
-        self.assertEqual((maya["model_subdirectory"], maya["dense_q8_0"]["tensors"], maya["dense_q8_0"]["size"]),
-                         ("IQ2_XS", 524, 8236072960))
-        self.assertEqual(maya["server"]["env"], yaml.safe_load(DS4.read_text(encoding="utf-8"))["strix_maya"]["server"]["env"]
-                         | {"ROCBLAS_TENSILE_LIBPATH": data["strix_paths"]["release"] + "/rocm/lib/rocblas/library",
-                            "DS4_LT_STORE": data["strix_paths"]["state"] + "/lt-picks.txt",
-                            "MAYA_DS4_SLOT_DIR": data["strix_paths"]["state"] + "/ds4-slots",
-                            "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0", "DS4_INDEX_TC": "1"})
-        for mutate, message in (
             (lambda d: d["strix_maya"].update(model_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
             (lambda d: d["strix_target"]["files"][1].update(local_subdirectory="Maya-S"), "strix_maya.model_subdirectory"),
             (lambda d: d["strix_maya"]["dense_q8_0"].update(tensors=0), "dense_q8_0 drifted"),
@@ -208,16 +184,29 @@ class ReleaseValidatorTest(unittest.TestCase):
                 with self.assertRaisesRegex(SystemExit, message):
                     VALIDATOR.validate_benchmarks(root)
 
+    def test_benchmark_only_pending_is_refused(self) -> None:
+        import json
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "benchmarks", root / "benchmarks")
+            shutil.copytree(ROOT / "ansible/releases", root / "ansible/releases")
+            path = root / "benchmarks/results.json"
+            data = json.loads(path.read_text())
+            data["systems"]["maya-ds4-maya-s-dual-xtx"]["quality"]["total"] = "PENDING-155"
+            path.write_text(json.dumps(data))
+            with self.assertRaisesRegex(SystemExit, "benchmark-only draft: PENDING-155"):
+                VALIDATOR.validate_benchmarks(root)
+
     def test_a_draft_is_skipped_by_the_benchmark_check(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             shutil.copytree(ROOT / "benchmarks", root / "benchmarks")
             shutil.copytree(ROOT / "ansible/releases", root / "ansible/releases")
-            if VALIDATOR.pending_fields(self.ds4()):
+            if VALIDATOR.pending_fields(self.gsq()):
                 VALIDATOR.validate_benchmarks(root)   # (the draft's predecessor's results do not fail it)
-            data = self.ds4()
+            data = self.gsq()
             data["strix_system"]["selected_default"] = True
-            (root / "ansible/releases" / DS4.name).write_text(yaml.safe_dump(
+            (root / "ansible/releases" / GSQ.name).write_text(yaml.safe_dump(
                 data if VALIDATOR.pending_fields(data) else dict(data, strix_qualification="PENDING"), sort_keys=False))
             with self.assertRaises(SystemExit) as raised:
                 VALIDATOR.validate_benchmarks(root)

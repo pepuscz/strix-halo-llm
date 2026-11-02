@@ -21,7 +21,6 @@ SYSTEMS = {
     "strata-qwen-q4xl": ("Strata HIP UD-Q4_K_XL", "strata"),
     "vulkan-iq3xxs": ("Strix Halo llama.cpp Vulkan IQ3_XXS", "vulkan"),
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
-    "maya-ds4-dual-xtx": ("Maya DS4 HIP Maya-S IQ2_XXS dual RX 7900 XTX", "maya"),
     "maya-ds4-gsq-dual-xtx": ("Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
@@ -30,7 +29,7 @@ SYSTEMS = {
 PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
-MAYA_FAMILIES = {"maya-ds4-dual-xtx": "deepseek", "maya-ds4-gsq-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
 MAYA_FILES = Path("ansible/roles/maya_runtime/files")
 # compat-bf16.json is not here: it names the model shard it was packed from, so it is pinned normalized.
 GLM_PACK_FILES = {
@@ -581,17 +580,31 @@ def validate_benchmarks(root: Path) -> None:
     gsq_manifest = yaml.safe_load((root / "ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml").read_text())
     if not pending_fields(gsq_manifest):
         gsq = data["systems"]["maya-ds4-gsq-dual-xtx"]
-        reference = data["systems"]["maya-ds4-dual-xtx"]
-        curve, baseline_curve = gsq["context_scaling"], reference["context_scaling"]
-        if len(curve) != 11 or len(baseline_curve) != 11:
-            fail("GSQ and Maya-S must retain the same eleven-point retrieval procedure")
-        for a, b in zip(curve, baseline_curve):
-            if any(a[k] != b[k] for k in ("actual_input_tokens", "prompt_sha256", "cached_tokens")):
-                fail("GSQ and Maya-S retrieval workload identities differ")
-            if a["cached_tokens"] != 0 or a["needle_passes"] != 5 or a["allocation_tokens"] != 524288:
-                fail("GSQ retrieval benchmark is not a cold five-value point at512K")
-        if gsq["maya_bench"]["inputs_sha256"] != reference["maya_bench"]["inputs_sha256"]:
-            fail("GSQ and Maya-S Maya benchmark inputs differ")
+        for sid in ("maya-ds4-maya-s-dual-xtx", "maya-ds4-maya-xs-dual-xtx"):
+            reference = data["systems"][sid]
+            curve, baseline_curve = gsq["context_scaling"], reference["context_scaling"]
+            if len(curve) != 11 or len(baseline_curve) != 11:
+                fail("GSQ and comparisons must retain the same eleven-point retrieval procedure")
+            for a, b in zip(curve, baseline_curve):
+                if any(a[k] != b[k] for k in ("actual_input_tokens", "prompt_sha256", "cached_tokens")):
+                    fail("GSQ and comparisons retrieval workload identities differ")
+                if a["cached_tokens"] != 0 or a["needle_passes"] != 5 or a["allocation_tokens"] != 524288:
+                    fail("GSQ retrieval benchmark is not a cold five-value point at512K")
+            if gsq["maya_bench"]["inputs_sha256"] != reference["maya_bench"]["inputs_sha256"]:
+                fail("GSQ and comparisons Maya benchmark inputs differ")
+            if not reference.get("benchmark_only") or any(k in reference for k in ("manifest", "manifest_sha256", "release_id")):
+                fail("benchmark-only comparisons must not have an installable manifest")
+            if pending_fields(reference):
+                fail("benchmark-only draft: PENDING-155")
+            for row in baseline_curve + [reference["deep_needle"]]:
+                if row["cached_tokens"] != 0 or row["needle_passes"] != 5 or row["allocation_tokens"] != 524288:
+                    fail("comparison retrieval must be a cold five-value point at512K")
+            for artifact in reference["target"]["files"] + reference["target"]["engram"]["files"]:
+                if Path(artifact["name"]).parts[0] not in ("Maya-S", "Maya-XS", "dspark") or ".." in Path(artifact["name"]).parts:
+                    fail("benchmark-only file must use a published Maya-S/, Maya-XS/ or dspark/ path")
+                require_sha(artifact["sha256"], "benchmark-only model file")
+                if type(artifact["size"]) is not int or artifact["size"] <= 0:
+                    fail("benchmark-only model file size must be positive")
         fixture = root / "benchmarks/maya-bench-inputs.json"
         if hashlib.sha256(fixture.read_bytes()).hexdigest() != gsq["maya_bench"]["inputs_sha256"]:
             fail("the published Maya benchmark inputs differ from the measurements")
