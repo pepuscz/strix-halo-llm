@@ -121,6 +121,24 @@ files = [{'name': s.name, 'size': s.stat().st_size, 'mtime_ns': s.stat().st_mtim
 (pack / 'sources.json').write_text(json.dumps({'files': files}, indent=1), encoding='utf-8')
 PY
 fi
+{% elif (strix_maya.pack_kind | default('gguf')) == 'exl3' %}
+# 5. The EXL3 pack: the engine's index of turboderp's safetensors, read in place (no weights copied), built with the
+# engine source's own tools/ds4/pack.py at the pinned tag. The DSpark drafter and its markov head are in the shards.
+{% set maya_model = strix_maya.model_subdirectory %}
+{% for tool, digest in strix_maya.pack_tool.files.items() %}
+[[ "$(sha256sum {{ ('source/' + tool) | quote }} | awk '{print $1}')" == {{ digest | quote }} ]]
+{% endfor %}
+if [[ ! -f "$pack/sources.json" ]]; then
+    rm -rf "$pack"
+    source/.venv/bin/python -I source/tools/ds4/pack.py --model "$models/{{ maya_model }}" --out "$pack"
+    python3 -I - "$models" "$pack" "{{ maya_model }}" <<'PY'
+import json, pathlib, sys
+models, pack, sub = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), sys.argv[3]
+shards = sorted((models / sub).glob('*.safetensors'))
+files = [{'name': s.name, 'size': s.stat().st_size, 'mtime_ns': s.stat().st_mtime_ns} for s in shards]
+(pack / 'sources.json').write_text(json.dumps({'files': files}, indent=1), encoding='utf-8')
+PY
+fi
 {% else %}
 # 5. The DSpark pack: the engine's index of the model files plus the drafter. Built with the pack tool the
 # qualified pack came from (Maya ds4-v4.1 commit), never with vision weights present.

@@ -20,6 +20,7 @@ VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
 GLM = ROOT / "ansible/releases/maya-glm-dual-xtx-512k.yml"
 GSQ = ROOT / "ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml"
+EXL3 = ROOT / "ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml"
 DUMMY_HEX64 = "0123456789abcdef" * 4
 # Typed dummies where the validator requires a type other than a 64-hex digest.
 DUMMIES = {"tag_object": "0123456789abcdef0123456789abcdef01234567",
@@ -163,6 +164,42 @@ class ReleaseValidatorTest(unittest.TestCase):
             with self.subTest(expect=message):
                 self.assert_fails(broken, message)
 
+    def exl3(self) -> dict:
+        data = without_pending(yaml.safe_load(EXL3.read_text(encoding="utf-8")))
+        qualification = data["strix_qualification"]
+        qualification["deep_needle"]["values"] = "5/5"
+        qualification["long_context"]["reused_prompt_cached_tokens"] = 130047
+        qualification["retrieval_ladder"]["largest_input_tokens"] = 983040
+        data["strix_service"]["minimum_effective_non_cma_kib"] = 8 * 1024 * 1024
+        return data
+
+    def test_exl3_ds4_pin_matches_public_model_path(self) -> None:
+        data = yaml.safe_load(EXL3.read_text(encoding="utf-8"))
+        normalized = (ROOT / "tests/fixtures/exl3-ds4-normalized.txt").read_text(encoding="utf-8")
+        import hashlib
+        self.assertEqual(hashlib.sha256(normalized.encode()).hexdigest(),
+                         data["strix_maya"]["pack_ds4_normalized_sha256"])
+        model = data["strix_paths"]["models"] + "/" + data["strix_maya"]["model_subdirectory"]
+        packed = normalized.replace("model_dir MODEL_DIR", "model_dir " + model)
+        self.assertEqual(hashlib.sha256(packed.encode()).hexdigest(), data["strix_maya"]["pack_files"]["ds4.txt"])
+
+    def test_exl3_validates_once_filled_and_rejects_drift(self) -> None:
+        data = self.exl3()
+        self.assertEqual(self.validate(data)["strix_system"]["id"], "maya-ds4-exl3-dual-xtx")
+        for change, message in (
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_EXL3_LEND="0"), "environment drifted: DS4_EXL3_LEND"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_TP_BORROW="1"), "environment drifted: DS4_TP_BORROW"),
+            (lambda d: d["strix_maya"]["server"]["args"].__setitem__(3, "524288"), "arguments drifted"),
+            (lambda d: d["strix_service"].update(context=524288), "must allocate exactly 1048576"),
+            (lambda d: d["strix_maya"]["pack_tool"]["files"].pop("tools/ds4/st.py"), "pack.py and its helpers"),
+            (lambda d: d["strix_maya"].update(pack=d["strix_maya"]["pack"] + "-x"),
+             "must live in strix_maya.model_subdirectory"),
+        ):
+            broken = copy.deepcopy(data)
+            change(broken)
+            with self.subTest(message=message):
+                self.assert_fails(broken, message)
+
     def test_gsq_reporting_rejects_other_prompts_or_cache_counts(self) -> None:
         import json
         for mutate, message in (
@@ -182,6 +219,32 @@ class ReleaseValidatorTest(unittest.TestCase):
                 mutate(data)
                 path.write_text(json.dumps(data))
                 with self.assertRaisesRegex(SystemExit, message):
+                    VALIDATOR.validate_benchmarks(root)
+
+    def test_exl3_reporting_matches_qualification(self) -> None:
+        import json
+        mutations = (
+            lambda d: d["context_scaling"][0].update(actual_input_tokens=1),
+            lambda d: d["context_scaling"][0].update(allocation_tokens=524288),
+            lambda d: d["context_scaling"][0].update(cached_tokens=1),
+            lambda d: d["near_capacity_needle"].update(actual_input_tokens=520000),
+            lambda d: d["long_context"]["reused_prompt"].update(cached_tokens=0),
+            lambda d: d["quality"].update(total=29),
+            lambda d: d["quality"]["perplexity"].update(value=7.8),
+            lambda d: d["runtime"].update(source_commit="0" * 40),
+            lambda d: d["maya_bench"].update(inputs_sha256="0" * 64),
+            lambda d: d["upstream_benchmark"]["arms"]["E+"]["mean"].update(decode=1),
+        )
+        for i, mutate in enumerate(mutations):
+            with self.subTest(mutation=i), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                shutil.copytree(ROOT / "benchmarks", root / "benchmarks")
+                shutil.copytree(ROOT / "ansible/releases", root / "ansible/releases")
+                path = root / "benchmarks/results.json"
+                data = json.loads(path.read_text())
+                mutate(data["systems"]["maya-ds4-exl3-dual-xtx"])
+                path.write_text(json.dumps(data))
+                with self.assertRaisesRegex(SystemExit, "EXL3"):
                     VALIDATOR.validate_benchmarks(root)
 
     def test_benchmark_only_pending_is_refused(self) -> None:
