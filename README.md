@@ -8,50 +8,30 @@ A **BOSGAME M5 / Ryzen AI Max+ 395** with **two RX 7900 XTX cards** runs DeepSee
 
 Both models use **two RX 7900 XTX cards** (48 GB VRAM), the M5's **Radeon 8060S and 128 GiB RAM**, and an **NVMe over USB4**. Each external GPU has its own PCIe 4.0 ×4 M.2-to-OCuLink link. [Full hardware list](#hardware).
 
-EXL3 supports **one conversation at up to 1M context**; the other dual-card recipes support up to 512K. Speeds are tokens per second: **decode** writes the answer; **prefill** reads the input. Tests use thinking off. Quality covers 10 coding and 20 maths cases; every retrieval prompt found all five values.
+Each setup serves **one conversation at a time**. Speeds are tokens per second: **decode** is how fast the answer is written, **prefill** how fast the input is read. Thinking is off in the tests. The quality checks are 10 coding and 20 maths tasks; in every long-input test the model found all five phrases hidden in the text.
 
-### DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw
+### DeepSeek-V4.1-Flash-1017
 
-**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses [turboderp’s EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3), original FP8 Engram and the qualified Maya v1.1.54-based fork with 16K prompt chunks. [Ansible recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).
-
-**Quality: 30/30. Perplexity: 7.1950** (23 × 2,048 tokens). **1.04M retrieval: 5/5.** All EXL3 rows allocate 1,048,576 tokens.
-
-| Test | Decode | Prefill |
-|---|---:|---:|
-| Fixed-input Maya benchmark (2K / 8K prompts) | **52.1** | **243 / 605** |
-| Five-phrase prompt, 2K (2,040 tokens) | 63.8 | 274 |
-| 32K (30,720) | 38.2 | 1,281 |
-| 128K (122,879) | 37.4 | 1,602 |
-| 480K (491,520) | 35.5 | 1,314 |
-| 1.04M five-phrase prompt (1,040,000) | 32.4 | 951 |
-| Real code, 130,048 tokens: cold / prompt cached | **44.8 / 48.0** | **1,382** |
-
-Speeds are tok/s. Cached decode is the mean of three consecutive answers from one load.
-
-### DeepSeek-V4.1-Flash-1017: quant comparison
+**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** runs [turboderp's EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3) with inputs up to **1M tokens**. [Ansible recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).
 
 <!-- quant-comparison-note -->
-EXL3 supports 1M context and has the lowest measured perplexity (7.1950). GSQ-RCO decodes faster at long context (55.8 against 37.4 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
+EXL3 is the closest to the original model and the only one tested at 1M. GSQ-RCO decodes faster at long inputs. Maya-XS v2 is the fastest and the furthest from the original.
 <!-- /quant-comparison-note -->
 
 <!-- quant-comparison-table -->
 | | **EXL3 2.25 bpw** | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
 |---|---:|---:|---:|---:|
-| Context allocation | 1M | 512K | 512K | 512K |
-| Model shards, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
-| Perplexity (23 × 2,048 tokens; lower is better) | 7.1950 | 7.3695 | 7.2498 | 7.9435 |
-| Quality | 30/30 | 30/30 | 30/30 | 30/30 |
-| 520K retrieval | 5/5 | 5/5 | 5/5 | 5/5 |
-| 1.04M retrieval | 5/5 | — | — | — |
-| Fixed-input Maya benchmark: decode | 52.1 | 60.9 | 41.7 | 80.7 |
-| Fixed-input Maya benchmark: prefill 2K / 8K | 243 / 605 | 210 / 537 | 169 / 478 | 286 / 661 |
-| 128K five-phrase: decode / prefill | 37.4 / 1,602 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
-| 480K five-phrase: decode / prefill | 35.5 / 1,314 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
-| Real code, 130,048 tokens: prefill | 1,382 | 1,464 | 1,378 | 1,587 |
-| Real code: decode cold / prompt cached | 44.8 / 48.0 | 52.5 / 65.7 | 37.3 / 49.4 | 66.2 / 68.0 |
+| Longest input | 1M | 512K | 512K | 512K |
+| Model size | 159 GB | 155 GB | 178 GB | 117 GB |
+| Perplexity (lower is closer to the original) | 7.20 | 7.37 | 7.25 | 7.94 |
+| Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 |
+| Decode, short prompt | 52 | 61 | 42 | 81 |
+| Decode, 128K input | 37 | 56 | 26 | 96 |
+| Prefill, 8K input | 605 | 537 | 478 | 661 |
+| Prefill, 128K input | 1,602 | 1,673 | 1,669 | 1,762 |
 <!-- /quant-comparison-table -->
 
-GSQ, Maya-S and Maya-XS use v1.1.48 at 512K; EXL3 uses the v1.1.54 fork at 1M. GSQ values are medians of three loads; the others are one load each. [Full measurements](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
+GSQ-RCO keeps its own [recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml); Maya-S and Maya-XS v2 were measured for comparison only. [All measurements and methods](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
 
 ### GLM-5.3-Flash Maya-M IQ2_S
 
