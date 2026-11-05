@@ -275,7 +275,7 @@ strix_service:
   memory_high: 118G
   memory_max: 120G
   memory_swap_max: 0
-  minimum_effective_non_cma_kib: 14680064
+  minimum_effective_non_cma_kib: PENDING
   load_available_kib: 115343360
   thermal_limit_millic: 95000
   health_retries: 720

@@ -415,7 +415,11 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     for key, value in expected_identity.items():
         if cfg.get(key) != value:
             fail("qualified Maya DS4 server setting drifted: " + key)
-    if service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
+    if exl3:
+        # (the EXL3 floor is the effective non-CMA memory the qualified run measured after its load, less a margin)
+        if not 2 * 1024 * 1024 <= service["minimum_effective_non_cma_kib"] <= 14 * 1024 * 1024:
+            fail("the EXL3 release's non-CMA floor must lie between 2 and 14 GiB")
+    elif service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
         fail("Maya requires the qualified 14 GiB non-CMA floor")
     validate_deepseek_qualification(data["strix_qualification"], service["context"])
 

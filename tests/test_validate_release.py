@@ -170,6 +170,7 @@ class ReleaseValidatorTest(unittest.TestCase):
         qualification["deep_needle"]["values"] = "5/5"
         qualification["long_context"]["reused_prompt_cached_tokens"] = 130047
         qualification["retrieval_ladder"]["largest_input_tokens"] = 983040
+        data["strix_service"]["minimum_effective_non_cma_kib"] = 8 * 1024 * 1024
         return data
 
     def test_exl3_validates_once_filled_and_rejects_drift(self) -> None:
