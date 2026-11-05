@@ -31,7 +31,7 @@ PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
 MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-ds4-exl3-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
-# turboderp's EXL3 repo: 26 shards, its Engram tables (BF16) and the files the engine source's pack.py reads; the
+# turboderp's EXL3 repo: 26 shards, its Engram tables (FP8) and the files the engine source's pack.py reads; the
 # DSpark drafter and its markov head are inside the shards.
 EXL3_SHARDS = tuple(f"model-{i:05d}-of-00026.safetensors" for i in range(1, 27))
 EXL3_FILES = {*EXL3_SHARDS, "ngram_embedding.safetensors", "model.safetensors.index.json", "config.json",
@@ -663,6 +663,59 @@ def validate_benchmarks(root: Path) -> None:
             fail("GSQ benchmark and release quality readings differ")
         if gsq["runtime"]["source_commit"] != gsq_manifest["strix_runtime"]["source_commit"]:
             fail("GSQ benchmark engine differs from the release")
+    exl3_path = root / "ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml"
+    if exl3_path.exists():
+        manifest = yaml.safe_load(exl3_path.read_text())
+        if not pending_fields(manifest):
+            e = data["systems"]["maya-ds4-exl3-dual-xtx"]
+            q = manifest["strix_qualification"]
+            context = manifest["strix_service"]["context"]
+            curve = e["context_scaling"]
+            common = data["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"]
+            if len(curve) != q["retrieval_ladder"]["points"] or len(curve) != len(common) or \
+                    max(p["actual_input_tokens"] for p in curve) != q["retrieval_ladder"]["largest_input_tokens"]:
+                fail("EXL3 retrieval ladder differs from qualification")
+            for point, reference in zip(curve, common):
+                if any(point[k] != reference[k] for k in ("actual_input_tokens", "prompt_sha256")) or \
+                        point["allocation_tokens"] != context or point["cached_tokens"] != 0 or point["needle_passes"] != 5:
+                    fail("EXL3 retrieval workload identity or allocation differs")
+            if q["retrieval_ladder"]["values"] != f"{sum(p['needle_passes'] for p in curve)}/{5 * len(curve)}":
+                fail("EXL3 retrieval values differ from qualification")
+            needle = e["near_capacity_needle"]
+            if needle["actual_input_tokens"] != q["deep_needle"]["input_tokens"] or \
+                    needle["allocation_tokens"] != context or needle["cached_tokens"] != 0 or \
+                    f"{needle['needle_passes']}/5" != q["deep_needle"]["values"]:
+                fail("EXL3 near-capacity retrieval differs from qualification")
+            require_sha(needle["prompt_sha256"], "EXL3 near-capacity prompt")
+            c, qc = e["long_context"], q["long_context"]
+            pairs = {"prefill_tokens_per_second": "first_request_prefill_tokens_per_second",
+                     "decode_tokens_per_second": "first_request_decode_tokens_per_second"}
+            if c["cached_tokens"] != 0 or any(c[k] != qc[k] for k in
+                    ("input_tokens", "output_tokens", "allocation_tokens", "prompt_sha256")) or \
+                    any(c[k] != qc[v] for k, v in pairs.items()) or \
+                    c["reused_prompt"]["cached_tokens"] != qc["reused_prompt_cached_tokens"] or \
+                    c["reused_prompt"]["decode_tokens_per_second"] != qc["reused_prompt_decode_tokens_per_second"]:
+                fail("EXL3 long-context readings differ from qualification")
+            if any(e["quality"][k] != q["answer_quality"][k] for k in
+                   ("coding", "gsm8k", "math", "total", "thinking")) or \
+                    e["quality"]["perplexity"]["value"] != q["answer_quality"]["perplexity"]:
+                fail("EXL3 quality readings differ from qualification")
+            if e["runtime"]["source_commit"] != manifest["strix_runtime"]["source_commit"] or \
+                    e["runtime"]["benchmark_binary_sha256"] != manifest["strix_runtime"]["server_sha256"]:
+                fail("EXL3 engine identity differs from qualification")
+            fixture = root / "benchmarks/maya-bench-inputs.json"
+            if e["maya_bench"]["inputs_sha256"] != hashlib.sha256(fixture.read_bytes()).hexdigest():
+                fail("EXL3 benchmark inputs differ from the published fixture")
+            native = e["upstream_benchmark"]
+            if native["allocation_tokens"] != context or native["order"] != ["E+", "G", "E0", "E+", "G", "E0"]:
+                fail("EXL3 native comparison procedure drifted")
+            for arm in native["arms"].values():
+                loads = arm["loads"]
+                if len(loads) != native["loads_per_arm"] or len(loads) != 2 or \
+                        abs(arm["mean"]["decode"] - sum(x["decode_mean_tokens_per_second"] for x in loads) / 2) > 1e-9 or \
+                        any(abs(arm["mean"]["prefill"][k] - sum(x["prefill_tokens_per_second"][k] for x in loads) / 2) > 1e-9
+                            for k in ("2048", "8192")):
+                    fail("EXL3 native comparison means differ from its loads")
     baseline = data["systems"]["qwen-vulkan-q4xl"]["context_scaling"]
     strata = data["systems"]["strata-qwen-q4xl"]
     curve = strata["context_scaling"]

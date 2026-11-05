@@ -1,5 +1,25 @@
 # Sources and provenance
 
+## Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX
+
+| Component | Pinned source |
+|---|---|
+| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-exl3-1m-20261105), annotated tag `maya-ds4-exl3-1m-20261105` (object `705096a235be23000cd2e7f726479506ef67fb2e`), commit `1a7405940f714dedf7d04e56fa9e8ebc358a92c4`, tree `b228a36e9e6343344cb7972dd3d42ffdea745971`, based on upstream v1.1.54 (`c1670044bbc09310f35f9d00f7596c50ae8a38f1`) |
+| Target | [turboderp/DeepSeek-V4.1-Flash-1017-exl3](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3/tree/9183eaaeb6f08dff6ee5b6e34b852911cf6733c9), revision `9183eaaeb6f08dff6ee5b6e34b852911cf6733c9`: 26 EXL3 shards, original FP8 Engram and pinned metadata; about 361 GB total |
+| Pack | The tagged engine’s `tools/ds4/pack.py`, `st.py`, `engram_hash.py` and chat template, all SHA-256 pinned. The pack indexes the downloaded safetensors in place and writes eight small metadata/tokenizer files |
+| Draft | DSpark and its Markov head are included in the target shards. The packer restores the Markov tensor names used by the engine |
+| Python | 3.14 and the existing hash-locked [requirements](../ansible/roles/maya_runtime/files/requirements.lock), matching the qualified environment |
+| ROCm / rocBLAS / GGML | The same pinned toolchain components described for GSQ below; the new release compiles its own engine |
+| State | `/var/lib/strix-halo-inference-exl3`; its profile, LT picks and saved conversations are separate from GSQ |
+
+The [manifest](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) pins every file. Packing runs without a GPU:
+
+```sh
+python tools/ds4/pack.py --model "$MODELS/EXL3-2.25" --out "$MODELS/EXL3-2.25/maya-ds4"
+```
+
+The engine source maps `markov_w1` to `embed` and `markov_w2` to `head`. Model tensors remain in their source files. The rebuilt pack matched the qualification pack byte for byte; `ds4.txt` is checked with its model directory normalized and at the published directory. GSQ’s GGUF/hybrid packing path is unchanged.
+
 ## Maya HIP Maya-M IQ2_S dual RX 7900 XTX
 
 Every source and setting below is pinned from the qualified host. The
@@ -39,7 +59,7 @@ manifest.
 
 ## Benchmark-only comparisons
 
-Maya-S IQ2_XXS and Maya-XS v2 IQ1_S use the GSQ production engine tag above and its environment. These entries are measurements, with no installer. The file digests below are published Hugging Face LFS oids at revision `c33d87b8c7a3b7d55e71324dc82395587a870b0b`; sizes match the verified download receipts.
+Maya-S IQ2_XXS and Maya-XS v2 IQ1_S use the GSQ engine tag above and its environment. These entries are measurements, with no installer. The file digests below are published Hugging Face LFS oids at revision `c33d87b8c7a3b7d55e71324dc82395587a870b0b`; sizes match the verified download receipts.
 
 Source: [peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF](https://huggingface.co/peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF/tree/c33d87b8c7a3b7d55e71324dc82395587a870b0b).
 

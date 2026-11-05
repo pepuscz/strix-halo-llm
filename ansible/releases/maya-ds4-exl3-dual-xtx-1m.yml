@@ -326,7 +326,7 @@ strix_maya:
       tools/ds4/engram_hash.py: 764106d9c4c48c0a16f2357903806872333775bda374690a21e08bb5430ecba4
       tools/ds4/chat_template.jinja: e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa
   pack_files:
-    ds4.txt: d5017be967cfb02be101c2e1b47daa232d288fa184dc1bbfe9c8a9e1a938313d
+    ds4.txt: 9f2ecedb2b5e9b75a9ff9edef5fdb956a8b215540a0cd671790728ef3697960b
     engram.bin: 08d55d6433f389b14aa115f4ea4eb31d6a2d63df1ae40821f03facf4c2d49142
     tensors.txt: 054b02396ccf983333a6dcd282dadc2d3b1a2f29bd5033502b6607c33fbd465d
     tokenizer/chat_template.jinja: d959d804d5101b79a49b6ff1bf3c54cd5affa9a5a78c503d925f3090040b31c3
@@ -429,32 +429,34 @@ strix_maya:
   model_subdirectory: EXL3-2.25
 strix_qualification:
   answer_quality:
-    coding: PENDING
-    gsm8k: PENDING
-    math: PENDING
-    total: PENDING
+    coding: 10
+    gsm8k: 10
+    math: 10
+    total: 30
     scoring: Reviewed final answers against frozen task gold; established scorer corrections retained in the qualification audit.
     thinking: false
     math_10_output_cap: 4096
-    measured: PENDING
-    perplexity: PENDING
+    measured: '2026-11-05'
+    perplexity: 7.1950
   retrieval_ladder:
     allocation_tokens: 1048576
     points: 11
-    values: PENDING
-    largest_input_tokens: PENDING
+    values: 55/55
+    largest_input_tokens: 491520
   long_context:
     prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: PENDING
-    first_request_decode_tokens_per_second: PENDING
-    reused_prompt_cached_tokens: PENDING
-    reused_prompt_decode_tokens_per_second: PENDING
+    first_request_prefill_tokens_per_second: 1381.9
+    first_request_decode_tokens_per_second: 44.8
+    reused_prompt_cached_tokens: 130047
+    reused_prompt_decode_tokens_per_second: 48.0
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
-    values: PENDING
-    measured: PENDING
-  qualified_configuration: PENDING
+    values: 5/5
+    measured: '2026-11-05'
+  qualified_configuration: >-
+    EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark and the Radeon 8060S helper; 65/65
+    retrieval values across thirteen cold loads.

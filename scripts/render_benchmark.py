@@ -16,7 +16,7 @@ SERIES = [
     ('vulkan-iq3xxs', '#8957e5', 'DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS'),
     ('rocm-rocmfpx', '#bc4c00', 'DeepSeek · Lucebox ROCm ROCmFPX'),
 ]
-DUAL_SERIES = [('maya-ds4-gsq-dual-xtx', '#8250df'), ('maya-ds4-maya-s-dual-xtx', '#0969da'), ('maya-ds4-maya-xs-dual-xtx', '#bc4c00'), ('maya-glm-dual-xtx', '#1a7f37')]
+DUAL_SERIES = [('maya-ds4-exl3-dual-xtx', '#cf222e'), ('maya-ds4-gsq-dual-xtx', '#8250df'), ('maya-ds4-maya-s-dual-xtx', '#0969da'), ('maya-ds4-maya-xs-dual-xtx', '#bc4c00'), ('maya-glm-dual-xtx', '#1a7f37')]
 
 
 def render(data, dual=False):
@@ -30,8 +30,9 @@ def render(data, dual=False):
              '<text x="70" y="40" class="title">Strix Halo LLM benchmarks</text>',
              '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · Radeon 8060S · 128 GiB RAM · 120 W · reasoning mode disabled</text>']
     if dual:
+        lines[0] = lines[0].replace('1100 775', '1100 850')
         lines[1] = '<title id="title">Dual RX 7900 XTX throughput: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</title>'
-        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper, the same prompt bytes for both models. GLM-5.3-Flash: twelve fresh loads, from 1886 to 456403 of its tokens, at 131072-, 262144- and 524288-token capacity. DeepSeek-V4.1-Flash-1017 on three quantizations, GSQ-RCO IQ2_XS, Maya-S IQ2_XXS and Maya-XS v2 IQ1_S: eleven fresh loads each at 524288-token capacity, from 2040 to 491520 of its tokens. Every answer found all five phrases. Each horizontal tick doubles the input length.</desc>'
+        lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper. DeepSeek EXL3 uses a 1,048,576-token allocation; GSQ-RCO, Maya-S and Maya-XS v2 use 524,288. Each quant has one eleven-point curve on the same prompt bytes; every point found all five phrases. GLM uses its own tokenizer and recorded capacities. Each horizontal tick doubles the input length.</desc>'
         lines[-2] = '<text x="70" y="40" class="title">Dual RX 7900 XTX · DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</text>'
         lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>'
     for i, (sid, color, name) in enumerate(series):
@@ -53,7 +54,7 @@ def render(data, dual=False):
         reading = next(m for m in (1200, 1600, 2000, 2400) if m >= fastest)
         writing = max(60, 20 * math.ceil(max(p['decode_tokens_per_second'] for sid, _ in DUAL_SERIES
                        for p in data['systems'][sid]['context_scaling'] if isinstance(p['decode_tokens_per_second'], (int, float))) / 20))
-        panels = [(title, key, top, maximum) for (title, key, top, _), maximum in zip(panels, (reading, writing))]
+        panels = [(title, key, top + 35, maximum) for (title, key, top, _), maximum in zip(panels, (reading, writing))]
     for title, key, top, maximum in panels:
         bottom = top + height
         def y(value):
@@ -67,6 +68,7 @@ def render(data, dual=False):
             tokens=1024*2**exp;xx=x(tokens)
             lines.extend([f'<line class="grid" x1="{xx:.2f}" y1="{top}" x2="{xx:.2f}" y2="{bottom}"/>',
                           f'<text class="tick" x="{xx:.2f}" y="{bottom+22}" text-anchor="middle">{2**exp}K</text>'])
+        end_labels = []
         for sid,color,_ in series:
             rows = data['systems'][sid]['context_scaling']
             points=[p for p in rows if isinstance(p.get(key), (int, float))]
@@ -85,143 +87,120 @@ def render(data, dual=False):
                 offset = 16
             if dual and sid == 'maya-glm-dual-xtx' and key == 'prefill_tokens_per_second':
                 offset = 20
+            if dual and sid == 'maya-ds4-exl3-dual-xtx':
+                offset = 32 if key == 'prefill_tokens_per_second' else -28
             if dual and sid == 'maya-ds4-maya-xs-dual-xtx':
                 offset = -32 if key == 'prefill_tokens_per_second' else -12
-            lines.append(f'<text class="value" x="{xx:.2f}" y="{yy+offset:.2f}" text-anchor="end" style="fill:{color}">{value:.1f}</text>')
+            if dual:
+                end_labels.append((yy + 4, xx, yy, value, color))
+            else:
+                lines.append(f'<text class="value" x="{xx:.2f}" y="{yy+offset:.2f}" text-anchor="end" style="fill:{color}">{value:.1f}</text>')
+        if dual:
+            end_labels.sort()
+            placed = []
+            for desired, *_ in end_labels:
+                placed.append(max(desired, placed[-1] + 16 if placed else desired))
+            shift = sum(y - item[0] for y, item in zip(placed, end_labels)) / len(placed)
+            placed = [y - shift for y in placed]
+            if placed[0] < top + 8:
+                placed = [y + top + 8 - placed[0] for y in placed]
+            if placed[-1] > bottom + 8:
+                placed = [y - (placed[-1] - bottom - 8) for y in placed]
+            for label_y, (_, xx, yy, value, color) in zip(placed, end_labels):
+                lines.append(f'<line x1="{xx:.2f}" y1="{yy:.2f}" x2="1032" y2="{label_y-4:.2f}" stroke="{color}" stroke-width="1"/>')
+                lines.append(f'<text class="value" x="1040" y="{label_y:.2f}" text-anchor="start" style="fill:{color}">{value:.1f}</text>')
+    if dual:
+        lines.append('<text x="550" y="765" text-anchor="middle" class="tick">EXL3: 1M allocation · other DeepSeek quants: 512K · runtime versions and full protocol in BENCHMARKS.md</text>')
     lines += ['<text x="550" y="700" text-anchor="middle" class="label">Input length (tokens; each tick doubles)</text>',
               '<text x="550" y="735" text-anchor="middle" class="label">Test: find five phrases hidden in a long text. Every run found all five correctly.</text>',
               '</svg>', '']
+    if dual:
+        lines = [line.replace('y="700"', 'y="750"').replace('y="735"', 'y="785"').replace('y="765"', 'y="815"') for line in lines]
     return '\n'.join(lines)
 
 
 def render_readme(data, text):
-    """Keep the current DeepSeek recipe tables bound to their own published measurements."""
-    for sid, quant in (('maya-ds4-gsq-dual-xtx', 'GSQ-RCO IQ2_XS'),):
-        system = data['systems'][sid]
-        bench = system['maya_bench']['this_release']
-        rows = {row['actual_input_tokens']: row for row in system['context_scaling']}
-        code = system['long_context']
-        table = ['| Test | Decode | Prefill |', '|---|---:|---:|',
-                 '| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | '
-                 f'**{bench["decode_mean_tokens_per_second"]:.1f}** | '
-                 f'**{bench["prefill_tokens_per_second"]["2048"]:,} / '
-                 f'{bench["prefill_tokens_per_second"]["8192"]:,}** |']
-        for label, count in (('Public five-phrase prompt, 2K (2,040 input tokens)', 2040),
-                             ('32K (30,720)', 30720), ('128K (122,879)', 122879), ('480K (491,520)', 491520)):
-            row = rows[count]
-            table.append(f'| {label} | {row["decode_tokens_per_second"]:.1f} | '
-                         f'{row["prefill_tokens_per_second"]:,.0f} |')
-        table.append('| Real code, 130,048 tokens: cold / prompt cached | '
-                     f'**{code["decode_tokens_per_second"]:.1f} / '
-                     f'{code["reused_prompt"]["decode_tokens_per_second"]:.1f}** | '
-                     f'**{code["prefill_tokens_per_second"]:,.0f}** |')
-        heading = re.escape('### DeepSeek-V4.1-Flash-1017 ' + quant)
-        section = re.compile(r'(' + heading + r'[^\n]*\n)(.*?)(?=\n### |\Z)', re.S)
-
-        def replace(match):
-            body, count = re.subn(r'^\| Test \| Decode \| Prefill \|\n(?:\|[^\n]*\n)+',
-                                 '\n'.join(table) + '\n', match[2], count=1, flags=re.M)
-            if count != 1:
-                raise ValueError('missing README performance table: ' + sid)
-            return match[1] + body
-        text, count = section.subn(replace, text, count=1)
-        if count != 1:
-            raise ValueError('missing README setup section: ' + sid)
-    return render_comparison_readme(data, text)
+    system = data['systems']['maya-ds4-exl3-dual-xtx']
+    bench, code = system['maya_bench']['this_release'], system['long_context']
+    rows = {row['actual_input_tokens']: row for row in system['context_scaling']}
+    table = ['| Test | Decode | Prefill |', '|---|---:|---:|',
+             f"| Fixed-input Maya benchmark (2K / 8K prompts) | **{bench['decode_mean_tokens_per_second']:.1f}** | **{bench['prefill_tokens_per_second']['2048']:,.0f} / {bench['prefill_tokens_per_second']['8192']:,.0f}** |"]
+    for label, count in [('Five-phrase prompt, 2K (2,040 tokens)',2040),('32K (30,720)',30720),
+                         ('128K (122,879)',122879),('480K (491,520)',491520)]:
+        x=rows[count];table.append(f"| {label} | {x['decode_tokens_per_second']:.1f} | {x['prefill_tokens_per_second']:,.0f} |")
+    x=system['near_capacity_needle'];table.append(f"| 1.04M five-phrase prompt (1,040,000) | {x['decode_tokens_per_second']:.1f} | {x['prefill_tokens_per_second']:,.0f} |")
+    table.append(f"| Real code, 130,048 tokens: cold / prompt cached | **{code['decode_tokens_per_second']:.1f} / {code['reused_prompt']['decode_tokens_per_second']:.1f}** | **{code['prefill_tokens_per_second']:,.0f}** |")
+    pattern=r'(### DeepSeek-V4\.1-Flash-1017 EXL3 2\.25 bpw[^\n]*\n)(.*?)(?=\n### |\Z)'
+    def replace(m):
+        body,n=re.subn(r'^\| Test \| Decode \| Prefill \|\n(?:\|[^\n]*\n)+','\n'.join(table)+'\n',m[2],count=1,flags=re.M)
+        if n!=1:raise ValueError('missing EXL3 README performance table')
+        return m[1]+body
+    text,n=re.subn(pattern,replace,text,count=1,flags=re.S)
+    if n!=1:raise ValueError('missing EXL3 README section')
+    return render_comparison_readme(data,text)
 
 
-COMPARISONS = ('maya-ds4-gsq-dual-xtx', 'maya-ds4-maya-s-dual-xtx', 'maya-ds4-maya-xs-dual-xtx')
+COMPARISONS = ('maya-ds4-exl3-dual-xtx', 'maya-ds4-gsq-dual-xtx', 'maya-ds4-maya-s-dual-xtx', 'maya-ds4-maya-xs-dual-xtx')
 
 
 def reading(value, digits=1):
     return f'{value:,.{digits}f}' if isinstance(value, (int, float)) else str(value)
 
 
-def render_comparison_readme(data, text):
-    systems = [data['systems'][sid] for sid in COMPARISONS]
-    def values(system):
-        b=system['maya_bench']['this_release'];c=system['long_context']
-        rows={r['actual_input_tokens']:r for r in system['context_scaling']}
-        q=system['quality'];needle=system['deep_needle']['needle_passes']
-        return [f"{system['target']['model_bytes']/1e9:.0f} GB",
-                reading(q['perplexity']['value'],4),
-                f"{q['total']}/30 · {needle}/5",
-                reading(b['decode_mean_tokens_per_second']),
-                reading(b['prefill_tokens_per_second']['2048'],0)+' / '+reading(b['prefill_tokens_per_second']['8192'],0),
-                *[reading(rows[n]['decode_tokens_per_second'])+' / '+reading(rows[n]['prefill_tokens_per_second'],0) for n in (122879,491520)],
-                reading(c['prefill_tokens_per_second'],0),
-                reading(c['decode_tokens_per_second'])+' / '+reading(c['reused_prompt']['decode_tokens_per_second'])]
-    cols=[values(system) for system in systems]
-    labels=['Model weights, without the Engram tables','Perplexity (23 × 2,048 tokens; lower is better)',
-            'Quality · 520K needle','`maya.py --bench` decode','`maya.py --bench` prefill, 2K / 8K',
-            '128K five-phrase (122,879): decode / prefill','480K five-phrase (491,520): decode / prefill',
-            'Real code, 130,048 tokens: prefill','Real code: decode cold / prompt cached']
-    table=['| | **GSQ-RCO IQ2_XS** | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |','|---|---:|---:|---:|']
-    table += ['| '+label+' | '+' | '.join(col[i] for col in cols)+' |' for i,label in enumerate(labels)]
-    text = text.replace('<!-- quant-comparison-table -->'+text.split('<!-- quant-comparison-table -->')[1].split('<!-- /quant-comparison-table -->')[0]+'<!-- /quant-comparison-table -->',
-                        '<!-- quant-comparison-table -->\n'+'\n'.join(table)+'\n<!-- /quant-comparison-table -->')
+def comparison_table(data):
+    headers=['**EXL3 2.25 bpw**','GSQ-RCO IQ2_XS','Maya-S IQ2_XXS','Maya-XS v2 IQ1_S']
+    cols=[]
+    for sid in COMPARISONS:
+        v=data['systems'][sid];b=v['maya_bench']['this_release'];c=v['long_context'];q=v['quality'];rows={x['actual_input_tokens']:x for x in v['context_scaling']}
+        cols.append(['1M' if v['context_allocation']==1048576 else '512K',f"{v['target']['model_bytes']/1e9:.0f} GB",reading(q['perplexity']['value'],4),f"{q['total']}/30",f"{v['deep_needle']['needle_passes']}/5",f"{v['near_capacity_needle']['needle_passes']}/5" if v.get('near_capacity_needle') else '—',reading(b['decode_mean_tokens_per_second']),reading(b['prefill_tokens_per_second']['2048'],0)+' / '+reading(b['prefill_tokens_per_second']['8192'],0),*[reading(rows[n]['decode_tokens_per_second'])+' / '+reading(rows[n]['prefill_tokens_per_second'],0) for n in [122879,491520]],reading(c['prefill_tokens_per_second'],0),reading(c['decode_tokens_per_second'])+' / '+reading(c['reused_prompt']['decode_tokens_per_second'])])
+    labels=['Context allocation','Model shards, excluding Engram','Perplexity (23 × 2,048 tokens; lower is better)','Quality','520K retrieval','1.04M retrieval','Fixed-input Maya benchmark: decode','Fixed-input Maya benchmark: prefill 2K / 8K','128K five-phrase: decode / prefill','480K five-phrase: decode / prefill','Real code, 130,048 tokens: prefill','Real code: decode cold / prompt cached']
+    return ['| | '+' | '.join(headers)+' |','|---|---:|---:|---:|---:|']+['| '+label+' | '+' | '.join(c[i] for c in cols)+' |' for i,label in enumerate(labels)]
 
-    note = xs_summary(data)
-    start = '<!-- quant-comparison-note -->'
-    end = '<!-- /quant-comparison-note -->'
-    before, rest = text.split(start, 1)
-    _, after = rest.split(end, 1)
-    return before + start + '\n' + note + '\n' + end + after
+
+def render_comparison_readme(data, text):
+    for name,body in [('quant-comparison-table','\n'.join(comparison_table(data))),('quant-comparison-note',xs_summary(data))]:
+        start='<!-- '+name+' -->';end='<!-- /'+name+' -->';before,rest=text.split(start,1);_,after=rest.split(end,1);text=before+start+'\n'+body+'\n'+end+after
+    return text
 
 
 def xs_summary(data, detailed=False):
-    xs = data['systems'][COMPARISONS[2]]
-    others = [data['systems'][sid] for sid in COMPARISONS[:2]]
-    disk = xs['disk_read_mb_per_token']
-    if not isinstance(disk['cold'], (int, float)):
-        return 'PENDING-155'
-    cached = sum(disk['cached']) / len(disk['cached'])
-    fastest = all(xs['maya_bench']['this_release']['decode_mean_tokens_per_second'] > other['maya_bench']['this_release']['decode_mean_tokens_per_second']
-                  and xs['long_context']['decode_tokens_per_second'] > other['long_context']['decode_tokens_per_second']
-                  and xs['long_context']['reused_prompt']['decode_tokens_per_second'] > other['long_context']['reused_prompt']['decode_tokens_per_second']
-                  and all(a['decode_tokens_per_second'] > b['decode_tokens_per_second'] for a,b in zip(xs['context_scaling'],other['context_scaling']))
-                  for other in others)
-    note = (f"Maya-XS v2 ({xs['target']['model_bytes']/1e9:.0f} GB) almost fits in VRAM + RAM: "
-            f"{disk['cold']:.1f} MB read per generated token cold and about {round(cached,1):g} cached. ")
-    if detailed:
-        note = (f"Maya-XS v2 ({xs['target']['model_bytes']/1e9:.0f} GB) almost fits in VRAM + RAM: "
-                f"the same counter recorded {disk['cold']:.1f} MB per generated token cold and "
-                + ' / '.join(reading(x) for x in disk['cached']) + ' MB for the three cached answers. ')
-    if fastest:
-        note += 'It decodes fastest of the three' if detailed else 'It is fastest of the three for decode'
-    else:
-        note += 'Its perplexity is'
-    xp = xs['quality']['perplexity']['value']
-    gp = others[0]['quality']['perplexity']['value']
-    if fastest:
-        note += (', at a higher perplexity' if detailed else ', with higher perplexity') if xp > gp else ', with perplexity'
-    note += f" ({xp:.2f} vs GSQ {gp:.2f})."
-    return note
+    x=data['systems']['maya-ds4-exl3-dual-xtx'];xs=data['systems']['maya-ds4-maya-xs-dual-xtx']
+    return f"EXL3 supports 1M context and has the lowest measured perplexity ({x['quality']['perplexity']['value']:.4f}). Maya-XS v2 has the fastest recorded decode, with higher perplexity ({xs['quality']['perplexity']['value']:.4f})."
 
 
 def render_quant_details(data, text):
-    lines=['### Other quants on the same engine (benchmark only)','',
-           'Maya-S IQ2_XXS and Maya-XS v2 IQ1_S use the production engine source and environment, changing the pack, its drafter and its own frozen expert profile. Each has one full run, with fresh loads and zero cached input for the same five-phrase prompts (including 491,520 tokens). Both allocate 524,288 tokens. These comparisons have no installer; [the exact data](../benchmarks/results.json) pin the model files and packing inputs.','']
-    for sid in COMPARISONS[1:]:
-        v=data['systems'][sid];lines += ['#### '+v['name'],'','| Input tokens | Reading the input (tok/s) | Writing the answer (tok/s) | Phrases found |','|---:|---:|---:|---:|']
-        for row in v['context_scaling']:
-            lines.append('| '+f"{row['actual_input_tokens']:,}"+' | '+reading(row['prefill_tokens_per_second'])+' | '+reading(row['decode_tokens_per_second'])+' | '+str(row['needle_passes'])+'/5 |')
-        c=v['long_context'];n=v['deep_needle'];q=v['quality'];lines += ['',f"Real code (130,048 input tokens, 768 output): **{reading(c['prefill_tokens_per_second'])} prefill / {reading(c['decode_tokens_per_second'])} decode tok/s**; with 130,047 input tokens cached, **{reading(c['reused_prompt']['decode_tokens_per_second'])} tok/s** (mean of three answers). The 520,000-token needle found {n['needle_passes']}/5: {reading(n['prefill_tokens_per_second'])} prefill / {reading(n['decode_tokens_per_second'])} decode. Quality **{q['total']}/30**; teacher perplexity **{reading(q['perplexity']['value'],4)}** on 23 × 2,048 tokens.",'']
-    disk=data['systems'][COMPARISONS[2]]['disk_read_mb_per_token']
-    maya_s = data['systems'][COMPARISONS[1]]
-    sd = maya_s['disk_read_mb_per_token']
-    speeds = [row['decode_tokens_per_second'] for row in maya_s['context_scaling']]
-    lines += [f"Maya-S's {maya_s['target']['model_bytes']/1e9:.0f} GB of model weights exceed the combined 48 GB VRAM and 128 GiB RAM available to experts. Uncached experts stream from the NVMe: the engine's `maya:engine_disk_mb` counter recorded {reading(sd['cold'])} MB per generated token cold and {reading(min(sd['cached']),0)}–{reading(max(sd['cached']),0)} MB with the prompt cached. Decode also depends on the experts each answer selects ({reading(min(speeds),0)}–{reading(max(speeds),0)} tok/s across this curve). The retrieval filler routes to few experts and reads faster than real text.",'',
-              xs_summary(data, detailed=True) + ' These are engine counters, not whole-drive traffic.','',
-              "### Maya's own benchmark",'',
-              "`maya.py --bench` writes three 256-token answers (greedy, thinking off; decode is their mean) and reads 2,048- and 8,192-token prompts from Maya's documentation. The [driver](../benchmarks/maya_bench.py) and [fixed token inputs](../benchmarks/maya-bench-inputs.json) publish the common workload. The fixture pins its public source and document hashes; the driver uses DeepSeek's explicit chat wrapper.",'',
-              '| Quant | Decode mean | Three questions | Prefill 2,048 / 8,192 |','|---|---:|---|---:|']
+    systems=data['systems'];e=systems[COMPARISONS[0]]
+    lines=['## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017','',
+           '![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)','',
+           '**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified v1.1.54-based fork, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).','',
+           'GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL3 uses 1M. The eleven curve points share identical input bytes, zero cached input, thinking off and a 256-token cap; each point is one fresh load from the frozen profile. All five values were found at every point.','',
+           *comparison_table(data),'',xs_summary(data),'',
+           'GSQ reports medians of three loads; EXL3, Maya-S and Maya-XS each report one load. Cached decode uses three consecutive answers per load. Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.','',
+           '### Recorded context scaling','']
     for sid in COMPARISONS:
-        v=data['systems'][sid];b=v['maya_bench']['this_release'];qs=b['decode_question_tokens_per_second'];name=v['name'].split('Maya DS4 HIP ')[1].split(' dual')[0]
-        if sid==COMPARISONS[0]:name='**'+name+'**'
-        lines += ['| '+name+' | '+reading(b['decode_mean_tokens_per_second'])+' | '+' / '.join(reading(x) for x in qs)+' | '+reading(b['prefill_tokens_per_second']['2048'],0)+' / '+reading(b['prefill_tokens_per_second']['8192'],0)+' |']
-    lines += ['',"GSQ reports the median of three per-load decode means and prefill from that median load. Maya-S and Maya-XS v2 each report one load. Generated text and draft acceptance differ; these decode rates do not isolate kernel speed.",'']
-    a=text.index('### Other quants on the same engine (benchmark only)');b=text.index('## Dual RX 7900 XTX: GLM-5.3-Flash',a)
+        v=systems[sid];name=v['name'];name='**'+name+'**' if sid==COMPARISONS[0] else name
+        lines += ['#### '+name,'','| Input tokens | Prefill (tok/s) | Decode (tok/s) | Values |','|---:|---:|---:|---:|']
+        for x in v['context_scaling']:lines.append(f"| {x['actual_input_tokens']:,} | {reading(x['prefill_tokens_per_second'])} | {reading(x['decode_tokens_per_second'])} | {x['needle_passes']}/5 |")
+        if v.get('near_capacity_needle'):
+            x=v['near_capacity_needle'];lines += ['',f"The separate **{x['actual_input_tokens']:,}-token** check found **{x['needle_passes']}/5** values with zero cached input: **{reading(x['prefill_tokens_per_second'])} prefill / {reading(x['decode_tokens_per_second'])} decode tok/s**."]
+        lines.append('')
+    lines += ['### Fixed-input Maya benchmark','',
+              'The [driver](../benchmarks/maya_bench.py) and [token fixture](../benchmarks/maya-bench-inputs.json) retain the public v1.1.28 benchmark procedure: three 256-token answers, greedy and thinking off, plus 2,048- and 8,192-token prompts. The comparison table above uses these same inputs for every quant.','',
+              '### Upstream v1.1.54 benchmark at 1M','',
+              'A separate source-native `maya.py --bench` comparison used the same actual token IDs, a 1,048,576-token allocation and two cold loads per arm, in optimized EXL3 / GSQ / stock EXL3 order, repeated once. These documentation tokens differ from the fixed-input fixture above.','',
+              '| Setup | Decode mean (tok/s) | Prefill 2K / 8K (tok/s) |','|---|---:|---:|']
+    u=e['upstream_benchmark']
+    for arm,label in [('E+','**Optimized EXL3 2.25**'),('G','GSQ-RCO IQ2_XS, stock v1.1.54'),('E0','EXL3 2.25, stock v1.1.54')]:
+        v=u['arms'][arm]['mean'];lines.append(f"| {label} | {reading(v['decode'])} | {reading(v['prefill']['2048'])} / {reading(v['prefill']['8192'])} |")
+    lines += ['',"The two EXL3 arms use the same configuration with different binaries. GSQ uses its published recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.",'',
+              '### Quality and teacher comparison','',
+              'All four DeepSeek quants scored 30/30 on the cold coding/maths suite. The established math_08 gold-answer correction is retained. The perplexity values in the main table use 23 × 2,048 tokens.','',
+              'The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.','',
+              '| Quant | KL | Top-1 agreement | Held-out PPL |','|---|---:|---:|---:|']
+    for sid,label in [(COMPARISONS[0],'**EXL3 2.25 (v1.1.54 fork)**'),(COMPARISONS[1],'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
+        z=systems[sid]['quality']['lucebox_kl']['all'];lines.append(f"| {label} | {z['kl_top256']:.4f} | {z['top1_agree']*100:.2f}% | {z['ppl']:.4f} |")
+    lines += ['', 'The EXL3 dump/PPL consistency check differed by 0.38%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).','']
+    a=text.index('## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017');b=text.index('## Dual RX 7900 XTX: GLM-5.3-Flash',a)
     return text[:a]+'\n'.join(lines)+'\n'+text[b:]
 
 

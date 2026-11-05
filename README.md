@@ -8,48 +8,50 @@ A **BOSGAME M5 / Ryzen AI Max+ 395** with **two RX 7900 XTX cards** runs DeepSee
 
 Both models use **two RX 7900 XTX cards** (48 GB VRAM), the M5's **Radeon 8060S and 128 GiB RAM**, and an **NVMe over USB4**. Each external GPU has its own PCIe 4.0 ×4 M.2-to-OCuLink link. [Full hardware list](#hardware).
 
-Each setup supports **one conversation at up to 512K context**. Speeds are tokens per second: **decode** writes the answer; **prefill** reads the input. Tests use thinking off. Quality covers 10 coding and 20 maths cases; every retrieval prompt found all five values.
+EXL3 supports **one conversation at up to 1M context**; the other dual-card recipes support up to 512K. Speeds are tokens per second: **decode** writes the answer; **prefill** reads the input. Tests use thinking off. Quality covers 10 coding and 20 maths cases; every retrieval prompt found all five values.
 
-### DeepSeek-V4.1-Flash-1017 GSQ-RCO IQ2_XS (production)
+### DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw
 
-**Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** uses [ISTA-DASLab's GSQ-RCO quant](https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF) and Maya v1.1.48 with the RDNA 3 indexer, using 32K prompt chunks. [Ansible recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml).
+**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses [turboderp’s EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3), original FP8 Engram and the qualified Maya v1.1.54-based fork with 16K prompt chunks. [Ansible recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).
 
-**Quality: 30/30. Perplexity: 7.3695** (23 × 2,048 tokens). **520K needle: 5/5.** All rows use a 524,288-token allocation.
+**Quality: 30/30. Perplexity: 7.1950** (23 × 2,048 tokens). **1.04M retrieval: 5/5.** All EXL3 rows allocate 1,048,576 tokens.
 
 | Test | Decode | Prefill |
 |---|---:|---:|
-| `maya.py --bench` (three 256-token answers; 2K / 8K prompts) | **60.9** | **210 / 537** |
-| Public five-phrase prompt, 2K (2,040 input tokens) | 59.1 | 258 |
-| 32K (30,720) | 54.5 | 1,112 |
-| 128K (122,879) | 55.8 | 1,673 |
-| 480K (491,520) | 54.8 | 1,436 |
-| Real code, 130,048 tokens: cold / prompt cached | **52.5 / 65.7** | **1,464** |
+| Fixed-input Maya benchmark (2K / 8K prompts) | **52.1** | **243 / 605** |
+| Five-phrase prompt, 2K (2,040 tokens) | 63.8 | 274 |
+| 32K (30,720) | 38.2 | 1,281 |
+| 128K (122,879) | 37.4 | 1,602 |
+| 480K (491,520) | 35.5 | 1,314 |
+| 1.04M five-phrase prompt (1,040,000) | 32.4 | 951 |
+| Real code, 130,048 tokens: cold / prompt cached | **44.8 / 48.0** | **1,382** |
 
-Real-code and native speeds are medians of three loads. Cached decode uses each load’s three-answer mean.
+Speeds are tok/s. Cached decode is the mean of three consecutive answers from one load.
 
-### DeepSeek-V4.1-Flash-1017: other quants on the same engine
-
-Maya-S IQ2_XXS and Maya-XS v2 IQ1_S ran on the production engine and settings with their own packs, drafters and frozen profiles. These are benchmark-only comparisons; [measurement details](docs/BENCHMARKS.md#other-quants-on-the-same-engine-benchmark-only) pin their files. Maya-S has the lowest perplexity and streams uncached experts from the NVMe.
+### DeepSeek-V4.1-Flash-1017: quant comparison
 
 <!-- quant-comparison-note -->
-Maya-XS v2 (117 GB) almost fits in VRAM + RAM: 0.6 MB read per generated token cold and about 0 cached. It is fastest of the three for decode, with higher perplexity (7.94 vs GSQ 7.37).
+EXL3 supports 1M context and has the lowest measured perplexity (7.1950). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
 <!-- /quant-comparison-note -->
 
 <!-- quant-comparison-table -->
-| | **GSQ-RCO IQ2_XS** | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
-|---|---:|---:|---:|
-| Model weights, without the Engram tables | 155 GB | 178 GB | 117 GB |
-| Perplexity (23 × 2,048 tokens; lower is better) | 7.3695 | 7.2498 | 7.9435 |
-| Quality · 520K needle | 30/30 · 5/5 | 30/30 · 5/5 | 30/30 · 5/5 |
-| `maya.py --bench` decode | 60.9 | 41.7 | 80.7 |
-| `maya.py --bench` prefill, 2K / 8K | 210 / 537 | 169 / 478 | 286 / 661 |
-| 128K five-phrase (122,879): decode / prefill | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
-| 480K five-phrase (491,520): decode / prefill | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
-| Real code, 130,048 tokens: prefill | 1,464 | 1,378 | 1,587 |
-| Real code: decode cold / prompt cached | 52.5 / 65.7 | 37.3 / 49.4 | 66.2 / 68.0 |
+| | **EXL3 2.25 bpw** | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
+|---|---:|---:|---:|---:|
+| Context allocation | 1M | 512K | 512K | 512K |
+| Model shards, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
+| Perplexity (23 × 2,048 tokens; lower is better) | 7.1950 | 7.3695 | 7.2498 | 7.9435 |
+| Quality | 30/30 | 30/30 | 30/30 | 30/30 |
+| 520K retrieval | 5/5 | 5/5 | 5/5 | 5/5 |
+| 1.04M retrieval | 5/5 | — | — | — |
+| Fixed-input Maya benchmark: decode | 52.1 | 60.9 | 41.7 | 80.7 |
+| Fixed-input Maya benchmark: prefill 2K / 8K | 243 / 605 | 210 / 537 | 169 / 478 | 286 / 661 |
+| 128K five-phrase: decode / prefill | 37.4 / 1,602 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
+| 480K five-phrase: decode / prefill | 35.5 / 1,314 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
+| Real code, 130,048 tokens: prefill | 1,382 | 1,464 | 1,378 | 1,587 |
+| Real code: decode cold / prompt cached | 44.8 / 48.0 | 52.5 / 65.7 | 37.3 / 49.4 | 66.2 / 68.0 |
 <!-- /quant-comparison-table -->
 
-GSQ's `--bench` and real-code values are medians of three loads; the other two are one load each.
+GSQ, Maya-S and Maya-XS use v1.1.48 at 512K; EXL3 uses the v1.1.54 fork at 1M. GSQ values are medians of three loads; the others are one load each. [Full measurements](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
 
 ### GLM-5.3-Flash Maya-M IQ2_S
 
@@ -89,7 +91,7 @@ Cold five-phrase retrieval, one request per point. Both models read the same tex
 
 ### Install
 
-Install one recipe at a time. The commands below select the production GSQ-RCO setup.
+Install one recipe at a time. The commands below select the EXL3 setup.
 
 ```bash
 git clone https://github.com/pepuscz/strix-halo-llm.git
@@ -98,7 +100,7 @@ cp ansible/inventory/hosts.example.yml ansible/inventory/hosts.yml
 $EDITOR ansible/inventory/hosts.yml
 python3 -m venv .venv
 .venv/bin/pip install --require-hashes -r requirements.lock
-export STRIX_SYSTEM=maya-ds4-gsq-dual-xtx
+export STRIX_SYSTEM=maya-ds4-exl3-dual-xtx
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify
@@ -106,7 +108,8 @@ bin/strixctl verify
 
 | Setup | `STRIX_SYSTEM` | Free disk needed |
 |---|---|---:|
-| **DeepSeek GSQ-RCO** | `maya-ds4-gsq-dual-xtx` | ~335 GB |
+| **DeepSeek EXL3 2.25** | `maya-ds4-exl3-dual-xtx` | ~423 GB |
+| DeepSeek GSQ-RCO | `maya-ds4-gsq-dual-xtx` | ~335 GB |
 | GLM Maya-M | `maya-glm-dual-xtx` | ~240 GB |
 
 The installer verifies the hardware and artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`. Dual-card recipes use ROCm 7.2.4; pinned build details are in [SOURCES.md](docs/SOURCES.md).
