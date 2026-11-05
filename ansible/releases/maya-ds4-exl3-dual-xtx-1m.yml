@@ -46,7 +46,7 @@ strix_runtime:
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.54
   upstream_commit: c1670044bbc09310f35f9d00f7596c50ae8a38f1
-  server_sha256: PENDING
+  server_sha256: 60b965b6f43598f288cb0b9364806f1c997a1dcb7a5f99144728fdf433321742
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -220,7 +220,7 @@ strix_target:
     - name: config.json
       local_subdirectory: EXL3-2.25
       size: 4473
-      sha256: PENDING
+      sha256: 044637f76322263ca892a909e5d392874ce0b15dd9fb30ff741a1dfb20c06bc1
     - name: quantization_config.json
       local_subdirectory: EXL3-2.25
       size: 54676465
@@ -228,23 +228,23 @@ strix_target:
     - name: tokenizer.json
       local_subdirectory: EXL3-2.25
       size: 6367257
-      sha256: PENDING
+      sha256: c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b
     - name: tokenizer_config.json
       local_subdirectory: EXL3-2.25
       size: 801
-      sha256: PENDING
+      sha256: 6ac8c8dc065ed118161d02dd532749ae3f52c243deac27872134fae2f50d8547
     - name: chat_template.jinja
       local_subdirectory: EXL3-2.25
       size: 15348
-      sha256: PENDING
+      sha256: d959d804d5101b79a49b6ff1bf3c54cd5affa9a5a78c503d925f3090040b31c3
     - name: LICENSE
       local_subdirectory: EXL3-2.25
       size: 1084
-      sha256: PENDING
+      sha256: f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040
     - name: README.md
       local_subdirectory: EXL3-2.25
       size: 5231
-      sha256: PENDING
+      sha256: b72b796e4f4c739eca5d0ad360a7679b39118ca7eb64891f7151a527b292c42a
 strix_extra_artifacts: []
 strix_draft:
   repository: turboderp/DeepSeek-V4.1-Flash-1017-exl3
@@ -275,7 +275,7 @@ strix_service:
   memory_high: 118G
   memory_max: 120G
   memory_swap_max: 0
-  minimum_effective_non_cma_kib: PENDING
+  minimum_effective_non_cma_kib: 14680064
   load_available_kib: 115343360
   thermal_limit_millic: 95000
   health_retries: 720
@@ -326,15 +326,15 @@ strix_maya:
       tools/ds4/engram_hash.py: 764106d9c4c48c0a16f2357903806872333775bda374690a21e08bb5430ecba4
       tools/ds4/chat_template.jinja: e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa
   pack_files:
-    ds4.txt: PENDING
-    engram.bin: PENDING
-    tensors.txt: PENDING
-    tokenizer/chat_template.jinja: PENDING
-    tokenizer/merges.txt: PENDING
-    tokenizer/token_type.json: PENDING
-    tokenizer/tokenizer.json: PENDING
-    tokenizer/vocab.json: PENDING
-  pack_ds4_normalized_sha256: PENDING
+    ds4.txt: d5017be967cfb02be101c2e1b47daa232d288fa184dc1bbfe9c8a9e1a938313d
+    engram.bin: 08d55d6433f389b14aa115f4ea4eb31d6a2d63df1ae40821f03facf4c2d49142
+    tensors.txt: 054b02396ccf983333a6dcd282dadc2d3b1a2f29bd5033502b6607c33fbd465d
+    tokenizer/chat_template.jinja: d959d804d5101b79a49b6ff1bf3c54cd5affa9a5a78c503d925f3090040b31c3
+    tokenizer/merges.txt: 547bace837acea98652eef5669c9b01cee1c73ad1d2a44d6fdce9e6a81c22147
+    tokenizer/token_type.json: 50bd0c477193145a1cd597623fe7d842e609e6b787ad49b7819cadca09a18ed6
+    tokenizer/tokenizer.json: 5889b25e08cc848bee0999d3a8fbc00150e9e3e78104936bf13b773282bf5dae
+    tokenizer/vocab.json: 2f0bf5b31f4aa191d5d0d78291927a4f28c9ceb498a5e345b97e926c4cb99c1a
+  pack_ds4_normalized_sha256: 4e9539013b0aaec4ef878128bcb1cb096aa7ca6c0cbb5d49c709b739fdc8e1b5
   expert_profile:
     file: expert-profile-maya-s.bin
     size: 66048
