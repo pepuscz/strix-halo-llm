@@ -38,8 +38,8 @@ strix_paths:
   state: /var/lib/strix-halo-inference
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
-  release_tag: PENDING
-  tag_object: PENDING
+  release_tag: maya-ds4-exl3-1m-20261105
+  tag_object: 705096a235be23000cd2e7f726479506ef67fb2e
   tag_object_type: tag
   source_commit: 1a7405940f714dedf7d04e56fa9e8ebc358a92c4
   source_tree: b228a36e9e6343344cb7972dd3d42ffdea745971
