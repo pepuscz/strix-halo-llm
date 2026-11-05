@@ -120,24 +120,7 @@ def render(data, dual=False):
 
 
 def render_readme(data, text):
-    system = data['systems']['maya-ds4-exl3-dual-xtx']
-    bench, code = system['maya_bench']['this_release'], system['long_context']
-    rows = {row['actual_input_tokens']: row for row in system['context_scaling']}
-    table = ['| Test | Decode | Prefill |', '|---|---:|---:|',
-             f"| Fixed-input Maya benchmark (2K / 8K prompts) | **{bench['decode_mean_tokens_per_second']:.1f}** | **{bench['prefill_tokens_per_second']['2048']:,.0f} / {bench['prefill_tokens_per_second']['8192']:,.0f}** |"]
-    for label, count in [('Five-phrase prompt, 2K (2,040 tokens)',2040),('32K (30,720)',30720),
-                         ('128K (122,879)',122879),('480K (491,520)',491520)]:
-        x=rows[count];table.append(f"| {label} | {x['decode_tokens_per_second']:.1f} | {x['prefill_tokens_per_second']:,.0f} |")
-    x=system['near_capacity_needle'];table.append(f"| 1.04M five-phrase prompt (1,040,000) | {x['decode_tokens_per_second']:.1f} | {x['prefill_tokens_per_second']:,.0f} |")
-    table.append(f"| Real code, 130,048 tokens: cold / prompt cached | **{code['decode_tokens_per_second']:.1f} / {code['reused_prompt']['decode_tokens_per_second']:.1f}** | **{code['prefill_tokens_per_second']:,.0f}** |")
-    pattern=r'(### DeepSeek-V4\.1-Flash-1017 EXL3 2\.25 bpw[^\n]*\n)(.*?)(?=\n### |\Z)'
-    def replace(m):
-        body,n=re.subn(r'^\| Test \| Decode \| Prefill \|\n(?:\|[^\n]*\n)+','\n'.join(table)+'\n',m[2],count=1,flags=re.M)
-        if n!=1:raise ValueError('missing EXL3 README performance table')
-        return m[1]+body
-    text,n=re.subn(pattern,replace,text,count=1,flags=re.S)
-    if n!=1:raise ValueError('missing EXL3 README section')
-    return render_comparison_readme(data,text)
+    return render_comparison_readme(data, text)
 
 
 COMPARISONS = ('maya-ds4-exl3-dual-xtx', 'maya-ds4-gsq-dual-xtx', 'maya-ds4-maya-s-dual-xtx', 'maya-ds4-maya-xs-dual-xtx')
@@ -151,9 +134,14 @@ def comparison_table(data):
     headers=['**EXL3 2.25 bpw**','GSQ-RCO IQ2_XS','Maya-S IQ2_XXS','Maya-XS v2 IQ1_S']
     cols=[]
     for sid in COMPARISONS:
-        v=data['systems'][sid];b=v['maya_bench']['this_release'];c=v['long_context'];q=v['quality'];rows={x['actual_input_tokens']:x for x in v['context_scaling']}
-        cols.append(['1M' if v['context_allocation']==1048576 else '512K',f"{v['target']['model_bytes']/1e9:.0f} GB",reading(q['perplexity']['value'],4),f"{q['total']}/30",f"{v['deep_needle']['needle_passes']}/5",f"{v['near_capacity_needle']['needle_passes']}/5" if v.get('near_capacity_needle') else '—',reading(b['decode_mean_tokens_per_second']),reading(b['prefill_tokens_per_second']['2048'],0)+' / '+reading(b['prefill_tokens_per_second']['8192'],0),*[reading(rows[n]['decode_tokens_per_second'])+' / '+reading(rows[n]['prefill_tokens_per_second'],0) for n in [122879,491520]],reading(c['prefill_tokens_per_second'],0),reading(c['decode_tokens_per_second'])+' / '+reading(c['reused_prompt']['decode_tokens_per_second'])])
-    labels=['Context allocation','Model shards, excluding Engram','Perplexity (23 × 2,048 tokens; lower is better)','Quality','520K retrieval','1.04M retrieval','Fixed-input Maya benchmark: decode','Fixed-input Maya benchmark: prefill 2K / 8K','128K five-phrase: decode / prefill','480K five-phrase: decode / prefill','Real code, 130,048 tokens: prefill','Real code: decode cold / prompt cached']
+        v=data['systems'][sid];b=v['maya_bench']['this_release'];q=v['quality']
+        at128=[x for x in v['context_scaling'] if x['actual_input_tokens']==122879][0]
+        cols.append(['1M' if v['context_allocation']==1048576 else '512K', f"{v['target']['model_bytes']/1e9:.0f} GB",
+                     f"{q['perplexity']['value']:.2f}", f"{q['total']}/30", f"{b['decode_mean_tokens_per_second']:.0f}",
+                     f"{at128['decode_tokens_per_second']:.0f}", f"{b['prefill_tokens_per_second']['8192']:,.0f}",
+                     f"{at128['prefill_tokens_per_second']:,.0f}"])
+    labels=['Longest input','Model size, excluding Engram','Perplexity (lower is better)','Quality checks passed',
+            'Decode, short prompt','Decode, 128K input','Prefill, 8K input','Prefill, 128K input']
     return ['| | '+' | '.join(headers)+' |','|---|---:|---:|---:|---:|']+['| '+label+' | '+' | '.join(c[i] for c in cols)+' |' for i,label in enumerate(labels)]
 
 
@@ -164,6 +152,21 @@ def render_comparison_readme(data, text):
 
 
 def xs_summary(data, detailed=False):
+    return ("EXL3 supports 1M context. GSQ-RCO decodes faster at long inputs; "
+            "Maya-XS v2 is the fastest, with higher perplexity.")
+
+
+def comparison_table_detailed(data):
+    headers=['**EXL3 2.25 bpw**','GSQ-RCO IQ2_XS','Maya-S IQ2_XXS','Maya-XS v2 IQ1_S']
+    cols=[]
+    for sid in COMPARISONS:
+        v=data['systems'][sid];b=v['maya_bench']['this_release'];c=v['long_context'];q=v['quality'];rows={x['actual_input_tokens']:x for x in v['context_scaling']}
+        cols.append(['1M' if v['context_allocation']==1048576 else '512K',f"{v['target']['model_bytes']/1e9:.0f} GB",reading(q['perplexity']['value'],4),f"{q['total']}/30",f"{v['deep_needle']['needle_passes']}/5",f"{v['near_capacity_needle']['needle_passes']}/5" if v.get('near_capacity_needle') else '—',reading(b['decode_mean_tokens_per_second']),reading(b['prefill_tokens_per_second']['2048'],0)+' / '+reading(b['prefill_tokens_per_second']['8192'],0),*[reading(rows[n]['decode_tokens_per_second'])+' / '+reading(rows[n]['prefill_tokens_per_second'],0) for n in [122879,491520]],reading(c['prefill_tokens_per_second'],0),reading(c['decode_tokens_per_second'])+' / '+reading(c['reused_prompt']['decode_tokens_per_second'])])
+    labels=['Context allocation','Model shards, excluding Engram','Perplexity (23 × 2,048 tokens; lower is better)','Quality','520K retrieval','1.04M retrieval','Fixed-input Maya benchmark: decode','Fixed-input Maya benchmark: prefill 2K / 8K','128K five-phrase: decode / prefill','480K five-phrase: decode / prefill','Real code, 130,048 tokens: prefill','Real code: decode cold / prompt cached']
+    return ['| | '+' | '.join(headers)+' |','|---|---:|---:|---:|---:|']+['| '+label+' | '+' | '.join(c[i] for c in cols)+' |' for i,label in enumerate(labels)]
+
+
+def detailed_summary(data):
     x=data['systems']['maya-ds4-exl3-dual-xtx'];xs=data['systems']['maya-ds4-maya-xs-dual-xtx']
     g=data['systems']['maya-ds4-gsq-dual-xtx']
     at=lambda sid_data:[p for p in sid_data['context_scaling'] if p['actual_input_tokens']==122879][0]['decode_tokens_per_second']
@@ -178,7 +181,7 @@ def render_quant_details(data, text):
            '![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)','',
            '**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified v1.1.54-based fork, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).','',
            'GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL3 uses 1M. The eleven curve points share identical input bytes, zero cached input, thinking off and a 256-token cap; each point is one fresh load from the frozen profile. All five values were found at every point.','',
-           *comparison_table(data),'',xs_summary(data),'',
+           *comparison_table_detailed(data),'',detailed_summary(data),'',
            'GSQ reports medians of three loads; EXL3, Maya-S and Maya-XS each report one load. Cached decode uses three consecutive answers per load. Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.','',
            '### Recorded context scaling','']
     for sid in COMPARISONS:
