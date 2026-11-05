@@ -35,7 +35,7 @@ strix_paths:
   downloads: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v1/downloads
   release: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v1
   models: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3
-  state: /var/lib/strix-halo-inference
+  state: /var/lib/strix-halo-inference-exl3
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
   release_tag: maya-ds4-exl3-1m-20261105
@@ -358,7 +358,7 @@ strix_maya:
       - --mmap-experts
       - 'on'
       - --expert-profile
-      - /var/lib/strix-halo-inference/expert-profile.bin
+      - /var/lib/strix-halo-inference-exl3/expert-profile.bin
       - --prefill-chunk
       - '16384'
       - --suffix-draft
@@ -379,7 +379,7 @@ strix_maya:
       - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v1/rocblas/install/lib
       - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v1/rocm/lib
     port: 18109
-    log: /var/lib/strix-halo-inference/native.log
+    log: /var/lib/strix-halo-inference-exl3/native.log
     installer:
       family: deepseek
       models_dir: /opt/strix-halo/models
@@ -406,7 +406,7 @@ strix_maya:
       DS4_HELPER_GB: '95'
       DS4_INDEX_TC: '1'
       DS4_LANE_SPIN_US: '200'
-      DS4_LT_STORE: /var/lib/strix-halo-inference/lt-picks.txt
+      DS4_LT_STORE: /var/lib/strix-halo-inference-exl3/lt-picks.txt
       DS4_LT_VERBOSE: '1'
       DS4_ROUTE_FUSE: '2'
       DS4_TP_CHECK: '1'
@@ -416,7 +416,7 @@ strix_maya:
       MAYA_DS4_DSPARK_CUM: '0.35'
       MAYA_DS4_RESTORE_TAIL: '0'
       MAYA_DS4_SLOT_CAP: '16'
-      MAYA_DS4_SLOT_DIR: /var/lib/strix-halo-inference/ds4-slots
+      MAYA_DS4_SLOT_DIR: /var/lib/strix-halo-inference-exl3/ds4-slots
       MAYA_DS4_SLOT_GB: '16'
       MAYA_DS4_SLOT_KEEP: '1'
       ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v1/rocm/lib/rocblas/library
