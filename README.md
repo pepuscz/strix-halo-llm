@@ -31,7 +31,7 @@ Speeds are tok/s. Cached decode is the mean of three consecutive answers from on
 ### DeepSeek-V4.1-Flash-1017: quant comparison
 
 <!-- quant-comparison-note -->
-EXL3 supports 1M context and has the lowest measured perplexity (7.1950). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
+EXL3 supports 1M context and has the lowest measured perplexity (7.1950). GSQ-RCO decodes faster at long context (55.8 against 37.4 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
 <!-- /quant-comparison-note -->
 
 <!-- quant-comparison-table -->

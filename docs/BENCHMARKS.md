@@ -27,7 +27,7 @@ GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL
 | Real code, 130,048 tokens: prefill | 1,382 | 1,464 | 1,378 | 1,587 |
 | Real code: decode cold / prompt cached | 44.8 / 48.0 | 52.5 / 65.7 | 37.3 / 49.4 | 66.2 / 68.0 |
 
-EXL3 supports 1M context and has the lowest measured perplexity (7.1950). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
+EXL3 supports 1M context and has the lowest measured perplexity (7.1950). GSQ-RCO decodes faster at long context (55.8 against 37.4 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
 
 GSQ reports medians of three loads; EXL3, Maya-S and Maya-XS each report one load. Cached decode uses three consecutive answers per load. Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.
 

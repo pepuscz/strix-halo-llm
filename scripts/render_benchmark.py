@@ -165,7 +165,11 @@ def render_comparison_readme(data, text):
 
 def xs_summary(data, detailed=False):
     x=data['systems']['maya-ds4-exl3-dual-xtx'];xs=data['systems']['maya-ds4-maya-xs-dual-xtx']
-    return f"EXL3 supports 1M context and has the lowest measured perplexity ({x['quality']['perplexity']['value']:.4f}). Maya-XS v2 has the fastest recorded decode, with higher perplexity ({xs['quality']['perplexity']['value']:.4f})."
+    g=data['systems']['maya-ds4-gsq-dual-xtx']
+    at=lambda sid_data:[p for p in sid_data['context_scaling'] if p['actual_input_tokens']==122879][0]['decode_tokens_per_second']
+    return (f"EXL3 supports 1M context and has the lowest measured perplexity ({x['quality']['perplexity']['value']:.4f}). "
+            f"GSQ-RCO decodes faster at long context ({at(g):.1f} against {at(x):.1f} tokens/s at 128K). "
+            f"Maya-XS v2 has the fastest recorded decode, with higher perplexity ({xs['quality']['perplexity']['value']:.4f}).")
 
 
 def render_quant_details(data, text):
