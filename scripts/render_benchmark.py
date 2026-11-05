@@ -140,7 +140,7 @@ def comparison_table(data):
                      f"{q['perplexity']['value']:.2f}", f"{q['total']}/30", f"{b['decode_mean_tokens_per_second']:.0f}",
                      f"{at128['decode_tokens_per_second']:.0f}", f"{b['prefill_tokens_per_second']['8192']:,.0f}",
                      f"{at128['prefill_tokens_per_second']:,.0f}"])
-    labels=['Longest input','Model size','Perplexity (lower is closer to the original)','Quality checks passed',
+    labels=['Longest input','Model size, excluding Engram','Perplexity (lower is better)','Quality checks passed',
             'Decode, short prompt','Decode, 128K input','Prefill, 8K input','Prefill, 128K input']
     return ['| | '+' | '.join(headers)+' |','|---|---:|---:|---:|---:|']+['| '+label+' | '+' | '.join(c[i] for c in cols)+' |' for i,label in enumerate(labels)]
 
@@ -152,8 +152,8 @@ def render_comparison_readme(data, text):
 
 
 def xs_summary(data, detailed=False):
-    return ("EXL3 is the closest to the original model and the only one tested at 1M. "
-            "GSQ-RCO decodes faster at long inputs. Maya-XS v2 is the fastest and the furthest from the original.")
+    return ("EXL3 supports 1M context. GSQ-RCO decodes faster at long inputs; "
+            "Maya-XS v2 is the fastest, with higher perplexity.")
 
 
 def comparison_table_detailed(data):
