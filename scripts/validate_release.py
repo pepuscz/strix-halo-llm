@@ -404,11 +404,9 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
             "DS4_DECODE_TRIM": "12", "DS4_INDEX_TC": "1", "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0",
             "MAYA_DS4_HELPER_EXL3": "1", "MAYA_DS4_FLOW_HELPER": "1", "DS4_AHEAD_EXL3": "1", "DS4_EXL3_LEND": "1",
             "DS4_FLOW_STATS": "1",
-            # every expert VRAM leaves over in the 8060S's pool but ~5 GB, the drafter's first, and those ~5 GB read
-            # ahead into RAM at load; the lend's hand-back past the page cache; conversations past the first kept on
-            # disk, not in RAM
-            "DS4_HELPER_GB": "109", "DS4_HELPER_DRAFT": "1", "DS4_WARM_CAP_GB": "6", "DS4_RAM_MARGIN_GB": "5",
-            "DS4_LEND_DIRECT": "1", "MAYA_DS4_SLOT_RAM_GB": "1",
+            # every expert VRAM leaves over in the 8060S's pool but ~5 GB, and those ~5 GB read ahead into RAM at load;
+            # conversations past the first kept on disk, not in RAM
+            "DS4_HELPER_GB": "109", "DS4_WARM_CAP_GB": "6", "DS4_RAM_MARGIN_GB": "5", "MAYA_DS4_SLOT_RAM_GB": "1",
         })
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))

@@ -41,8 +41,8 @@ strix_runtime:
   release_tag: PENDING
   tag_object: PENDING
   tag_object_type: tag
-  source_commit: da540897e3a069e6d1515e7b5272460150a2793f
-  source_tree: 1f8bb726f1c6100f053be083eb0a5c4fb96f53ba
+  source_commit: f2292baeee925ae02aeec35b9532fa4203c8db6d
+  source_tree: 51e8ccbbe7f68325edf5d086294798968c4c1064
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.56
   upstream_commit: 22fc101f2c109b7e7174c975ff3c2d8e9ce0a867
@@ -402,11 +402,9 @@ strix_maya:
       DS4_DRAFT_VRAM: 96,48,32
       DS4_HELPER: '2'
       DS4_HELPER_CHECK: '1'
-      DS4_HELPER_DRAFT: '1'
       DS4_HELPER_GB: '109'
       DS4_INDEX_TC: '1'
       DS4_LANE_SPIN_US: '200'
-      DS4_LEND_DIRECT: '1'
       DS4_LT_STORE: /var/lib/strix-halo-inference-exl3/lt-picks.txt
       DS4_LT_VERBOSE: '1'
       DS4_RAM_MARGIN_GB: '5'
