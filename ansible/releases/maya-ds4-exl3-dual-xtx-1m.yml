@@ -413,7 +413,7 @@ strix_maya:
       DS4_ROUTE_FUSE: '2'
       DS4_TP_CHECK: '1'
       DS4_W16_MB: '128'
-      DS4_WARM_CAP_GB: '0.5'
+      DS4_WARM_CAP_GB: '6'
       DS4_YOCO_TP: '1'
       MAYA_DS4_DSPARK_CUM: '0.35'
       MAYA_DS4_RESTORE_TAIL: '0'
