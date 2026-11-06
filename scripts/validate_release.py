@@ -393,15 +393,21 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         expected_env["DS4_INDEX_TC"] = "1"
     if exl3:
         # turboderp's EXL3 read in place: the helper's pool, the lookahead and the lend for EXL3 (the release's PRs),
-        # no GGUF-only flow / Q8 / borrow settings.
+        # no GGUF-only flow / Q8 / borrow settings.  No DS4_COMMIT_CAP_GB: on Linux it made the engine charge the
+        # XTX's experts to a Windows-style commit less the helper's whole pool, which kept 7.2 GB of experts off the
+        # GPUs once the pool grew to 109 GB.
         for key in ("DS4_Q8_BATCH", "DS4_Q8_CHECK", "DS4_TP_GGUF_UNEVEN", "DS4_FLOW_TP", "DS4_HC_FUSE", "DS4_FLOW_HELPER",
                     "DS4_FLOW_PUMP_WAIT", "DS4_TP_BORROW", "DS4_FLOW_DOWN_SHARE", "DS4_FLOW_DOWN_PART",
-                    "DS4_HELPER_RECENT"):
+                    "DS4_HELPER_RECENT", "DS4_COMMIT_CAP_GB"):
             del expected_env[key]
         expected_env.update({
             "DS4_DECODE_TRIM": "12", "DS4_INDEX_TC": "1", "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0",
             "MAYA_DS4_HELPER_EXL3": "1", "MAYA_DS4_FLOW_HELPER": "1", "DS4_AHEAD_EXL3": "1", "DS4_EXL3_LEND": "1",
             "DS4_FLOW_STATS": "1",
+            # every expert VRAM leaves over in the 8060S's pool but ~5 GB, the drafter's first; the lend's hand-back
+            # past the page cache; conversations past the first kept on disk, not in RAM
+            "DS4_HELPER_GB": "109", "DS4_HELPER_DRAFT": "1", "DS4_WARM_CAP_GB": "0.5", "DS4_RAM_MARGIN_GB": "5",
+            "DS4_LEND_DIRECT": "1", "MAYA_DS4_SLOT_RAM_GB": "1",
         })
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
