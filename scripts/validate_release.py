@@ -404,9 +404,11 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
             "DS4_DECODE_TRIM": "12", "DS4_INDEX_TC": "1", "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0",
             "MAYA_DS4_HELPER_EXL3": "1", "MAYA_DS4_FLOW_HELPER": "1", "DS4_AHEAD_EXL3": "1", "DS4_EXL3_LEND": "1",
             "DS4_FLOW_STATS": "1",
-            # every expert VRAM leaves over in the 8060S's pool but ~5 GB, and those ~5 GB read ahead into RAM at load;
+            # every expert VRAM leaves over in the 8060S's pool but ~5 GB, the DSpark blocks' leftovers first (else they
+            # come from the drive at a decode's first rounds), and those ~5 GB read ahead into RAM at load;
             # conversations past the first kept on disk, not in RAM
-            "DS4_HELPER_GB": "109", "DS4_WARM_CAP_GB": "6", "DS4_RAM_MARGIN_GB": "5", "MAYA_DS4_SLOT_RAM_GB": "1",
+            "DS4_HELPER_GB": "109", "DS4_HELPER_DRAFT": "1", "DS4_WARM_CAP_GB": "6", "DS4_RAM_MARGIN_GB": "5",
+            "MAYA_DS4_SLOT_RAM_GB": "1",
         })
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
@@ -421,6 +423,11 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         if cfg.get(key) != value:
             fail("qualified Maya DS4 server setting drifted: " + key)
     if exl3:
+        # no background compaction while it serves: kcompactd moving pages the GPUs map stopped both XTX for 100-300 ms
+        # in the first request after a load (the driver binds the process's host memory again)
+        if data["strix_policy"].get("vm_compaction_proactiveness") != 0 or \
+                data["strix_policy"].get("vm_watermark_boost_factor") != 0:
+            fail("the EXL3 release runs with vm.compaction_proactiveness and vm.watermark_boost_factor at 0")
         # (the EXL3 floor is the effective non-CMA memory the qualified run measured after its load, less a margin)
         if not 2 * 1024 * 1024 <= service["minimum_effective_non_cma_kib"] <= 14 * 1024 * 1024:
             fail("the EXL3 release's non-CMA floor must lie between 2 and 14 GiB")

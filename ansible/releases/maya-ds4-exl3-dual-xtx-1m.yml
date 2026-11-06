@@ -41,8 +41,8 @@ strix_runtime:
   release_tag: PENDING
   tag_object: PENDING
   tag_object_type: tag
-  source_commit: f2292baeee925ae02aeec35b9532fa4203c8db6d
-  source_tree: 51e8ccbbe7f68325edf5d086294798968c4c1064
+  source_commit: f5aa4cb9a0347aabd9062801ece97885861c0a68
+  source_tree: e5de6895f0174cd52f3bae99ab18673a9dfa86b4
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.56
   upstream_commit: 22fc101f2c109b7e7174c975ff3c2d8e9ce0a867
@@ -296,6 +296,8 @@ strix_policy:
   fast_mw: 120000
   slow_mw: 120000
   expected_watts: '120.000'
+  vm_compaction_proactiveness: 0
+  vm_watermark_boost_factor: 0
 strix_allow_reboot: false
 strix_verify_full_model_hashes: false
 strix_verify_api_smoke: true
@@ -402,6 +404,7 @@ strix_maya:
       DS4_DRAFT_VRAM: 96,48,32
       DS4_HELPER: '2'
       DS4_HELPER_CHECK: '1'
+      DS4_HELPER_DRAFT: '1'
       DS4_HELPER_GB: '109'
       DS4_INDEX_TC: '1'
       DS4_LANE_SPIN_US: '200'

@@ -12,6 +12,11 @@ readonly STAPM={{ strix_policy.stapm_mw }}
 readonly FAST={{ strix_policy.fast_mw }}
 readonly SLOW={{ strix_policy.slow_mw }}
 readonly EXPECTED_W={{ strix_policy.expected_watts | quote }}
+# (optional) the kernel's memory compaction while the service runs: kcompactd moving pages a GPU maps makes the driver
+# stop the process's queues and bind its host memory again - 100-300 ms with the GPUs idle (a DeepSeek EXL3 release
+# right after its load). Empty: left as the host has it
+readonly VM_COMPACTION_PROACTIVENESS={{ strix_policy.vm_compaction_proactiveness | default('') }}
+readonly VM_WATERMARK_BOOST_FACTOR={{ strix_policy.vm_watermark_boost_factor | default('') }}
 
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 read_limit() {
@@ -46,10 +51,14 @@ capture() {
     save_paths "$STATE/gpu" \
         /sys/class/drm/card*/device/power/control \
         /sys/class/drm/card*/device/power_dpm_force_performance_level
+    save_paths "$STATE/vm" \
+        ${VM_COMPACTION_PROACTIVENESS:+/proc/sys/vm/compaction_proactiveness} \
+        ${VM_WATERMARK_BOOST_FACTOR:+/proc/sys/vm/watermark_boost_factor}
     "$RYZENADJ" --info > "$STATE/power"
 }
 restore_state() {
     [ -d "$STATE" ] || return 0
+    restore_paths "$STATE/vm"
     restore_paths "$STATE/gpu"
     restore_paths "$STATE/cpu"
     if [ -s "$STATE/power" ]; then
@@ -82,6 +91,14 @@ verify() {
         found_gpu=1
     done
     [ "$found_gpu" -eq 1 ] || fail 'No writable GPU performance control found.'
+    if [ -n "$VM_COMPACTION_PROACTIVENESS" ]; then
+        [ "$(cat /proc/sys/vm/compaction_proactiveness)" = "$VM_COMPACTION_PROACTIVENESS" ] ||
+            fail 'vm.compaction_proactiveness mismatch.'
+    fi
+    if [ -n "$VM_WATERMARK_BOOST_FACTOR" ]; then
+        [ "$(cat /proc/sys/vm/watermark_boost_factor)" = "$VM_WATERMARK_BOOST_FACTOR" ] ||
+            fail 'vm.watermark_boost_factor mismatch.'
+    fi
     info=$(mktemp /run/strix-power.XXXXXX)
     trap 'rm -f -- "$info"' RETURN
     "$RYZENADJ" --info > "$info"
@@ -109,6 +126,8 @@ apply() {
     for path in /sys/class/drm/card*/device/power_dpm_force_performance_level; do
         [ -w "$path" ] && printf '%s\n' "$GPU_DPM" > "$path"
     done
+    [ -z "$VM_COMPACTION_PROACTIVENESS" ] || printf '%s\n' "$VM_COMPACTION_PROACTIVENESS" > /proc/sys/vm/compaction_proactiveness
+    [ -z "$VM_WATERMARK_BOOST_FACTOR" ] || printf '%s\n' "$VM_WATERMARK_BOOST_FACTOR" > /proc/sys/vm/watermark_boost_factor
     "$RYZENADJ" --stapm-limit="$STAPM" --fast-limit="$FAST" --slow-limit="$SLOW"
     sleep 2
     verify
