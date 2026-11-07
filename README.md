@@ -89,10 +89,22 @@ bin/strixctl verify
 | Setup | `STRIX_SYSTEM` | Free disk needed |
 |---|---|---:|
 | **DeepSeek EXL3 2.25** | `maya-ds4-exl3-dual-xtx` | ~423 GB |
+| DeepSeek EXL3 2.25, one card | `maya-ds4-exl3-single-xtx` | ~423 GB |
 | DeepSeek GSQ-RCO | `maya-ds4-gsq-dual-xtx` | ~335 GB |
 | GLM Maya-M | `maya-glm-dual-xtx` | ~240 GB |
 
 The installer verifies the hardware and artifacts, builds the runtime, and enables `strix-halo-inference.service` on `127.0.0.1:18109`. Dual-card recipes use ROCm 7.2.4; pinned build details are in [SOURCES.md](docs/SOURCES.md).
+
+## Single RX 7900 XTX setup
+
+For a host with **one RX 7900 XTX** (24 GB VRAM) beside the M5's Radeon 8060S and 128 GiB RAM: the same EXL3 2.25 bpw model and engine as the dual recipe, with the 8060S holding a 113 GB expert pool, inputs up to **1M tokens**. [Ansible recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
+
+<!-- single-xtx-table -->
+<!-- /single-xtx-table -->
+
+![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with one RX 7900 XTX and a Radeon 8060S helper, against two cards](docs/benchmark-single-xtx.svg)
+
+Install it with the commands above and `export STRIX_SYSTEM=maya-ds4-exl3-single-xtx` (~423 GB free disk; the same model files as the dual recipe). On a host with more cards it serves on the first RX 7900 XTX; set `strix_xtx_pci` (e.g. `"c6:00.0"`) in the inventory to pick another. [Measurements and method](docs/BENCHMARKS.md#single-rx-7900-xtx-deepseek-v41-flash-1017).
 
 ## BOSGAME M5 only
 
