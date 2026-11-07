@@ -113,7 +113,7 @@ A separate source-native `maya.py --bench` comparison used the same actual token
 | GSQ-RCO IQ2_XS, stock v1.1.56 | 58.9 | 199.5 / 538.0 |
 | EXL3 2.25, stock v1.1.56 | 48.6 | 230.5 / 650.0 |
 
-The two EXL3 arms use the same configuration with different binaries. GSQ uses its published recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.
+The optimized arm is this release: its binary and recipe (the helper's 109 GB pool with the drafter's leftover experts, ~5 GB read ahead). The stock EXL3 arm keeps the retained stock reference recipe (a 95 GB pool, 14.9 GB read-ahead, no DS4_HELPER_DRAFT), so the rows compare the release with a stock reference, not binaries alone. GSQ uses its recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.
 
 ### Quality and teacher comparison
 

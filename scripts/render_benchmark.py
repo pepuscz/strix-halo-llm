@@ -217,7 +217,7 @@ def render_quant_details(data, text):
     u=e['upstream_benchmark']
     for arm,label in [('E+','**Optimized EXL3 2.25**'),('G',f'GSQ-RCO IQ2_XS, stock {stock_version(e)}'),('E0',f'EXL3 2.25, stock {stock_version(e)}')]:
         v=u['arms'][arm]['mean'];lines.append(f"| {label} | {reading(v['decode'])} | {reading(v['prefill']['2048'])} / {reading(v['prefill']['8192'])} |")
-    lines += ['',"The two EXL3 arms use the same configuration with different binaries. GSQ uses its published recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.",'',
+    lines += ['',"The optimized arm is this release: its binary and recipe (the helper's 109 GB pool with the drafter's leftover experts, ~5 GB read ahead). The stock EXL3 arm keeps the retained stock reference recipe (a 95 GB pool, 14.9 GB read-ahead, no DS4_HELPER_DRAFT), so the rows compare the release with a stock reference, not binaries alone. GSQ uses its recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.",'',
               '### Quality and teacher comparison','',
               'All four DeepSeek quants scored 30/30 on the cold coding/maths suite. The established math_08 gold-answer correction is retained. The perplexity values in the main table use 23 × 2,048 tokens.','',
               'The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.','',
