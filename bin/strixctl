@@ -15,6 +15,7 @@ case "$system" in
     rocm-rocmfpx) default_release="$repo_root/ansible/releases/rocm-rocmfpx-128k.yml" ;;
     maya-ds4-gsq-dual-xtx) default_release="$repo_root/ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml" ;;
     maya-ds4-exl3-dual-xtx) default_release="$repo_root/ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml" ;;
+    maya-ds4-exl3-single-xtx) default_release="$repo_root/ansible/releases/maya-ds4-exl3-single-xtx-1m.yml" ;;
     maya-glm-dual-xtx) default_release="$repo_root/ansible/releases/maya-glm-dual-xtx-512k.yml" ;;
     *) fail "Unknown system: $system" ;;
 esac

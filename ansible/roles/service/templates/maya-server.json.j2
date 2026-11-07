@@ -1,1 +1,1 @@
-{{ strix_maya.server | to_nice_json }}
+{{ (service_maya_server | default(strix_maya.server)) | to_nice_json }}
