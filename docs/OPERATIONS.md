@@ -8,6 +8,7 @@ export STRIX_SYSTEM=strata-qwen-q4xl     # Winning single-box Qwen setup; defaul
 # export STRIX_SYSTEM=rocm-rocmfpx      # Single-box DeepSeek comparison baseline
 # export STRIX_SYSTEM=maya-glm-dual-xtx # GLM-5.3-Flash on two RX 7900 XTX cards
 # export STRIX_SYSTEM=maya-ds4-gsq-dual-xtx # DeepSeek-V4.1-Flash-1017 (GSQ-RCO IQ2_XS) on two RX 7900 XTX cards
+# export STRIX_SYSTEM=maya-ds4-exl3-dual-xtx # DeepSeek-V4.1-Flash-1017 (EXL3 2.25 bpw, 1M context) on two RX 7900 XTX cards
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify
@@ -24,7 +25,11 @@ bin/strixctl start
 bin/strixctl verify
 ```
 
-Stop restores the captured CPU, GPU, and package-power policy. The cooling
+Stop restores the captured CPU, GPU, and package-power policy, and the kernel's
+memory-compaction settings where a release sets them. The DeepSeek EXL3 release
+turns background compaction off while it serves (`vm.compaction_proactiveness`
+and `vm.watermark_boost_factor` at 0): kcompactd moving pages the GPUs map made
+the driver stop both cards for 100–300 ms early in a request. The cooling
 dependency returns all three AXB35 fans to firmware-auto. Verify checks API and
 runtime identity, context allocation, model representation, cgroup events,
 memory headroom, memory PSI, temperatures, cooling state, package-power

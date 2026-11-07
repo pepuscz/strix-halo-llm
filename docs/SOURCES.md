@@ -4,7 +4,7 @@
 
 | Component | Pinned source |
 |---|---|
-| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-exl3-1m-20261105), annotated tag `maya-ds4-exl3-1m-20261105` (object `705096a235be23000cd2e7f726479506ef67fb2e`), commit `1a7405940f714dedf7d04e56fa9e8ebc358a92c4`, tree `b228a36e9e6343344cb7972dd3d42ffdea745971`, based on upstream v1.1.54 (`c1670044bbc09310f35f9d00f7596c50ae8a38f1`) |
+| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-exl3-1m-20261107), annotated tag `maya-ds4-exl3-1m-20261107` (object `efdb189fa30fa31811bab9fcbdaaf64acc276592`), commit `f5aa4cb9a0347aabd9062801ece97885861c0a68`, tree `e5de6895f0174cd52f3bae99ab18673a9dfa86b4`: upstream v1.1.56 (`22fc101f2c109b7e7174c975ff3c2d8e9ce0a867`) with the open PR mw00/project-maya#867 (the EXL3 lend in place) and DS4_HELPER_DRAFT |
 | Target | [turboderp/DeepSeek-V4.1-Flash-1017-exl3](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3/tree/9183eaaeb6f08dff6ee5b6e34b852911cf6733c9), revision `9183eaaeb6f08dff6ee5b6e34b852911cf6733c9`: 26 EXL3 shards, original FP8 Engram and pinned metadata; about 361 GB total |
 | Pack | The tagged engine’s `tools/ds4/pack.py`, `st.py`, `engram_hash.py` and chat template, all SHA-256 pinned. The pack indexes the downloaded safetensors in place and writes eight small metadata/tokenizer files |
 | Draft | DSpark and its Markov head are included in the target shards. The packer restores the Markov tensor names used by the engine |
