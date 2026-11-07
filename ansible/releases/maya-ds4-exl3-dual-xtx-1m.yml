@@ -388,7 +388,7 @@ strix_maya:
       quant: DeepSeek-V4.1-Flash-1017
       ds4_quant: exl3-2.25
       model_dir: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25
-      written: PENDING
+      written: 2026-11-07 00:00
       speed_calibration:
         skipped: true
         reason: The qualified release fixes DSpark itself; no startup calibration
