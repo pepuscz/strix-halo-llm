@@ -174,15 +174,19 @@
       register: rendered_maya_build
       when: strix_system.engine == 'maya'
 
-    - name: Assert Maya DS4 dual RX 7900 XTX serving contract
+    - name: Assert Maya DS4 serving contract (two RX 7900 XTX, or one)
       ansible.builtin.assert:
         that:
           - (rendered_maya_config.content | b64decode | from_json) == strix_maya.server
-          - strix_maya.server.gpu == [0, 1, 2]
-          - strix_maya.server.env.DS4_HELPER == '2'
-          - strix_maya.server.env.DS4_DRAFT_VRAM == '96,48,32'
-          - strix_maya.server.env.DS4_DRAFT_DEV == '1,0,0'
-          - strix_maya.server.env.DS4_DECODE_TRIM == ('12' if strix_system.id == 'maya-ds4-exl3-dual-xtx' else '15')
+          - strix_maya.server.gpu == ([0, 1] if single else [0, 1, 2])
+          - strix_maya.server.env.DS4_HELPER == ('1' if single else '2')
+          - strix_maya.server.env.DS4_DRAFT_VRAM == ('0,0,0' if single else '96,48,32')
+          - strix_maya.server.env.DS4_DRAFT_DEV == ('0,0,0' if single else '1,0,0')
+          - (strix_maya.gpu_from_topology | default(false)) == single
+          - single == ('--tp' not in strix_maya.server.args)
+          - >-
+            strix_maya.server.env.DS4_DECODE_TRIM ==
+            ('12' if strix_system.id in ['maya-ds4-exl3-dual-xtx', 'maya-ds4-exl3-single-xtx'] else '15')
           - strix_maya.server.args[:4] == ['--pack', strix_maya.pack, '--max-context', strix_service.context | string]
           - strix_maya.server.env.MAYA_DS4_SLOT_DIR == strix_paths.state + '/ds4-slots'
           - strix_maya.server.env.MAYA_DS4_SLOT_KEEP == '1'
@@ -196,6 +200,8 @@
           - "('ConditionPathExists=' + strix_maya.pack + '/ds4.txt') in rendered_unit_text"
           - "'--target maya-ds4 ' in (rendered_maya_build.content | b64decode)"
           - "('source/tools/ds4/pack.py --model' if (strix_maya.pack_kind | default('gguf')) == 'exl3' else 'packtool/tools/ds4/pack_gguf.py') in (rendered_maya_build.content | b64decode)"
+      vars:
+        single: "{{ strix_system.id == 'maya-ds4-exl3-single-xtx' }}"
       when:
         - strix_system.engine == 'maya'
         - (strix_maya.family | default('deepseek')) == 'deepseek'
