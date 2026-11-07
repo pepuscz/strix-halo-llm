@@ -38,15 +38,15 @@ strix_paths:
   state: /var/lib/strix-halo-inference-exl3
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
-  release_tag: PENDING
-  tag_object: PENDING
+  release_tag: maya-ds4-exl3-1m-20261107
+  tag_object: efdb189fa30fa31811bab9fcbdaaf64acc276592
   tag_object_type: tag
   source_commit: f5aa4cb9a0347aabd9062801ece97885861c0a68
   source_tree: e5de6895f0174cd52f3bae99ab18673a9dfa86b4
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.56
   upstream_commit: 22fc101f2c109b7e7174c975ff3c2d8e9ce0a867
-  server_sha256: PENDING
+  server_sha256: 9bb8ef8d3a81e395deadf0e06961365e297b169d0fcac050ad6c7e3326b56473
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
