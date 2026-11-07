@@ -46,7 +46,7 @@ strix_runtime:
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.56
   upstream_commit: 22fc101f2c109b7e7174c975ff3c2d8e9ce0a867
-  server_sha256: 9bb8ef8d3a81e395deadf0e06961365e297b169d0fcac050ad6c7e3326b56473
+  server_sha256: b95d7c4c570549de55d9aaed2ebe965007f975bf224a27ba6c1b41b2522a3667
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
