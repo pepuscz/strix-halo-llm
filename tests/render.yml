@@ -60,6 +60,19 @@
         - {src: ansible/roles/service/templates/maya-server.json.j2, dest: server.json, mode: "0444"}
       when: strix_system.engine == 'maya'
 
+    - name: Render the memory compaction program and its nightly timer
+      ansible.builtin.template:
+        src: "../{{ item.src }}"
+        dest: "{{ render_root }}/{{ item.dest }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - {src: ansible/roles/service/templates/strix-compact-memory.j2, dest: strix-compact-memory, mode: "0755"}
+        - {src: ansible/roles/service/templates/strix-compact-memory.service.j2, dest: strix-compact-memory.service, mode: "0644"}
+        - {src: ansible/roles/service/templates/strix-compact-memory.timer.j2, dest: strix-compact-memory.timer, mode: "0644"}
+      loop_control:
+        label: "{{ item.dest }}"
+      when: strix_policy.vm_compaction_proactiveness is defined
+
     - name: Render the demand-based fan governor service
       ansible.builtin.template:
         src: ../ansible/roles/fan/templates/strix-fan-governor.service.j2
@@ -77,6 +90,7 @@
           + (['build-strata', 'run-strata'] if strix_system.engine == 'strata' else [])
           + (['build-maya-rocm', 'build-maya-engine', 'run-maya', 'strix-drain-ttm-pool']
              if strix_system.engine == 'maya' else [])
+          + (['strix-compact-memory'] if strix_policy.vm_compaction_proactiveness is defined else [])
         }}
       changed_when: false
 
@@ -98,6 +112,14 @@
           - "'strix-host-policy apply' in rendered_unit_text"
           - "'strix-host-policy restore' in rendered_unit_text"
           - "'serviceRequires' not in rendered_unit_text"
+          # background compaction off while serving <=> compaction before the load (and the nightly timer)
+          - >-
+            ('strix-compact-memory load' in rendered_unit_text) ==
+            (strix_policy.vm_compaction_proactiveness is defined)
+          - >-
+            rendered_unit_text.find('strix-drain-ttm-pool') <
+            rendered_unit_text.find('strix-compact-memory load')
+            if strix_policy.vm_compaction_proactiveness is defined else true
 
     - name: Assert Strix Halo llama.cpp Vulkan IQ3_XXS service contract
       ansible.builtin.assert:

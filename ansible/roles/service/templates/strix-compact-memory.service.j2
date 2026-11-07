@@ -1,0 +1,12 @@
+[Unit]
+Description=Memory compaction while the model's GPUs are idle (background compaction is off while it serves)
+After={{ strix_service.name }}
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/sbin/strix-compact-memory idle
+TimeoutStartSec=3h
+Nice=19
+IOSchedulingClass=idle

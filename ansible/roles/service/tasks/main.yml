@@ -128,6 +128,41 @@
     mode: "0755"
   notify: Restart selected model service
 
+# A release that turns the kernel's background compaction off (strix_policy.vm_compaction_proactiveness) compacts
+# memory itself where no request waits: once before the engine's load, and nightly once the GPUs are idle.
+- name: Install the memory compaction program and its nightly timer
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {src: strix-compact-memory.j2, dest: /usr/local/sbin/strix-compact-memory, mode: "0755"}
+    - {src: strix-compact-memory.service.j2, dest: /etc/systemd/system/strix-compact-memory.service, mode: "0644"}
+    - {src: strix-compact-memory.timer.j2, dest: /etc/systemd/system/strix-compact-memory.timer, mode: "0644"}
+  loop_control:
+    label: "{{ item.dest }}"
+  when: strix_policy.vm_compaction_proactiveness is defined
+
+- name: Stop the nightly memory compaction for a release that leaves background compaction on
+  ansible.builtin.systemd_service:
+    name: strix-compact-memory.timer
+    state: stopped
+    enabled: false
+  failed_when: false
+  when: strix_policy.vm_compaction_proactiveness is not defined
+
+- name: Remove the memory compaction program and its timer for a release that leaves background compaction on
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/strix-compact-memory.timer
+    - /etc/systemd/system/strix-compact-memory.service
+    - /usr/local/sbin/strix-compact-memory
+  when: strix_policy.vm_compaction_proactiveness is not defined
+
 - name: Install selected model service service
   ansible.builtin.template:
     src: strix-halo-inference.service.j2
@@ -165,6 +200,13 @@
     name: "{{ strix_service.name }}"
     enabled: "{{ strix_service.auto_start }}"
     state: started
+
+- name: Enable the nightly memory compaction while the GPUs are idle
+  ansible.builtin.systemd_service:
+    name: strix-compact-memory.timer
+    enabled: true
+    state: started
+  when: strix_policy.vm_compaction_proactiveness is defined
 
 - name: Enable and start demand-based fan governor
   ansible.builtin.systemd_service:

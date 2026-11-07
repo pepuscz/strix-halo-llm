@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Memory compaction where no request waits on it, for a release that turns the kernel's background compaction off
+# (strix_policy.vm_compaction_proactiveness): "load" once before the engine allocates its pools, "idle" from the
+# nightly timer once the GPUs have been idle for a minute. A request that arrives during the pass waits 0.1-0.3 s.
+set -Eeuo pipefail
+readonly SERVICE={{ strix_service.name | quote }}
+readonly BUSY_PCT={{ strix_fan.governor.busy_threshold_pct | default(5) }}
+readonly IDLE_SECONDS=60
+readonly WINDOW_SECONDS=7200
+
+fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
+# free memory in blocks of 2 MiB and larger (orders 9 and up of /proc/buddyinfo), all zones, in GiB
+large_free_gib() {
+    awk '{for (i = 14; i <= NF; i++) mib += $i * 2 ^ (i - 13)} END {printf "%.1f", mib / 1024}' /proc/buddyinfo
+}
+gpu_busy() {
+    local path value max=-1
+    for path in /sys/class/drm/card*/device/gpu_busy_percent; do
+        value=$(cat "$path" 2>/dev/null) || continue
+        [[ $value =~ ^[0-9]+$ ]] || continue
+        [ "$value" -le "$max" ] || max=$value
+    done
+    [ "$max" -ge 0 ] || return 1
+    printf '%s\n' "$max"
+}
+compact() {
+    local before start=$SECONDS
+    before=$(large_free_gib)
+    printf '1\n' > /proc/sys/vm/compact_memory
+    printf '%s: free in blocks of 2 MiB and up %s -> %s GiB in %s s\n' \
+        "$1" "$before" "$(large_free_gib)" $((SECONDS - start))
+}
+idle() {
+    if ! systemctl is-active --quiet "$SERVICE"; then
+        printf '%s is not running: nothing to do\n' "$SERVICE"
+        return 0
+    fi
+    local deadline=$((SECONDS + WINDOW_SECONDS)) quiet=0 busy
+    while [ "$SECONDS" -lt "$deadline" ]; do
+        busy=$(gpu_busy) || fail 'no GPU busy counter'
+        if [ "$busy" -lt "$BUSY_PCT" ]; then quiet=$((quiet + 1)); else quiet=0; fi
+        if [ "$quiet" -ge "$IDLE_SECONDS" ]; then
+            compact 'GPUs idle'
+            return 0
+        fi
+        sleep 1
+    done
+    printf 'the GPUs were not idle for %s s within %s h: left to the next run\n' "$IDLE_SECONDS" $((WINDOW_SECONDS / 3600))
+}
+
+[ "${EUID}" -eq 0 ] || fail 'Run as root.'
+case "${1:-}" in
+    load) compact 'before the load' ;;
+    idle) idle ;;
+    *) fail 'Usage: strix-compact-memory {load|idle}' ;;
+esac
