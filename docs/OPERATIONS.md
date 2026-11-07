@@ -9,6 +9,7 @@ export STRIX_SYSTEM=strata-qwen-q4xl     # Winning single-box Qwen setup; defaul
 # export STRIX_SYSTEM=maya-glm-dual-xtx # GLM-5.3-Flash on two RX 7900 XTX cards
 # export STRIX_SYSTEM=maya-ds4-gsq-dual-xtx # DeepSeek-V4.1-Flash-1017 (GSQ-RCO IQ2_XS) on two RX 7900 XTX cards
 # export STRIX_SYSTEM=maya-ds4-exl3-dual-xtx # DeepSeek-V4.1-Flash-1017 (EXL3 2.25 bpw, 1M context) on two RX 7900 XTX cards
+# export STRIX_SYSTEM=maya-ds4-exl3-single-xtx # the same on one RX 7900 XTX (strix_xtx_pci picks the card on a host with more)
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify

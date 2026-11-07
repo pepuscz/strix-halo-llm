@@ -16,12 +16,17 @@ SERIES = [
     ('vulkan-iq3xxs', '#8957e5', 'DeepSeek · Strix Halo llama.cpp Vulkan IQ3_XXS'),
     ('rocm-rocmfpx', '#bc4c00', 'DeepSeek · Lucebox ROCm ROCmFPX'),
 ]
+SINGLE = 'maya-ds4-exl3-single-xtx'
+# the single-card chart: its curve against the dual recipe's, the same model, engine and prompts
+SINGLE_SERIES = [(SINGLE, '#cf222e'), ('maya-ds4-exl3-dual-xtx', '#8c959f')]
 DUAL_SERIES = [('maya-ds4-exl3-dual-xtx', '#cf222e'), ('maya-ds4-gsq-dual-xtx', '#8250df'), ('maya-ds4-maya-s-dual-xtx', '#0969da'), ('maya-ds4-maya-xs-dual-xtx', '#bc4c00'), ('maya-glm-dual-xtx', '#1a7f37')]
 
 
-def render(data, dual=False):
+def render(data, dual=False, single=False):
+    dual = dual or single
+    pairs = SINGLE_SERIES if single else DUAL_SERIES
     series = SERIES if not dual else [(sid, color, f"{data['systems'][sid]['model']} · {data['systems'][sid]['name']}")
-                                      for sid, color in DUAL_SERIES]
+                                      for sid, color in pairs]
     lines = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 775" role="img" aria-labelledby="title desc">',
              '<title id="title">Strix Halo LLM throughput: Qwen and DeepSeek</title>',
              '<desc id="desc">Reading and answer-writing speeds on a 128 GiB Ryzen AI Max+ 395. The test asks each model to find five labelled phrases placed in a long text. Every run found all five correctly. The winning setup for Qwen and the winning setup for DeepSeek are shown with their respective comparison baselines. Each point measures one request at the input length shown. Each horizontal tick doubles the input length.</desc>',
@@ -35,9 +40,13 @@ def render(data, dual=False):
         lines[2] = '<desc id="desc">Cold five-phrase retrieval on two RX 7900 XTX cards with a Radeon 8060S expert helper. DeepSeek EXL3 uses a 1,048,576-token allocation; GSQ-RCO, Maya-S and Maya-XS v2 use 524,288. Each quant has one eleven-point curve on the same prompt bytes; every point found all five phrases. GLM uses its own tokenizer and recorded capacities. Each horizontal tick doubles the input length.</desc>'
         lines[-2] = '<text x="70" y="40" class="title">Dual RX 7900 XTX · DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash</text>'
         lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>'
+    if single:
+        lines[1] = '<title id="title">One RX 7900 XTX throughput: DeepSeek-V4.1-Flash-1017</title>'
+        lines[2] = '<desc id="desc">Cold five-phrase retrieval with one RX 7900 XTX and the Radeon 8060S as the expert helper, against the same EXL3 2.25 bpw model and engine on two cards. Both use a 1,048,576-token allocation and the same prompt bytes; every point found all five phrases. Each horizontal tick doubles the input length.</desc>'
+        lines[-2] = '<text x="70" y="40" class="title">One RX 7900 XTX · DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw</text>'
     for i, (sid, color, name) in enumerate(series):
         yy = 99 + i * 24
-        weight = 700 if sid in data["winning_setups"].values() else 400
+        weight = 700 if (sid == SINGLE if single else sid in data["winning_setups"].values()) else 400
         lines += [f'<line x1="70" y1="{yy}" x2="98" y2="{yy}" stroke="{color}" stroke-width="3"/>',
                   f'<text x="110" y="{yy+5}" class="label" style="font-weight:{weight}">{html.escape(name)}</text>']
     left, right, height = 80, 1020, 165
@@ -49,12 +58,13 @@ def render(data, dual=False):
     panels = [('Reading the input (tokens/second) · higher is better', 'prefill_tokens_per_second', 235, 900),
               ('Writing the answer (tokens/second) · higher is better', 'decode_tokens_per_second', 480, 60)]
     if dual:
-        fastest = max(p['prefill_tokens_per_second'] for sid, _ in DUAL_SERIES
+        fastest = max(p['prefill_tokens_per_second'] for sid, _ in pairs
                       for p in data['systems'][sid]['context_scaling'] if isinstance(p['prefill_tokens_per_second'], (int, float)))
         reading = next(m for m in (1200, 1600, 2000, 2400) if m >= fastest)
-        writing = max(60, 20 * math.ceil(max(p['decode_tokens_per_second'] for sid, _ in DUAL_SERIES
+        writing = max(60, 20 * math.ceil(max(p['decode_tokens_per_second'] for sid, _ in pairs
                        for p in data['systems'][sid]['context_scaling'] if isinstance(p['decode_tokens_per_second'], (int, float))) / 20))
-        panels = [(title, key, top + 35, maximum) for (title, key, top, _), maximum in zip(panels, (reading, writing))]
+        panels = [(title, key, top + (-45 if single else 35), maximum)
+                  for (title, key, top, _), maximum in zip(panels, (reading, writing))]
     for title, key, top, maximum in panels:
         bottom = top + height
         def y(value):
@@ -109,12 +119,17 @@ def render(data, dual=False):
             for label_y, (_, xx, yy, value, color) in zip(placed, end_labels):
                 lines.append(f'<line x1="{xx:.2f}" y1="{yy:.2f}" x2="1032" y2="{label_y-4:.2f}" stroke="{color}" stroke-width="1"/>')
                 lines.append(f'<text class="value" x="1040" y="{label_y:.2f}" text-anchor="start" style="fill:{color}">{value:.1f}</text>')
-    if dual:
+    if single:
+        lines.append('<text x="550" y="765" text-anchor="middle" class="tick">Both: 1M allocation, the same engine and prompts · runtime versions and full protocol in BENCHMARKS.md</text>')
+    elif dual:
         lines.append('<text x="550" y="765" text-anchor="middle" class="tick">EXL3: 1M allocation · other DeepSeek quants: 512K · runtime versions and full protocol in BENCHMARKS.md</text>')
     lines += ['<text x="550" y="700" text-anchor="middle" class="label">Input length (tokens; each tick doubles)</text>',
               '<text x="550" y="735" text-anchor="middle" class="label">Test: find five phrases hidden in a long text. Every run found all five correctly.</text>',
               '</svg>', '']
-    if dual:
+    if single:   # (two legend rows, not five: the panels and the notes sit 80 px higher than the dual chart's)
+        lines = [line.replace('1100 850', '1100 770').replace('height="775"', 'height="770"')
+                 .replace('y="700"', 'y="670"').replace('y="735"', 'y="705"').replace('y="765"', 'y="735"') for line in lines]
+    elif dual:
         lines = [line.replace('y="700"', 'y="750"').replace('y="735"', 'y="785"').replace('y="765"', 'y="815"') for line in lines]
     return '\n'.join(lines)
 
@@ -145,8 +160,26 @@ def comparison_table(data):
     return ['| | '+' | '.join(headers)+' |','|---|---:|---:|---:|---:|']+['| '+label+' | '+' | '.join(c[i] for c in cols)+' |' for i,label in enumerate(labels)]
 
 
+def single_table(data):
+    """One card against two: the same model, engine, prompts and measures as the quant comparison's EXL3 column."""
+    cols=[]
+    for sid in (SINGLE, 'maya-ds4-exl3-dual-xtx'):
+        v=data['systems'][sid];b=v['maya_bench']['this_release'];q=v['quality'];c=v['long_context']
+        at128=[x for x in v['context_scaling'] if x['actual_input_tokens']==122879][0]
+        cols.append(['1M' if v['context_allocation']==1048576 else '512K', f"{q['total']}/30", f"{q['perplexity']['value']:.2f}",
+                     f"{b['decode_mean_tokens_per_second']:.0f}", f"{at128['decode_tokens_per_second']:.0f}",
+                     f"{b['prefill_tokens_per_second']['8192']:,.0f}", f"{at128['prefill_tokens_per_second']:,.0f}",
+                     f"{c['prefill_tokens_per_second']:,.0f} / {c['decode_tokens_per_second']:.1f}"])
+    labels=['Longest input','Quality checks passed','Perplexity (lower is better)','Decode, short prompt','Decode, 128K input',
+            'Prefill, 8K input','Prefill, 128K input','Real code, 130K tokens: prefill / decode']
+    return ['| | **1 × RX 7900 XTX** | 2 × RX 7900 XTX |','|---|---:|---:|']+['| '+label+' | '+' | '.join(c[i] for c in cols)+' |' for i,label in enumerate(labels)]
+
+
 def render_comparison_readme(data, text):
-    for name,body in [('quant-comparison-table','\n'.join(comparison_table(data))),('quant-comparison-note',xs_summary(data))]:
+    blocks=[('quant-comparison-table','\n'.join(comparison_table(data))),('quant-comparison-note',xs_summary(data))]
+    if SINGLE in data['systems'] and '<!-- single-xtx-table -->' in text:
+        blocks.append(('single-xtx-table','\n'.join(single_table(data))))
+    for name,body in blocks:
         start='<!-- '+name+' -->';end='<!-- /'+name+' -->';before,rest=text.split(start,1);_,after=rest.split(end,1);text=before+start+'\n'+body+'\n'+end+after
     return text
 
@@ -225,8 +258,33 @@ def render_quant_details(data, text):
     for sid,label in [(COMPARISONS[0],f'**EXL3 2.25 ({fork_version(e)} fork)**'),(COMPARISONS[1],'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
         z=systems[sid]['quality']['lucebox_kl']['all'];lines.append(f"| {label} | {z['kl_top256']:.4f} | {z['top1_agree']*100:.2f}% | {z['ppl']:.4f} |")
     lines += ['', 'The EXL3 dump/PPL consistency check differed by 0.27%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).','']
+    if SINGLE in systems:
+        lines += single_details(data)
     a=text.index('## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017');b=text.index('## Dual RX 7900 XTX: GLM-5.3-Flash',a)
     return text[:a]+'\n'.join(lines)+'\n'+text[b:]
+
+
+def single_details(data):
+    """The single-card release: its curve, needles, real-code prompt, quality and native --bench rows."""
+    v=data['systems'][SINGLE];c=v['long_context'];q=v['quality'];b=v['maya_bench']['this_release']
+    lines=['## Single RX 7900 XTX: DeepSeek-V4.1-Flash-1017','',
+           '![One RX 7900 XTX context scaling against two, DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw](benchmark-single-xtx.svg)','',
+           f"**{v['name']}** runs the same EXL3 2.25 bpw model and {fork_version(v)}-based engine as the dual recipe on one card, for a host without a second one. The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).",'',
+           f"Quality **{q['total']}/30**, perplexity **{reading(q['perplexity']['value'],4)}** (23 × 2,048 tokens). The 130,048-token real-code prompt: **{reading(c['prefill_tokens_per_second'],0)}** prefill, **{reading(c['decode_tokens_per_second'])}** decode cold, **{reading(c['reused_prompt']['decode_tokens_per_second'])}** with the prompt cached. Fixed-input Maya benchmark: **{reading(b['decode_mean_tokens_per_second'])}** decode, **{reading(b['prefill_tokens_per_second']['2048'],0)} / {reading(b['prefill_tokens_per_second']['8192'],0)}** prefill at 2K / 8K.",'',
+           'One fresh load per point, the same eleven prompts as the dual recipe, zero cached input, thinking off.','',
+           '| Input tokens | Prefill (tok/s) | Decode (tok/s) | Values |','|---:|---:|---:|---:|']
+    for x in v['context_scaling']:lines.append(f"| {x['actual_input_tokens']:,} | {reading(x['prefill_tokens_per_second'])} | {reading(x['decode_tokens_per_second'])} | {x['needle_passes']}/5 |")
+    for key,label in (('deep_needle','deep'),('near_capacity_needle','near-capacity')):
+        if v.get(key):
+            x=v[key];lines += ['',f"The {label} **{x['actual_input_tokens']:,}-token** check found **{x['needle_passes']}/5** values with zero cached input: **{reading(x['prefill_tokens_per_second'])} prefill / {reading(x['decode_tokens_per_second'])} decode tok/s**."]
+    u=v['upstream_benchmark']
+    lines += ['',f"### Upstream {stock_version(v)} benchmark, one card",'',
+              'Source-native `maya.py --bench`, the same token IDs as the dual recipe\'s, two cold loads per arm, interleaved.','',
+              '| Setup | Decode mean (tok/s) | Prefill 2K / 8K (tok/s) |','|---|---:|---:|']
+    for arm,label in [('S+','**This release**'),('S0',f'Stock {stock_version(v)}, the same settings without DS4_HELPER_DRAFT')]:
+        m=u['arms'][arm]['mean'];lines.append(f"| {label} | {reading(m['decode'])} | {reading(m['prefill']['2048'])} / {reading(m['prefill']['8192'])} |")
+    lines += ['','The lend of #867 runs on a tensor-parallel group only, so on one card the release differs from stock by DS4_HELPER_DRAFT (#904). Changed text and draft acceptance prevent a stream-matched causal claim.','']
+    return lines
 
 
 def main():
@@ -235,6 +293,7 @@ def main():
     args=parser.parse_args()
     data = json.loads(DATA.read_text())
     outputs = [(OUTPUT, render(data)), (ROOT / 'docs/benchmark-dual-xtx.svg', render(data, True)),
+               *([(ROOT / 'docs/benchmark-single-xtx.svg', render(data, single=True))] if SINGLE in data['systems'] else []),
                (ROOT / 'README.md', render_readme(data, (ROOT / 'README.md').read_text())),
                (ROOT / 'docs/BENCHMARKS.md', render_quant_details(data, (ROOT / 'docs/BENCHMARKS.md').read_text()))]
     for output, expected in outputs:

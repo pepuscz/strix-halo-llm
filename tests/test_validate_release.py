@@ -21,6 +21,7 @@ SPEC.loader.exec_module(VALIDATOR)
 GLM = ROOT / "ansible/releases/maya-glm-dual-xtx-512k.yml"
 GSQ = ROOT / "ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml"
 EXL3 = ROOT / "ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml"
+EXL3_SINGLE = ROOT / "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml"
 DUMMY_HEX64 = "0123456789abcdef" * 4
 # Typed dummies where the validator requires a type other than a 64-hex digest.
 DUMMIES = {"tag_object": "0123456789abcdef0123456789abcdef01234567",
@@ -194,6 +195,26 @@ class ReleaseValidatorTest(unittest.TestCase):
             (lambda d: d["strix_maya"]["pack_tool"]["files"].pop("tools/ds4/st.py"), "pack.py and its helpers"),
             (lambda d: d["strix_maya"].update(pack=d["strix_maya"]["pack"] + "-x"),
              "must live in strix_maya.model_subdirectory"),
+        ):
+            broken = copy.deepcopy(data)
+            change(broken)
+            with self.subTest(message=message):
+                self.assert_fails(broken, message)
+
+    def test_exl3_single_validates_once_filled_and_rejects_drift(self) -> None:
+        data = without_pending(yaml.safe_load(EXL3_SINGLE.read_text(encoding="utf-8")))
+        qualification = data["strix_qualification"]
+        qualification["deep_needle"]["values"] = "5/5"
+        qualification["retrieval_ladder"]["largest_input_tokens"] = 491520
+        self.assertEqual(self.validate(data)["strix_system"]["id"], "maya-ds4-exl3-single-xtx")
+        for change, message in (
+            (lambda d: d["strix_maya"]["server"]["args"].__setitem__(slice(4, 4), ["--tp", "2"]), "arguments drifted"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_HELPER="2"), "environment drifted: DS4_HELPER"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_EXL3_LEND="1"), "environment drifted: DS4_EXL3_LEND"),
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_AR2="2"), "environment drifted: DS4_AR2"),
+            (lambda d: d["strix_maya"]["server"].update(gpu=[0, 1, 2]), "service contract"),
+            (lambda d: d["strix_maya"].pop("gpu_from_topology"), "gpu_from_topology"),
+            (lambda d: d["strix_platform"]["discrete_gpus"][0].pop("at_least"), "at least one RX 7900 XTX"),
         ):
             broken = copy.deepcopy(data)
             change(broken)

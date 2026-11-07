@@ -6,11 +6,13 @@
       - strix_release_id | length > 0
       - >-
         strix_system.id in ['vulkan-iq3xxs', 'rocm-rocmfpx', 'strata-qwen-q4xl',
-                            'maya-ds4-gsq-dual-xtx', 'maya-ds4-exl3-dual-xtx', 'maya-glm-dual-xtx']
+                            'maya-ds4-gsq-dual-xtx', 'maya-ds4-exl3-dual-xtx', 'maya-ds4-exl3-single-xtx',
+                            'maya-glm-dual-xtx']
       - >-
         strix_system.name in ['Strix Halo llama.cpp Vulkan IQ3_XXS', 'Lucebox ROCm ROCmFPX', 'Strata HIP UD-Q4_K_XL',
                               'Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX',
                               'Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX',
+                              'Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX',
                               'Maya HIP Maya-M IQ2_S dual RX 7900 XTX']
       - strix_system.engine in ['vulkan', 'rocm', 'strata', 'maya']
       # A Maya release builds one model family; a release without strix_maya.family is DeepSeek.
@@ -18,13 +20,15 @@
         strix_system.engine != 'maya' or
         (strix_maya.family | default('deepseek')) ==
         {'maya-ds4-gsq-dual-xtx': 'deepseek', 'maya-ds4-exl3-dual-xtx': 'deepseek',
-         'maya-glm-dual-xtx': 'glm'}[strix_system.id]
+         'maya-ds4-exl3-single-xtx': 'deepseek', 'maya-glm-dual-xtx': 'glm'}[strix_system.id]
       - >-
         (strix_system.engine == 'vulkan' and strix_service.context | int == 524288) or
         (strix_system.engine == 'rocm' and strix_service.context | int == 131072) or
-        (strix_system.engine == 'maya' and strix_system.id != 'maya-ds4-exl3-dual-xtx' and
+        (strix_system.engine == 'maya' and
+         strix_system.id not in ['maya-ds4-exl3-dual-xtx', 'maya-ds4-exl3-single-xtx'] and
          strix_service.context | int == 524288) or
-        (strix_system.id == 'maya-ds4-exl3-dual-xtx' and strix_service.context | int == 1048576) or
+        (strix_system.id in ['maya-ds4-exl3-dual-xtx', 'maya-ds4-exl3-single-xtx'] and
+         strix_service.context | int == 1048576) or
         (strix_system.engine == 'strata' and strix_service.context | int == 262144 and
          strix_service.parallel_slots | int == 4)
       # The large envelope: Strata, and the GLM engine's pinned RAM tier; DeepSeek's mmap regime keeps 118G / 120G.
@@ -83,8 +87,13 @@
 - name: Require every discrete GPU the release was qualified with
   ansible.builtin.assert:
     that:
-      - item.stdout | trim | int == item.item.count | int
-    fail_msg: "Expected {{ item.item.count }} x {{ item.item.name }} ({{ item.item.pci_id }}); found {{ item.stdout | trim }}."
+      # (at_least: a release that runs on one card of a kind installs on a host with more; it picks one)
+      - >-
+        item.stdout | trim | int == item.item.count | int or
+        (item.item.at_least | default(false) and item.stdout | trim | int >= item.item.count | int)
+    fail_msg: >-
+      Expected {{ 'at least ' if item.item.at_least | default(false) else '' }}{{ item.item.count }} x
+      {{ item.item.name }} ({{ item.item.pci_id }}); found {{ item.stdout | trim }}.
   loop: "{{ preflight_discrete_gpus.results }}"
   loop_control:
     label: "{{ item.item.name }}"

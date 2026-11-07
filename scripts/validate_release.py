@@ -23,6 +23,7 @@ SYSTEMS = {
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
     "maya-ds4-gsq-dual-xtx": ("Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX", "maya"),
     "maya-ds4-exl3-dual-xtx": ("Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX", "maya"),
+    "maya-ds4-exl3-single-xtx": ("Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
 # A pin or result the qualified host has yet to supply. A manifest holding one, alone or in a sentence, is a draft:
@@ -30,7 +31,18 @@ SYSTEMS = {
 PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
-MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-ds4-exl3-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-ds4-exl3-dual-xtx": "deepseek",
+                 "maya-ds4-exl3-single-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+# turboderp's EXL3 on two cards (tensor parallel) and on one (for a host without a second card), and their manifests
+EXL3_SYSTEMS = {"maya-ds4-exl3-dual-xtx": "maya-ds4-exl3-dual-xtx-1m.yml",
+                "maya-ds4-exl3-single-xtx": "maya-ds4-exl3-single-xtx-1m.yml"}
+SINGLE_SYSTEMS = {"maya-ds4-exl3-single-xtx"}
+# the single-card release's prompt chunk and what its tuning changed from the dual release's settings (one card lends
+# no VRAM to the prompt path, so its chunk buffers stay: 8K chunks leave ~200 more experts in VRAM; the 8060S's pool
+# 113 GB; the DSpark blocks' experts all in the pool, VRAM for the trunk's) - --bench 46.8 / 45.5 against 44.5 / 42.7 /
+# 43.1 tok/s, prompts 2K / 8K +3 % / +2 %
+SINGLE_CHUNK = "8192"
+SINGLE_ENV = {"DS4_HELPER_GB": "113", "DS4_DRAFT_VRAM": "0,0,0"}
 # turboderp's EXL3 repo: 26 shards, its Engram tables (FP8) and the files the engine source's pack.py reads; the
 # DSpark drafter and its markov head are inside the shards.
 EXL3_SHARDS = tuple(f"model-{i:05d}-of-00026.safetensors" for i in range(1, 27))
@@ -98,8 +110,8 @@ def validate_manifest(path: Path, root: Path) -> dict:
 
     service = data["strix_service"]
     required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 524288}[system["engine"]]
-    if system["id"] == "maya-ds4-exl3-dual-xtx":
-        required_context = 1048576   # the EXL3 release is qualified at 1M
+    if system["id"] in EXL3_SYSTEMS:
+        required_context = 1048576   # the EXL3 releases are qualified at 1M
     if service["context"] != required_context:
         fail(f"{system['name']} release must allocate exactly {required_context} tokens")
     if service["minimum_effective_non_cma_kib"] < 2 * 1024 * 1024:
@@ -267,8 +279,18 @@ def validate_maya(data: dict, root: Path) -> None:
         fail(f"Maya family {family!r} does not match {data['strix_system']['id']}")
     service, runtime = data["strix_service"], data["strix_runtime"]
     rocm, rocblas, maya = data["strix_rocm724"], data["strix_rocblas"], data["strix_maya"]
-    if data["strix_platform"].get("discrete_gpus") != [{"name": "AMD Radeon RX 7900 XTX", "pci_id": "1002:744c", "count": 2}]:
-        fail("Maya dual RX 7900 XTX requires exactly two RX 7900 XTX cards")
+    single = data["strix_system"]["id"] in SINGLE_SYSTEMS
+    # one card: a host with more installs it too and serves on one of them (preflight's at_least, the service's
+    # gpu_from_topology); two cards: exactly two
+    xtx = {"name": "AMD Radeon RX 7900 XTX", "pci_id": "1002:744c", "count": 1 if single else 2}
+    if single:
+        xtx["at_least"] = True
+    if data["strix_platform"].get("discrete_gpus") != [xtx]:
+        fail("Maya single RX 7900 XTX requires at least one RX 7900 XTX card" if single else
+             "Maya dual RX 7900 XTX requires exactly two RX 7900 XTX cards")
+    if single != (maya.get("gpu_from_topology") is True) or (not single and "gpu_from_topology" in maya):
+        fail("a single-card release numbers its GPUs from the host's topology (strix_maya.gpu_from_topology), "
+             "a dual-card release by its fixed order")
     require_sha(data["strix_target"]["revision"], "target revision", HEX40)
     require_url(runtime["repository"], "Maya repository")
     for key in ("tag_object", "source_tree", "upstream_commit", "ggml_commit"):
@@ -293,7 +315,8 @@ def validate_maya(data: dict, root: Path) -> None:
     if hashlib.sha256(patch.read_bytes()).hexdigest() != rocblas["patch"]["sha256"]:
         fail("rocBLAS backport patch hash drifted")
     cfg = maya["server"]
-    if cfg["gpu"] != [0, 1, 2] or cfg["port"] != service["port"] or cfg["model_name"] != service["alias"]:
+    if cfg["gpu"] != ([0, 1] if single else [0, 1, 2]) or cfg["port"] != service["port"] or \
+            cfg["model_name"] != service["alias"]:
         fail("Maya server identity differs from the service contract")
     if cfg["lib_dirs"][0] != data["strix_paths"]["release"] + "/rocblas/install/lib":
         fail("the per-architecture rocBLAS must lead the engine's library path")
@@ -308,7 +331,8 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     service, files = data["strix_service"], data["strix_target"]["files"]
     rocblas, maya, paths = data["strix_rocblas"], data["strix_maya"], data["strix_paths"]
     release, state = paths["release"], paths["state"]
-    exl3 = data["strix_system"]["id"] == "maya-ds4-exl3-dual-xtx"
+    exl3 = data["strix_system"]["id"] in EXL3_SYSTEMS
+    single = data["strix_system"]["id"] in SINGLE_SYSTEMS
     if exl3:
         if {file["name"] for file in files} != EXL3_FILES or len(files) != len(EXL3_FILES) or \
                 service["parallel_slots"] != 1:
@@ -364,10 +388,12 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     for digest in (maya["pack_ds4_normalized_sha256"], *maya["pack_files"].values()):
         require_sha(digest, "pack")
     cfg = maya["server"]
-    expected_args = ["--pack", maya["pack"], "--max-context", str(service["context"]), "--tp", "2", "--vision", "off",
+    expected_args = ["--pack", maya["pack"], "--max-context", str(service["context"]),
+                     *([] if single else ["--tp", "2"]), "--vision", "off",
                      "--dspark", "on", "--threads", "on", "--mmap-experts", "on",
-                     "--expert-profile", state + "/expert-profile.bin", "--prefill-chunk", "16384" if exl3 else "32768"]
-    if data["strix_system"]["id"] in ("maya-ds4-gsq-dual-xtx", "maya-ds4-exl3-dual-xtx"):
+                     "--expert-profile", state + "/expert-profile.bin",
+                     "--prefill-chunk", SINGLE_CHUNK if single else "16384" if exl3 else "32768"]
+    if data["strix_system"]["id"] in ("maya-ds4-gsq-dual-xtx", *EXL3_SYSTEMS):
         expected_args += ["--suffix-draft", "0"]
     if cfg["args"] != expected_args:
         fail("qualified Maya DS4 arguments drifted")
@@ -410,6 +436,12 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
             "DS4_HELPER_GB": "109", "DS4_HELPER_DRAFT": "1", "DS4_WARM_CAP_GB": "6", "DS4_RAM_MARGIN_GB": "5",
             "MAYA_DS4_SLOT_RAM_GB": "1",
         })
+    if single:
+        # one card: no tensor-parallel group (its all-reduce and checks), no lend (the engine lends on a group only),
+        # the 8060S second in the engine's GPU order, the DSpark blocks on the card
+        for key in ("DS4_AR2", "DS4_AR2_DECODE", "DS4_YOCO_TP", "DS4_TP_CHECK", "DS4_EXL3_LEND"):
+            del expected_env[key]
+        expected_env.update({"DS4_HELPER": "1", "DS4_DRAFT_DEV": "0,0,0", **SINGLE_ENV})
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
         fail("qualified Maya DS4 environment drifted: " + ", ".join(drifted))
@@ -675,11 +707,13 @@ def validate_benchmarks(root: Path) -> None:
             fail("GSQ benchmark and release quality readings differ")
         if gsq["runtime"]["source_commit"] != gsq_manifest["strix_runtime"]["source_commit"]:
             fail("GSQ benchmark engine differs from the release")
-    exl3_path = root / "ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml"
-    if exl3_path.exists():
+    for exl3_id, exl3_file in EXL3_SYSTEMS.items():
+        exl3_path = root / "ansible/releases" / exl3_file
+        if not exl3_path.exists():
+            continue
         manifest = yaml.safe_load(exl3_path.read_text())
         if not pending_fields(manifest):
-            e = data["systems"]["maya-ds4-exl3-dual-xtx"]
+            e = data["systems"][exl3_id]
             q = manifest["strix_qualification"]
             context = manifest["strix_service"]["context"]
             curve = e["context_scaling"]
@@ -719,7 +753,10 @@ def validate_benchmarks(root: Path) -> None:
             if e["maya_bench"]["inputs_sha256"] != hashlib.sha256(fixture.read_bytes()).hexdigest():
                 fail("EXL3 benchmark inputs differ from the published fixture")
             native = e["upstream_benchmark"]
-            if native["allocation_tokens"] != context or native["order"] != ["E+", "G", "E0", "E+", "G", "E0"]:
+            # (two cards: the release, GSQ and stock EXL3; one card: the release and stock v1.1.56 without the
+            #  helper's drafter experts, the only open PR a single card runs)
+            order = ["S+", "S0", "S+", "S0"] if exl3_id in SINGLE_SYSTEMS else ["E+", "G", "E0", "E+", "G", "E0"]
+            if native["allocation_tokens"] != context or native["order"] != order:
                 fail("EXL3 native comparison procedure drifted")
             for arm in native["arms"].values():
                 loads = arm["loads"]

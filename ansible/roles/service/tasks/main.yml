@@ -32,6 +32,44 @@
   when: strix_system.engine == 'strata'
   notify: Restart selected model service
 
+# A release qualified on one card of several (strix_maya.gpu_from_topology): the engine's GPU numbers are the KFD
+# topology's order, which depends on the host - the card (the first of its kind, or strix_xtx_pci "bb:dd.f" on a host
+# with more) and the Radeon 8060S are looked up there, in the order of the release's `gpu`.
+- name: Find the release's card and the Radeon 8060S among the engine's GPUs
+  ansible.builtin.shell: |
+    set -o pipefail
+    want_bdf={{ strix_xtx_pci | default('') | quote }}
+    i=0; card=; apu=
+    for n in $(ls /sys/class/kfd/kfd/topology/nodes | sort -n); do
+      d=/sys/class/kfd/kfd/topology/nodes/$n
+      [ "$(cat "$d/gpu_id")" != 0 ] || continue
+      dev=$(printf '%04x' "$(awk '$1 == "device_id" {print $2}' "$d/properties")")
+      loc=$(awk '$1 == "location_id" {print $2}' "$d/properties")
+      bdf=$(printf '%02x:%02x.%d' $((loc >> 8 & 255)) $((loc >> 3 & 31)) $((loc & 7)))
+      if [ "$dev" = {{ (strix_platform.discrete_gpus | first).pci_id.split(':')[1] | quote }} ] && [ -z "$card" ] &&
+         { [ -z "$want_bdf" ] || [ "$bdf" = "$want_bdf" ]; }; then card=$i; fi
+      if [ "$dev" = {{ strix_platform.gpu_pci_id.split(':')[1] | quote }} ] && [ -z "$apu" ]; then apu=$i; fi
+      i=$((i + 1))
+    done
+    [ -n "$card" ] && [ -n "$apu" ] || { echo "card '${card}' 8060S '${apu}' (strix_xtx_pci '${want_bdf}')" >&2; exit 1; }
+    echo "$card $apu"
+  args:
+    executable: /bin/bash
+  register: service_topology_gpus
+  changed_when: false
+  check_mode: false
+  when:
+    - strix_system.engine == 'maya'
+    - strix_maya.gpu_from_topology | default(false)
+
+- name: Number the engine's GPUs as the host's topology has them
+  ansible.builtin.set_fact:
+    service_maya_server: >-
+      {{ strix_maya.server | combine({'gpu': service_topology_gpus.stdout.split() | map('int') | list}) }}
+  when:
+    - strix_system.engine == 'maya'
+    - strix_maya.gpu_from_topology | default(false)
+
 - name: Install the qualified Maya serving configuration
   ansible.builtin.template:
     src: maya-server.json.j2
