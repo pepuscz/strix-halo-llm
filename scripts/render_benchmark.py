@@ -151,9 +151,25 @@ def render_comparison_readme(data, text):
     return text
 
 
+def at_128k(system):
+    return [p for p in system['context_scaling'] if p['actual_input_tokens']==122879][0]['decode_tokens_per_second']
+
+
 def xs_summary(data, detailed=False):
-    return ("EXL3 supports 1M context. GSQ-RCO decodes faster at long inputs; "
-            "Maya-XS v2 is the fastest, with higher perplexity.")
+    x=data['systems']['maya-ds4-exl3-dual-xtx'];g=data['systems']['maya-ds4-gsq-dual-xtx']
+    lead=("EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; " if at_128k(x)>at_128k(g)
+          else "EXL3 supports 1M context. GSQ-RCO decodes faster at long inputs; ")
+    return lead+"Maya-XS v2 is the fastest, with higher perplexity."
+
+
+def fork_version(system):
+    import re
+    return re.search(r'v\d+\.\d+\.\d+', system['runtime']['upstream']).group(0)
+
+
+def stock_version(system):
+    import re
+    return re.search(r'v\d+\.\d+\.\d+', system['upstream_benchmark']['procedure']).group(0)
 
 
 def comparison_table_detailed(data):
@@ -169,9 +185,11 @@ def comparison_table_detailed(data):
 def detailed_summary(data):
     x=data['systems']['maya-ds4-exl3-dual-xtx'];xs=data['systems']['maya-ds4-maya-xs-dual-xtx']
     g=data['systems']['maya-ds4-gsq-dual-xtx']
-    at=lambda sid_data:[p for p in sid_data['context_scaling'] if p['actual_input_tokens']==122879][0]['decode_tokens_per_second']
+    at=at_128k
+    faster=(f"It also decodes faster at long context ({at(x):.1f} against GSQ-RCO's {at(g):.1f} tokens/s at 128K). "
+            if at(x)>at(g) else f"GSQ-RCO decodes faster at long context ({at(g):.1f} against {at(x):.1f} tokens/s at 128K). ")
     return (f"EXL3 supports 1M context and has the lowest measured perplexity ({x['quality']['perplexity']['value']:.4f}). "
-            f"GSQ-RCO decodes faster at long context ({at(g):.1f} against {at(x):.1f} tokens/s at 128K). "
+            f"{faster}"
             f"Maya-XS v2 has the fastest recorded decode, with higher perplexity ({xs['quality']['perplexity']['value']:.4f}).")
 
 
@@ -179,10 +197,10 @@ def render_quant_details(data, text):
     systems=data['systems'];e=systems[COMPARISONS[0]]
     lines=['## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017','',
            '![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)','',
-           '**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified v1.1.54-based fork, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).','',
-           'GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL3 uses 1M. The eleven curve points share identical input bytes, zero cached input, thinking off and a 256-token cap; each point is one fresh load from the frozen profile. All five values were found at every point.','',
+           f"**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified {fork_version(e)}-based fork, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).",'',
+           'GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL3 uses 1M. The eleven curve points share identical input bytes, zero cached input, thinking off and a 256-token cap; each load is fresh, from the frozen profile. All five values were found at every point.','',
            *comparison_table_detailed(data),'',detailed_summary(data),'',
-           'GSQ reports medians of three loads; EXL3, Maya-S and Maya-XS each report one load. Cached decode uses three consecutive answers per load. Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.','',
+           'GSQ and EXL3 report medians of three loads per point; Maya-S and Maya-XS each report one load. Cached decode uses three consecutive answers per load. Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.','',
            '### Recorded context scaling','']
     for sid in COMPARISONS:
         v=systems[sid];name=v['name'];name='**'+name+'**' if sid==COMPARISONS[0] else name
@@ -193,20 +211,20 @@ def render_quant_details(data, text):
         lines.append('')
     lines += ['### Fixed-input Maya benchmark','',
               'The [driver](../benchmarks/maya_bench.py) and [token fixture](../benchmarks/maya-bench-inputs.json) retain the public v1.1.28 benchmark procedure: three 256-token answers, greedy and thinking off, plus 2,048- and 8,192-token prompts. The comparison table above uses these same inputs for every quant.','',
-              '### Upstream v1.1.54 benchmark at 1M','',
+              f"### Upstream {stock_version(e)} benchmark at 1M",'',
               'A separate source-native `maya.py --bench` comparison used the same actual token IDs, a 1,048,576-token allocation and two cold loads per arm, in optimized EXL3 / GSQ / stock EXL3 order, repeated once. These documentation tokens differ from the fixed-input fixture above.','',
               '| Setup | Decode mean (tok/s) | Prefill 2K / 8K (tok/s) |','|---|---:|---:|']
     u=e['upstream_benchmark']
-    for arm,label in [('E+','**Optimized EXL3 2.25**'),('G','GSQ-RCO IQ2_XS, stock v1.1.54'),('E0','EXL3 2.25, stock v1.1.54')]:
+    for arm,label in [('E+','**Optimized EXL3 2.25**'),('G',f'GSQ-RCO IQ2_XS, stock {stock_version(e)}'),('E0',f'EXL3 2.25, stock {stock_version(e)}')]:
         v=u['arms'][arm]['mean'];lines.append(f"| {label} | {reading(v['decode'])} | {reading(v['prefill']['2048'])} / {reading(v['prefill']['8192'])} |")
     lines += ['',"The two EXL3 arms use the same configuration with different binaries. GSQ uses its published recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.",'',
               '### Quality and teacher comparison','',
               'All four DeepSeek quants scored 30/30 on the cold coding/maths suite. The established math_08 gold-answer correction is retained. The perplexity values in the main table use 23 × 2,048 tokens.','',
               'The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.','',
               '| Quant | KL | Top-1 agreement | Held-out PPL |','|---|---:|---:|---:|']
-    for sid,label in [(COMPARISONS[0],'**EXL3 2.25 (v1.1.54 fork)**'),(COMPARISONS[1],'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
+    for sid,label in [(COMPARISONS[0],f'**EXL3 2.25 ({fork_version(e)} fork)**'),(COMPARISONS[1],'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
         z=systems[sid]['quality']['lucebox_kl']['all'];lines.append(f"| {label} | {z['kl_top256']:.4f} | {z['top1_agree']*100:.2f}% | {z['ppl']:.4f} |")
-    lines += ['', 'The EXL3 dump/PPL consistency check differed by 0.38%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).','']
+    lines += ['', 'The EXL3 dump/PPL consistency check differed by 0.27%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).','']
     a=text.index('## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017');b=text.index('## Dual RX 7900 XTX: GLM-5.3-Flash',a)
     return text[:a]+'\n'.join(lines)+'\n'+text[b:]
 

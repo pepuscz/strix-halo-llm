@@ -433,33 +433,35 @@ strix_maya:
   model_subdirectory: EXL3-2.25
 strix_qualification:
   answer_quality:
-    coding: PENDING
-    gsm8k: PENDING
-    math: PENDING
-    total: PENDING
+    coding: 10
+    gsm8k: 10
+    math: 10
+    total: 30
     scoring: Reviewed final answers against frozen task gold; established scorer corrections retained in the qualification audit.
     thinking: false
     math_10_output_cap: 4096
-    measured: PENDING
-    perplexity: PENDING
+    measured: '2026-11-07'
+    perplexity: 7.1973
   retrieval_ladder:
     allocation_tokens: 1048576
     points: 11
-    values: PENDING
-    largest_input_tokens: PENDING
+    values: 55/55
+    largest_input_tokens: 491520
   long_context:
     prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: PENDING
-    first_request_decode_tokens_per_second: PENDING
-    reused_prompt_cached_tokens: PENDING
-    reused_prompt_decode_tokens_per_second: PENDING
+    first_request_prefill_tokens_per_second: 1434.3
+    first_request_decode_tokens_per_second: 50.3
+    reused_prompt_cached_tokens: 130047
+    reused_prompt_decode_tokens_per_second: 48.4
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
-    values: PENDING
-    measured: PENDING
+    values: 5/5
+    measured: '2026-11-07'
   qualified_configuration: >-
-    PENDING
+    EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark with its blocks' leftover experts in
+    the Radeon 8060S helper's 109 GB pool, background memory compaction off while serving; 175/175 retrieval values
+    across thirty-five cold loads.

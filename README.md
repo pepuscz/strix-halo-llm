@@ -15,7 +15,7 @@ Each setup serves **one conversation at a time**. Speeds are tokens per second: 
 **Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** runs [turboderp's EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3) with inputs up to **1M tokens**. [Ansible recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).
 
 <!-- quant-comparison-note -->
-EXL3 supports 1M context. GSQ-RCO decodes faster at long inputs; Maya-XS v2 is the fastest, with higher perplexity.
+EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; Maya-XS v2 is the fastest, with higher perplexity.
 <!-- /quant-comparison-note -->
 
 <!-- quant-comparison-table -->
@@ -25,10 +25,10 @@ EXL3 supports 1M context. GSQ-RCO decodes faster at long inputs; Maya-XS v2 is t
 | Model size, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (lower is better) | 7.20 | 7.37 | 7.25 | 7.94 |
 | Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 |
-| Decode, short prompt | 52 | 61 | 42 | 81 |
-| Decode, 128K input | 37 | 56 | 26 | 96 |
-| Prefill, 8K input | 605 | 537 | 478 | 661 |
-| Prefill, 128K input | 1,602 | 1,673 | 1,669 | 1,762 |
+| Decode, short prompt | 60 | 61 | 42 | 81 |
+| Decode, 128K input | 75 | 56 | 26 | 96 |
+| Prefill, 8K input | 627 | 537 | 478 | 661 |
+| Prefill, 128K input | 1,654 | 1,673 | 1,669 | 1,762 |
 <!-- /quant-comparison-table -->
 
 GSQ-RCO keeps its own [recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml); Maya-S and Maya-XS v2 were measured for comparison only. [All measurements and methods](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
