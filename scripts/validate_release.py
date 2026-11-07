@@ -753,7 +753,10 @@ def validate_benchmarks(root: Path) -> None:
             if e["maya_bench"]["inputs_sha256"] != hashlib.sha256(fixture.read_bytes()).hexdigest():
                 fail("EXL3 benchmark inputs differ from the published fixture")
             native = e["upstream_benchmark"]
-            if native["allocation_tokens"] != context or native["order"] != ["E+", "G", "E0", "E+", "G", "E0"]:
+            # (two cards: the release, GSQ and stock EXL3; one card: the release and stock v1.1.56 without the
+            #  helper's drafter experts, the only open PR a single card runs)
+            order = ["S+", "S0", "S+", "S0"] if exl3_id in SINGLE_SYSTEMS else ["E+", "G", "E0", "E+", "G", "E0"]
+            if native["allocation_tokens"] != context or native["order"] != order:
                 fail("EXL3 native comparison procedure drifted")
             for arm in native["arms"].values():
                 loads = arm["loads"]

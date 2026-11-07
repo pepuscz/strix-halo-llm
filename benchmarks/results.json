@@ -2937,6 +2937,569 @@
         ],
         "loads_per_arm": 2
       }
+    },
+    "maya-ds4-exl3-single-xtx": {
+      "power_watts": {
+        "stapm": 120,
+        "fast": 120,
+        "slow": 120
+      },
+      "cpu": {
+        "governor": "performance",
+        "minimum_khz": 2000000,
+        "boost": true
+      },
+      "gpu_dpm": "high",
+      "context_allocation": 1048576,
+      "target": {
+        "repository": "turboderp/DeepSeek-V4.1-Flash-1017-exl3",
+        "revision": "9183eaaeb6f08dff6ee5b6e34b852911cf6733c9",
+        "quantization": "EXL3 2.25 bpw with original FP8 Engram",
+        "bytes": 361366012365,
+        "model_bytes": 158531331104,
+        "engram_bytes": 202758032904
+      },
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "selection": "added_hardware",
+      "runtime": {
+        "repository": "https://github.com/pepuscz/project-maya",
+        "release_tag": "maya-ds4-exl3-1m-20261107",
+        "source_commit": "f5aa4cb9a0347aabd9062801ece97885861c0a68",
+        "source_tree": "e5de6895f0174cd52f3bae99ab18673a9dfa86b4",
+        "upstream": "Project Maya v1.1.56 plus #867 and DS4_HELPER_DRAFT",
+        "benchmark_binary_sha256": "22119a195be62693910d17bda16efe6b10116cdd7d94d8410e389847b39ca0e1"
+      },
+      "draft": {
+        "type": "DSpark",
+        "bytes": 0,
+        "storage": "included in the target safetensors shards",
+        "placement": "APU helper (DS4_HELPER_DRAFT=1); no DSpark draft VRAM allocation on the XTX (DS4_DRAFT_VRAM=0,0,0)."
+      },
+      "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
+      "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
+      "manifest_sha256": "adb9f3b0e3ee4c1a9a39c4d1fbe6b9d7fb841c1103003156d3f00733daba42f6",
+      "release_id": "maya-ds4-exl3-single-xtx-1m-v1",
+      "hardware": {
+        "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",
+        "helper_gpu": "AMD Radeon 8060S (1002:1586), 113 GB helper budget"
+      },
+      "quality": {
+        "coding": 10,
+        "gsm8k": 10,
+        "math": 9,
+        "total": 29,
+        "raw_total": 28,
+        "thinking": false,
+        "math_10_output_cap": 4096,
+        "perplexity": {
+          "value": 7.1933,
+          "sequences": 23,
+          "tokens_per_sequence": 2048,
+          "scored_tokens": 47081,
+          "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
+        },
+        "scoring": "Coding execution and reviewed final answers; frozen math_08 reference 20/3.",
+        "misses": [
+          {
+            "id": "math_10",
+            "reason": "Reached the 4,096-token output cap while expanding the recurrence, without a final answer."
+          }
+        ]
+      },
+      "context_scaling": [
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 2040,
+          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+          "prefill_tokens_per_second": 135.8,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 15033.99408981204,
+          "handback_ms": [],
+          "decode_tokens_per_second": 50.68102629078239,
+          "minimum_non_cma_gib": 6.544048309326172,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 2040,
+              "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+              "prefill_tokens_per_second": 135.8,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 15033.99408981204,
+              "handback_ms": [],
+              "decode_tokens_per_second": 50.68102629078239,
+              "minimum_non_cma_gib": 6.544048309326172,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 3840,
+          "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
+          "prefill_tokens_per_second": 244.2,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 15733.96893707104,
+          "handback_ms": [],
+          "decode_tokens_per_second": 53.89019872010778,
+          "minimum_non_cma_gib": 6.6077117919921875,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 3840,
+              "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
+              "prefill_tokens_per_second": 244.2,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 15733.96893707104,
+              "handback_ms": [],
+              "decode_tokens_per_second": 53.89019872010778,
+              "minimum_non_cma_gib": 6.6077117919921875,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 7680,
+          "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
+          "prefill_tokens_per_second": 419.2,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 18337.377629010007,
+          "handback_ms": [],
+          "decode_tokens_per_second": 51.29027087674307,
+          "minimum_non_cma_gib": 7.783660888671875,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 7680,
+              "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
+              "prefill_tokens_per_second": 419.2,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 18337.377629010007,
+              "handback_ms": [],
+              "decode_tokens_per_second": 51.29027087674307,
+              "minimum_non_cma_gib": 7.783660888671875,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 15359,
+          "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
+          "prefill_tokens_per_second": 578.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 26559.777115006,
+          "handback_ms": [],
+          "decode_tokens_per_second": 54.58422174840085,
+          "minimum_non_cma_gib": 7.676975250244141,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 15359,
+              "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
+              "prefill_tokens_per_second": 578.7,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 26559.777115006,
+              "handback_ms": [],
+              "decode_tokens_per_second": 54.58422174840085,
+              "minimum_non_cma_gib": 7.676975250244141,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 729.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 42134.58332209848,
+          "handback_ms": [],
+          "decode_tokens_per_second": 55.66185423551922,
+          "minimum_non_cma_gib": 7.684532165527344,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 30720,
+              "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+              "prefill_tokens_per_second": 729.7,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 42134.58332209848,
+              "handback_ms": [],
+              "decode_tokens_per_second": 55.66185423551922,
+              "minimum_non_cma_gib": 7.684532165527344,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 59933,
+          "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
+          "prefill_tokens_per_second": 829.8,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 72285.08573584259,
+          "handback_ms": [],
+          "decode_tokens_per_second": 54.51912428656614,
+          "minimum_non_cma_gib": 7.752735137939453,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 59933,
+              "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
+              "prefill_tokens_per_second": 829.8,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 72285.08573584259,
+              "handback_ms": [],
+              "decode_tokens_per_second": 54.51912428656614,
+              "minimum_non_cma_gib": 7.752735137939453,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 941.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 130598.67333597504,
+          "handback_ms": [],
+          "decode_tokens_per_second": 54.81798715203426,
+          "minimum_non_cma_gib": 7.675319671630859,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 122879,
+              "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+              "prefill_tokens_per_second": 941.7,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 130598.67333597504,
+              "handback_ms": [],
+              "decode_tokens_per_second": 54.81798715203426,
+              "minimum_non_cma_gib": 7.675319671630859,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 163840,
+          "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
+          "prefill_tokens_per_second": 954.4,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 171802.61964700185,
+          "handback_ms": [],
+          "decode_tokens_per_second": 54.31093007467752,
+          "minimum_non_cma_gib": 8.183799743652344,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 163840,
+              "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
+              "prefill_tokens_per_second": 954.4,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 171802.61964700185,
+              "handback_ms": [],
+              "decode_tokens_per_second": 54.31093007467752,
+              "minimum_non_cma_gib": 8.183799743652344,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 212992,
+          "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
+          "prefill_tokens_per_second": 952.9,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 223698.77857994288,
+          "handback_ms": [],
+          "decode_tokens_per_second": 54.53306066803,
+          "minimum_non_cma_gib": 7.950401306152344,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 212992,
+              "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
+              "prefill_tokens_per_second": 952.9,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 223698.77857994288,
+              "handback_ms": [],
+              "decode_tokens_per_second": 54.53306066803,
+              "minimum_non_cma_gib": 7.950401306152344,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 245760,
+          "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
+          "prefill_tokens_per_second": 945.6,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 260093.41633389704,
+          "handback_ms": [],
+          "decode_tokens_per_second": 53.81769256643121,
+          "minimum_non_cma_gib": 7.990055084228516,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 245760,
+              "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
+              "prefill_tokens_per_second": 945.6,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 260093.41633389704,
+              "handback_ms": [],
+              "decode_tokens_per_second": 53.81769256643121,
+              "minimum_non_cma_gib": 7.990055084228516,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 491520,
+          "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
+          "prefill_tokens_per_second": 876.7,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "http_to_first_text_ms": 561019.9339231476,
+          "handback_ms": [],
+          "decode_tokens_per_second": 54.24648245465333,
+          "minimum_non_cma_gib": 7.855884552001953,
+          "per_load": [
+            {
+              "workload": "deep_retrieval",
+              "allocation_tokens": 1048576,
+              "actual_input_tokens": 491520,
+              "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
+              "prefill_tokens_per_second": 876.7,
+              "completion_tokens": 64,
+              "cached_tokens": 0,
+              "needle_passes": 5,
+              "http_to_first_text_ms": 561019.9339231476,
+              "handback_ms": [],
+              "decode_tokens_per_second": 54.24648245465333,
+              "minimum_non_cma_gib": 7.855884552001953,
+              "load": 1
+            }
+          ],
+          "aggregation": "one independent fresh cold load"
+        }
+      ],
+      "context_scaling_note": "Eleven matched five-phrase prompts, one fresh cold load per point; each point is that load. Greedy, thinking off, 1,048,576-token allocation.",
+      "deep_needle": {
+        "workload": "deep_retrieval",
+        "allocation_tokens": 1048576,
+        "actual_input_tokens": 520000,
+        "prompt_sha256": "a66b924eb0fbeb6330383ac2aa21fc50a73fc06af10f18ff33b3293370a4adcd",
+        "prefill_tokens_per_second": 865.9,
+        "completion_tokens": 64,
+        "cached_tokens": 0,
+        "needle_passes": 5,
+        "http_to_first_text_ms": 600977.4828590453,
+        "handback_ms": [],
+        "decode_tokens_per_second": 50.797682355742516,
+        "minimum_non_cma_gib": 7.882801055908203
+      },
+      "near_capacity_needle": {
+        "workload": "deep_retrieval",
+        "allocation_tokens": 1048576,
+        "actual_input_tokens": 1040000,
+        "prompt_sha256": "1420bcb32be6877eae9e491927e03654d25bafab3a4c0ea0241cf8953ca59881",
+        "prefill_tokens_per_second": 718.2,
+        "completion_tokens": 64,
+        "cached_tokens": 0,
+        "needle_passes": 5,
+        "http_to_first_text_ms": 1448890.5336770695,
+        "handback_ms": [],
+        "decode_tokens_per_second": 51.05296745373325,
+        "minimum_non_cma_gib": 7.724620819091797
+      },
+      "long_context": {
+        "input_tokens": 130048,
+        "output_tokens": 768,
+        "cached_tokens": 0,
+        "prefill_tokens_per_second": 604.5,
+        "decode_tokens_per_second": 40.2,
+        "allocation_tokens": 1048576,
+        "reused_prompt": {
+          "cached_tokens": 130047,
+          "decode_tokens_per_second": 41.4,
+          "samples": 3,
+          "loads": 1,
+          "answers_per_load": 3,
+          "per_sample": [
+            42.138068013475404,
+            41.06227243320698,
+            41.020820202753946
+          ],
+          "aggregation": "mean of three consecutive cached answers from one load"
+        },
+        "prompt_sha256": "5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a"
+      },
+      "maya_bench": {
+        "procedure": "Frozen Project Maya v1.1.28 maya.py --bench procedure on the installed S+ engine: three 256-token greedy answers, thinking off; decode is their arithmetic mean, followed by fixed 2,048- and 8,192-token prompts. One engine load; the published fixture is unchanged.",
+        "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
+        "this_release": {
+          "decode_mean_tokens_per_second": 45.91131735981103,
+          "decode_question_tokens_per_second": [
+            46.720443844216526,
+            36.29043690283803,
+            54.723071332378524
+          ],
+          "prefill_tokens_per_second": {
+            "2048": 115.85872928770641,
+            "8192": 355.6728782063528
+          }
+        },
+        "aggregation": "one load"
+      },
+      "upstream_benchmark": {
+        "procedure": "Source-native Project Maya v1.1.56 maya.py --bench: S+ (installed single-XTX release with helper drafting) and S0 (stock v1.1.56 without helper drafting), repeated twice. Same actual warmup/2K/8K token IDs, greedy, thinking off, 256-token answers, 1,048,576-token allocation. Each mean is over two independent cold loads. Both compaction sysctls zero.",
+        "source_stock": "22fc101f2c109b7e7174c975ff3c2d8e9ce0a867",
+        "source_optimized": "f5aa4cb9a0347aabd9062801ece97885861c0a68",
+        "arms": {
+          "S+": {
+            "mean": {
+              "decode": 45.55,
+              "prefill": {
+                "2048": 114.5,
+                "8192": 369.0
+              }
+            },
+            "loads": [
+              {
+                "decode_mean_tokens_per_second": 45.4,
+                "prefill_tokens_per_second": {
+                  "2048": 115.0,
+                  "8192": 369.0
+                }
+              },
+              {
+                "decode_mean_tokens_per_second": 45.7,
+                "prefill_tokens_per_second": {
+                  "2048": 114.0,
+                  "8192": 369.0
+                }
+              }
+            ]
+          },
+          "S0": {
+            "mean": {
+              "decode": 43.3,
+              "prefill": {
+                "2048": 115.0,
+                "8192": 371.0
+              }
+            },
+            "loads": [
+              {
+                "decode_mean_tokens_per_second": 43.7,
+                "prefill_tokens_per_second": {
+                  "2048": 115.0,
+                  "8192": 371.0
+                }
+              },
+              {
+                "decode_mean_tokens_per_second": 42.9,
+                "prefill_tokens_per_second": {
+                  "2048": 115.0,
+                  "8192": 371.0
+                }
+              }
+            ]
+          }
+        },
+        "prefill_input_sha256": {
+          "warmup": "4e7cddf7da245e40f59b9f03836ab56df223f0ac6f8cf2a2dd3ed3143ba02a98",
+          "tokens_2048": "ec12f705993ff21f021f4daf8505e54400221800e2cf1741be08c221eb0c7ea1",
+          "tokens_8192": "ff1dec9e13c1406c4a08b0726e5302f89601bd2ee6c06e663dcd13f55dcc8d80"
+        },
+        "input_hash_encoding": "sha256 of little-endian signed int32 token IDs",
+        "allocation_tokens": 1048576,
+        "order": [
+          "S+",
+          "S0",
+          "S+",
+          "S0"
+        ],
+        "loads_per_arm": 2
+      },
+      "qualification_note": "29/30 reviewed quality cases (28 raw; established math_08 reference correction only), frozen 23-sequence PPL 7.1933, 65/65 retrieval checks across 11 ladder points and two deep prompts. math_10 reached its 4,096-token cap without a final answer. No KL measured."
     }
   },
   "winning_setups": {

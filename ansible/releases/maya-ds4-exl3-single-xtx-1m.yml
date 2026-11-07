@@ -47,7 +47,7 @@ strix_runtime:
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.56
   upstream_commit: 22fc101f2c109b7e7174c975ff3c2d8e9ce0a867
-  server_sha256: b95d7c4c570549de55d9aaed2ebe965007f975bf224a27ba6c1b41b2522a3667
+  server_sha256: 22119a195be62693910d17bda16efe6b10116cdd7d94d8410e389847b39ca0e1
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -427,35 +427,36 @@ strix_maya:
   model_subdirectory: EXL3-2.25
 strix_qualification:
   answer_quality:
-    coding: PENDING
-    gsm8k: PENDING
-    math: PENDING
-    total: PENDING
+    coding: 10
+    gsm8k: 10
+    math: 9
+    total: 29
     scoring: Reviewed final answers against frozen task gold; established scorer corrections retained in the qualification audit.
     thinking: false
     math_10_output_cap: 4096
-    measured: PENDING
-    perplexity: PENDING
+    measured: '2026-11-07'
+    perplexity: 7.1933
   retrieval_ladder:
     allocation_tokens: 1048576
     points: 11
-    values: PENDING
+    values: 55/55
     largest_input_tokens: 491520
   long_context:
     prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: PENDING
-    first_request_decode_tokens_per_second: PENDING
+    first_request_prefill_tokens_per_second: 604.5
+    first_request_decode_tokens_per_second: 40.2
     reused_prompt_cached_tokens: 130047
-    reused_prompt_decode_tokens_per_second: PENDING
+    reused_prompt_decode_tokens_per_second: 41.4
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
-    values: PENDING
-    measured: PENDING
+    values: 5/5
+    measured: '2026-11-07'
   qualified_configuration: >-
-    EXL3 2.25 bpw with original FP8 Engram, 1M context, 8K chunks, one RX 7900 XTX (the faster of a host's cards, or
+    EXL3 2.25 bpw with original FP8 Engram, 1M context, 8K chunks, one RX 7900 XTX (the first of a host's cards, or
     strix_xtx_pci), DSpark with every one of its blocks' experts in the Radeon 8060S helper's 113 GB pool, background
-    memory compaction off while serving; PENDING.
+    memory compaction off while serving; 65/65 retrieval values across thirteen cold loads, the deepest at 1,040,000
+    input tokens.

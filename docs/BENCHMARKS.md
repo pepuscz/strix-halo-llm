@@ -128,6 +128,45 @@ The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 pred
 
 The EXL3 dump/PPL consistency check differed by 0.27%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).
 
+## Single RX 7900 XTX: DeepSeek-V4.1-Flash-1017
+
+![One RX 7900 XTX context scaling against two, DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw](benchmark-single-xtx.svg)
+
+**Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX** runs the same EXL3 2.25 bpw model and v1.1.56-based engine as the dual recipe on one card, for a host without a second one. The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
+
+Quality **29/30**, perplexity **7.1933** (23 × 2,048 tokens). The 130,048-token real-code prompt: **604** prefill, **40.2** decode cold, **41.4** with the prompt cached. Fixed-input Maya benchmark: **45.9** decode, **116 / 356** prefill at 2K / 8K.
+
+One fresh load per point, the same eleven prompts as the dual recipe, zero cached input, thinking off.
+
+| Input tokens | Prefill (tok/s) | Decode (tok/s) | Values |
+|---:|---:|---:|---:|
+| 2,040 | 135.8 | 50.7 | 5/5 |
+| 3,840 | 244.2 | 53.9 | 5/5 |
+| 7,680 | 419.2 | 51.3 | 5/5 |
+| 15,359 | 578.7 | 54.6 | 5/5 |
+| 30,720 | 729.7 | 55.7 | 5/5 |
+| 59,933 | 829.8 | 54.5 | 5/5 |
+| 122,879 | 941.7 | 54.8 | 5/5 |
+| 163,840 | 954.4 | 54.3 | 5/5 |
+| 212,992 | 952.9 | 54.5 | 5/5 |
+| 245,760 | 945.6 | 53.8 | 5/5 |
+| 491,520 | 876.7 | 54.2 | 5/5 |
+
+The deep **520,000-token** check found **5/5** values with zero cached input: **865.9 prefill / 50.8 decode tok/s**.
+
+The near-capacity **1,040,000-token** check found **5/5** values with zero cached input: **718.2 prefill / 51.1 decode tok/s**.
+
+### Upstream v1.1.56 benchmark, one card
+
+Source-native `maya.py --bench`, the same token IDs as the dual recipe's, two cold loads per arm, interleaved.
+
+| Setup | Decode mean (tok/s) | Prefill 2K / 8K (tok/s) |
+|---|---:|---:|
+| **This release** | 45.5 | 114.5 / 369.0 |
+| Stock v1.1.56, the same settings without DS4_HELPER_DRAFT | 43.3 | 115.0 / 371.0 |
+
+The lend of #867 runs on a tensor-parallel group only, so on one card the release differs from stock by DS4_HELPER_DRAFT (#904). Changed text and draft acceptance prevent a stream-matched causal claim.
+
 ## Dual RX 7900 XTX: GLM-5.3-Flash
 
 **Maya HIP Maya-M IQ2_S dual RX 7900 XTX**, on the same two cards and Radeon 8060S as the DeepSeek rows above, with the same five-phrase prompts (identical bytes, pinned by SHA-256). GLM's tokenizer counts about 7 % fewer tokens for the same text, so its input counts are lower at each length. The layers are split between the cards (0-24 on the first, the rest on the second). The 8060S computes each card's routed experts held in RAM, and the model's own MTP layer drafts the next token. Each point is a fresh load, with thinking off, a 256-token cap (answers used 52-61 tokens) and zero cached input. The release allocates 524,288 tokens; each point ran at the smallest of 131,072, 262,144 and 524,288 that holds it. At 128K the two smaller allocations read at 907.1 and 895.3 tok/s and both wrote at 55.8.

@@ -100,6 +100,16 @@ The installer verifies the hardware and artifacts, builds the runtime, and enabl
 For a host with **one RX 7900 XTX** (24 GB VRAM) beside the M5's Radeon 8060S and 128 GiB RAM: the same EXL3 2.25 bpw model and engine as the dual recipe, with the 8060S holding a 113 GB expert pool, inputs up to **1M tokens**. [Ansible recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
 
 <!-- single-xtx-table -->
+| | **1 × RX 7900 XTX** | 2 × RX 7900 XTX |
+|---|---:|---:|
+| Longest input | 1M | 1M |
+| Quality checks passed | 29/30 | 30/30 |
+| Perplexity (lower is better) | 7.19 | 7.20 |
+| Decode, short prompt | 46 | 60 |
+| Decode, 128K input | 55 | 75 |
+| Prefill, 8K input | 356 | 627 |
+| Prefill, 128K input | 942 | 1,654 |
+| Real code, 130K tokens: prefill / decode | 604 / 40.2 | 1,434 / 50.3 |
 <!-- /single-xtx-table -->
 
 ![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with one RX 7900 XTX and a Radeon 8060S helper, against two cards](docs/benchmark-single-xtx.svg)
