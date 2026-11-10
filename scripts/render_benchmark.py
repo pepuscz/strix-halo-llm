@@ -42,7 +42,9 @@ def render(data, dual=False, single=False):
         lines[-1] = '<text x="70" y="67" class="sub">Ryzen AI Max+ 395 · 128 GiB RAM · Radeon 8060S helper · one conversation · thinking off</text>'
     if single:
         lines[1] = '<title id="title">One RX 7900 XTX throughput: DeepSeek-V4.1-Flash-1017</title>'
-        lines[2] = '<desc id="desc">Cold five-phrase retrieval with one RX 7900 XTX and the Radeon 8060S as the expert helper, against the same EXL3 2.25 bpw model and engine on two cards. Both use a 1,048,576-token allocation and the same prompt bytes; every point found all five phrases. Each horizontal tick doubles the input length.</desc>'
+        two = ('the same EXL3 2.25 bpw model and engine on two cards' if same_exl3_engine(data)
+               else "the same EXL3 2.25 bpw model on two cards, on the dual release's newer engine")
+        lines[2] = f'<desc id="desc">Cold five-phrase retrieval with one RX 7900 XTX and the Radeon 8060S as the expert helper, against {two}. Both use a 1,048,576-token allocation and the same prompt bytes; every point found all five phrases. Each horizontal tick doubles the input length.</desc>'
         lines[-2] = '<text x="70" y="40" class="title">One RX 7900 XTX · DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw</text>'
     for i, (sid, color, name) in enumerate(series):
         yy = 99 + i * 24
@@ -195,6 +197,12 @@ def xs_summary(data, detailed=False):
     return lead+"Maya-XS v2 is the fastest, with higher perplexity."
 
 
+def same_exl3_engine(data):
+    """Whether the one-card and two-card EXL3 releases run the same engine tag."""
+    systems = data['systems']
+    return systems[SINGLE]['runtime']['release_tag'] == systems[SINGLE.replace('single', 'dual')]['runtime']['release_tag']
+
+
 def fork_version(system):
     import re
     return re.search(r'v\d+\.\d+\.\d+', system['runtime']['upstream']).group(0)
@@ -230,7 +238,7 @@ def render_quant_details(data, text):
     systems=data['systems'];e=systems[COMPARISONS[0]]
     lines=['## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017','',
            '![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)','',
-           f"**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified {fork_version(e)}-based fork, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).",'',
+           f"**Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified {fork_version(e)}-based fork{' with the full-rate HIP EXL3 decode kernels' if 'full-rate' in e['runtime']['upstream'] else ''}, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).",'',
            'GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL3 uses 1M. The eleven curve points share identical input bytes, zero cached input, thinking off and a 256-token cap; each load is fresh, from the frozen profile. All five values were found at every point.','',
            *comparison_table_detailed(data),'',detailed_summary(data),'',
            'GSQ and EXL3 report medians of three loads per point; Maya-S and Maya-XS each report one load. Cached decode uses three consecutive answers per load. Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.','',
@@ -269,7 +277,9 @@ def single_details(data):
     v=data['systems'][SINGLE];c=v['long_context'];q=v['quality'];b=v['maya_bench']['this_release']
     lines=['## Single RX 7900 XTX: DeepSeek-V4.1-Flash-1017','',
            '![One RX 7900 XTX context scaling against two, DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw](benchmark-single-xtx.svg)','',
-           f"**{v['name']}** runs the same EXL3 2.25 bpw model and {fork_version(v)}-based engine as the dual recipe on one card, for a host without a second one. The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).",'',
+           (f"**{v['name']}** runs the same EXL3 2.25 bpw model and {fork_version(v)}-based engine as the dual recipe on one card, for a host without a second one." if same_exl3_engine(data) else
+            f"**{v['name']}** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the {fork_version(v)}-based engine tag `{v['runtime']['release_tag']}`. The two-card line in the chart is the current dual release, on its newer engine tag `{data['systems'][SINGLE.replace('single', 'dual')]['runtime']['release_tag']}`.") +
+           f" The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).",'',
            f"Quality **{q['total']}/30**, perplexity **{reading(q['perplexity']['value'],4)}** (23 × 2,048 tokens). The 130,048-token real-code prompt: **{reading(c['prefill_tokens_per_second'],0)}** prefill, **{reading(c['decode_tokens_per_second'])}** decode cold, **{reading(c['reused_prompt']['decode_tokens_per_second'])}** with the prompt cached. Fixed-input Maya benchmark: **{reading(b['decode_mean_tokens_per_second'])}** decode, **{reading(b['prefill_tokens_per_second']['2048'],0)} / {reading(b['prefill_tokens_per_second']['8192'],0)}** prefill at 2K / 8K.",'',
            'One fresh load per point, the same eleven prompts as the dual recipe, zero cached input, thinking off.','',
            '| Input tokens | Prefill (tok/s) | Decode (tok/s) | Values |','|---:|---:|---:|---:|']
