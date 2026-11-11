@@ -305,6 +305,14 @@ strix_policy:
   expected_watts: '120.000'
   vm_compaction_proactiveness: 0
   vm_watermark_boost_factor: 0
+# Optional tuning (off by default; set strix_gpu_od_enabled: true in the inventory to use it): GPU OverDrive on both
+# RX 7900 XTX plus GPU DPM auto and CPU boost off, as qualified on the reference host. Enabling it adds amdgpu.ppfeaturemask=0xfff7ffff (OverDrive).
+strix_gpu_od:
+  pci_id: '1002:744c'
+  voltage_offset_mv: -100
+  power_cap_w: 350
+  gpu_dpm: auto
+  cpu_boost: 0
 strix_allow_reboot: false
 strix_verify_full_model_hashes: false
 strix_verify_api_smoke: true

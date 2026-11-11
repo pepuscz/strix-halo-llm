@@ -2837,7 +2837,7 @@
         },
         "aggregation": "one load"
       },
-      "manifest_sha256": "54ef73340f86815ac81484374c80ad2978e1b291a5f4ec1a137e5d0e9810df14",
+      "manifest_sha256": "7e972d6ece5a4b882d560e68649cc49674ea13d42ebc4b2af41c5301afe7e64f",
       "qualification_note": "Qualified full-rate EXL3 V3 at 1M allocation: 33 fresh ladder loads plus both deep needles recovered 175/175 values; quality 30/30 reviewed, PPL and Lucebox KL passed. Same quant, FP8 Engram, drafter and recipe. All measured repetitions are included; decode changes are not stream-matched causal comparisons.",
       "upstream_benchmark": {
         "procedure": "Source-native Project Maya v1.1.56 maya.py --bench: E+ / G / E0 repeated twice, all at 1,048,576 allocation, same actual input token IDs, greedy, thinking off, 256-token answers; each mean is over two independent cold loads. E+ uses the installed release; G and E0 use stock v1.1.56. Both compaction sysctls were zero for every arm.",
@@ -2977,7 +2977,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
       "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
-      "manifest_sha256": "086113e1bb5ccffc9045ab2d7987b9c35347f71e8c9916a9e28d3ae43445c7eb",
+      "manifest_sha256": "961596a74de5f28ed4954a1ce115dd2b14fc1f177ce500700382f1c944389b09",
       "release_id": "maya-ds4-exl3-single-xtx-1m-v1",
       "hardware": {
         "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",
