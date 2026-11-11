@@ -62,16 +62,20 @@ od_cards() {
         [ "$(cat "$dev/vendor" 2>/dev/null)":"$(cat "$dev/device" 2>/dev/null)" = "0x${GPU_OD_PCI_ID%%:*}:0x${GPU_OD_PCI_ID#*:}" ] && echo "$dev"
     done
 }
+od_sclk_max() { awk '/^OD_SCLK:/ {f = 1; next} f && /^1:/ {gsub(/[^0-9]/, "", $2); print $2; exit}' "$1/pp_od_clk_voltage"; }
 od_hwmon() { local h; for h in "$1"/hwmon/hwmon*; do [ -e "$h/power1_cap" ] && { echo "$h"; return 0; }; done; return 1; }
 od_apply() {
-    local dev h found=0
+    local dev h sclk found=0
     for dev in $(od_cards); do
         [ -w "$dev/pp_od_clk_voltage" ] || fail "OverDrive is off for $dev (amdgpu.ppfeaturemask needs bit 0x4000)."
         h=$(od_hwmon "$dev") || fail "No power cap for $dev."
-        printf '%s|%s\n' "$dev" "$(cat "$h/power1_cap")" >> "$STATE/od"
+        # the card's own clock ceiling stays as it is: an offset committed alone moves it (+25 MHz measured)
+        sclk=${GPU_OD_SCLK_MAX_MHZ:-$(od_sclk_max "$dev")}
+        [ -n "$sclk" ] || fail "No OD_SCLK ceiling for $dev."
+        printf '%s|%s|%s\n' "$dev" "$(cat "$h/power1_cap")" "$sclk" >> "$STATE/od"
         # one commit for every OverDrive value, after the DPM level is set (a later DPM write can bring back the default clocks)
         printf 'vo %s\n' "$GPU_OD_VOLTAGE_OFFSET_MV" > "$dev/pp_od_clk_voltage"
-        [ -z "$GPU_OD_SCLK_MAX_MHZ" ] || printf 's 1 %s\n' "$GPU_OD_SCLK_MAX_MHZ" > "$dev/pp_od_clk_voltage"
+        printf 's 1 %s\n' "$sclk" > "$dev/pp_od_clk_voltage"
         printf 'c\n' > "$dev/pp_od_clk_voltage"
         printf '%s\n' "$((GPU_OD_POWER_CAP_W * 1000000))" > "$h/power1_cap"
         found=1
@@ -81,22 +85,20 @@ od_apply() {
 od_restore() {
     # before power/control returns to auto: a runtime-suspended card refuses OverDrive writes (EBUSY)
     [ -s "$STATE/od" ] || return 0
-    local dev cap h
-    while IFS='|' read -r dev cap; do
+    local dev cap sclk h
+    while IFS='|' read -r dev cap sclk; do
         printf 'r\n' > "$dev/pp_od_clk_voltage" || true
         printf 'c\n' > "$dev/pp_od_clk_voltage" || true
         h=$(od_hwmon "$dev") && [ -n "$cap" ] && printf '%s\n' "$cap" > "$h/power1_cap" || true
     done < "$STATE/od"
 }
 od_verify() {
-    local dev h
+    local dev h sclk
     for dev in $(od_cards); do
         grep -A1 '^OD_VDDGFX_OFFSET:' "$dev/pp_od_clk_voltage" | tail -1 | grep -qxF -- "${GPU_OD_VOLTAGE_OFFSET_MV}mV" ||
             fail "$dev voltage offset is not ${GPU_OD_VOLTAGE_OFFSET_MV} mV."
-        if [ -n "$GPU_OD_SCLK_MAX_MHZ" ]; then
-            grep -A2 '^OD_SCLK:' "$dev/pp_od_clk_voltage" | grep -qxE "1: *${GPU_OD_SCLK_MAX_MHZ}Mhz" ||
-                fail "$dev sclk ceiling is not ${GPU_OD_SCLK_MAX_MHZ} MHz."
-        fi
+        sclk=$(awk -F '|' -v d="$dev" '$1 == d {print $3; exit}' "$STATE/od" 2>/dev/null)
+        [ -n "$sclk" ] && [ "$(od_sclk_max "$dev")" = "$sclk" ] || fail "$dev sclk ceiling is not ${sclk:-recorded} MHz."
         h=$(od_hwmon "$dev") || fail "No power cap for $dev."
         [ "$(cat "$h/power1_cap")" = "$((GPU_OD_POWER_CAP_W * 1000000))" ] || fail "$dev power cap is not ${GPU_OD_POWER_CAP_W} W."
     done
