@@ -17,17 +17,17 @@ GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL
 | Context allocation | 1M | 512K | 512K | 512K |
 | Model shards, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (23 × 2,048 tokens; lower is better) | 7.1973 | 7.3695 | 7.2498 | 7.9435 |
-| Quality | 30/30 | 30/30 | 30/30 | 30/30 |
+| Quality | 29/30 | 30/30 | 30/30 | 30/30 |
 | 520K retrieval | 5/5 | 5/5 | 5/5 | 5/5 |
 | 1.04M retrieval | 5/5 | — | — | — |
-| Fixed-input Maya benchmark: decode | 63.5 | 60.9 | 41.7 | 80.7 |
-| Fixed-input Maya benchmark: prefill 2K / 8K | 244 / 630 | 210 / 537 | 169 / 478 | 286 / 661 |
-| 128K five-phrase: decode / prefill | 79.5 / 1,649 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
-| 480K five-phrase: decode / prefill | 76.9 / 1,359 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
-| Real code, 130,048 tokens: prefill | 1,424 | 1,464 | 1,378 | 1,587 |
-| Real code: decode cold / prompt cached | 54.0 / 51.9 | 52.5 / 65.7 | 37.3 / 49.4 | 66.2 / 68.0 |
+| Fixed-input Maya benchmark: decode | 67.3 | 60.9 | 41.7 | 80.7 |
+| Fixed-input Maya benchmark: prefill 2K / 8K | 253 / 654 | 210 / 537 | 169 / 478 | 286 / 661 |
+| 128K five-phrase: decode / prefill | 82.2 / 1,777 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
+| 480K five-phrase: decode / prefill | 79.1 / 1,466 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
+| Real code, 130,048 tokens: prefill | 1,510 | 1,464 | 1,378 | 1,587 |
+| Real code: decode cold / prompt cached | 56.5 / 54.6 | 52.5 / 65.7 | 37.3 / 49.4 | 66.2 / 68.0 |
 
-EXL3 supports 1M context and has the lowest measured perplexity (7.1973). It also decodes faster at long context (79.5 against GSQ-RCO's 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
+EXL3 supports 1M context and has the lowest measured perplexity (7.1973). It also decodes faster at long context (82.2 against GSQ-RCO's 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
 
 GSQ and EXL3 report medians of three loads per point; Maya-S and Maya-XS each report one load. Cached decode uses three consecutive answers per load. Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.
 
@@ -37,19 +37,19 @@ GSQ and EXL3 report medians of three loads per point; Maya-S and Maya-XS each re
 
 | Input tokens | Prefill (tok/s) | Decode (tok/s) | Values |
 |---:|---:|---:|---:|
-| 2,040 | 279.0 | 83.8 | 5/5 |
-| 3,840 | 460.6 | 83.2 | 5/5 |
-| 7,680 | 751.9 | 83.2 | 5/5 |
-| 15,359 | 1,027.8 | 80.7 | 5/5 |
-| 30,720 | 1,363.1 | 81.5 | 5/5 |
-| 59,933 | 1,562.8 | 82.5 | 5/5 |
-| 122,879 | 1,649.1 | 79.5 | 5/5 |
-| 163,840 | 1,657.5 | 80.2 | 5/5 |
-| 212,992 | 1,620.1 | 80.0 | 5/5 |
-| 245,760 | 1,590.4 | 78.8 | 5/5 |
-| 491,520 | 1,359.3 | 76.9 | 5/5 |
+| 2,040 | 279.1 | 86.0 | 5/5 |
+| 3,840 | 483.2 | 86.2 | 5/5 |
+| 7,680 | 782.7 | 86.3 | 5/5 |
+| 15,359 | 1,108.5 | 84.1 | 5/5 |
+| 30,720 | 1,457.4 | 84.3 | 5/5 |
+| 59,933 | 1,683.6 | 84.0 | 5/5 |
+| 122,879 | 1,777.0 | 82.2 | 5/5 |
+| 163,840 | 1,784.1 | 82.9 | 5/5 |
+| 212,992 | 1,756.7 | 82.0 | 5/5 |
+| 245,760 | 1,723.2 | 80.5 | 5/5 |
+| 491,520 | 1,466.5 | 79.1 | 5/5 |
 
-The separate **1,040,000-token** check found **5/5** values with zero cached input: **978.9 prefill / 71.8 decode tok/s**.
+The separate **1,040,000-token** check found **5/5** values with zero cached input: **1,063.1 prefill / 73.1 decode tok/s**.
 
 #### Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX
 
@@ -109,15 +109,15 @@ A separate source-native `maya.py --bench` comparison used the same actual token
 
 | Setup | Decode mean (tok/s) | Prefill 2K / 8K (tok/s) |
 |---|---:|---:|
-| **Optimized EXL3 2.25** | 63.5 | 243.0 / 626.5 |
-| GSQ-RCO IQ2_XS, stock v1.1.56 | 60.4 | 205.5 / 538.5 |
-| EXL3 2.25, stock v1.1.56 | 48.8 | 227.0 / 651.5 |
+| **Optimized EXL3 2.25** | 66.6 | 250.5 / 684.0 |
+| GSQ-RCO IQ2_XS, stock v1.1.56 | 62.9 | 215.0 / 583.5 |
+| EXL3 2.25, stock v1.1.56 | 49.6 | 233.0 / 678.0 |
 
 The optimized arm is this release: its binary and recipe (the helper's 109 GB pool with the drafter's leftover experts, ~5 GB read ahead). The stock EXL3 arm keeps the retained stock reference recipe (a 95 GB pool, 14.9 GB read-ahead, no DS4_HELPER_DRAFT), so the rows compare the release with a stock reference, not binaries alone. GSQ uses its recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.
 
 ### Quality and teacher comparison
 
-All four DeepSeek quants scored 30/30 on the cold coding/maths suite. The established math_08 gold-answer correction is retained. The perplexity values in the main table use 23 × 2,048 tokens.
+EXL3 scored 29/30 on the cold coding/maths suite; GSQ, Maya-S and Maya-XS scored 30/30. The established math_08 gold-answer correction is retained. The perplexity values in the main table use 23 × 2,048 tokens.
 
 The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.
 

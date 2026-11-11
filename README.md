@@ -24,11 +24,11 @@ EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; Maya-XS
 | Longest input | 1M | 512K | 512K | 512K |
 | Model size, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (lower is better) | 7.20 | 7.37 | 7.25 | 7.94 |
-| Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 |
-| Decode, short prompt | 63 | 61 | 42 | 81 |
-| Decode, 128K input | 79 | 56 | 26 | 96 |
-| Prefill, 8K input | 630 | 537 | 478 | 661 |
-| Prefill, 128K input | 1,649 | 1,673 | 1,669 | 1,762 |
+| Quality checks passed | 29/30 | 30/30 | 30/30 | 30/30 |
+| Decode, short prompt | 67 | 61 | 42 | 81 |
+| Decode, 128K input | 82 | 56 | 26 | 96 |
+| Prefill, 8K input | 654 | 537 | 478 | 661 |
+| Prefill, 128K input | 1,777 | 1,673 | 1,669 | 1,762 |
 <!-- /quant-comparison-table -->
 
 GSQ-RCO keeps its own [recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml); Maya-S and Maya-XS v2 were measured for comparison only. [All measurements and methods](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
@@ -105,13 +105,13 @@ For a host with **one RX 7900 XTX** (24 GB VRAM) beside the M5's Radeon 8060S an
 | | **1 × RX 7900 XTX** | 2 × RX 7900 XTX |
 |---|---:|---:|
 | Longest input | 1M | 1M |
-| Quality checks passed | 29/30 | 30/30 |
+| Quality checks passed | 29/30 | 29/30 |
 | Perplexity (lower is better) | 7.19 | 7.20 |
-| Decode, short prompt | 46 | 63 |
-| Decode, 128K input | 55 | 79 |
-| Prefill, 8K input | 356 | 630 |
-| Prefill, 128K input | 942 | 1,649 |
-| Real code, 130K tokens: prefill / decode | 604 / 40.2 | 1,424 / 54.0 |
+| Decode, short prompt | 46 | 67 |
+| Decode, 128K input | 55 | 82 |
+| Prefill, 8K input | 356 | 654 |
+| Prefill, 128K input | 942 | 1,777 |
+| Real code, 130K tokens: prefill / decode | 604 / 40.2 | 1,510 / 56.5 |
 <!-- /single-xtx-table -->
 
 ![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with one RX 7900 XTX and a Radeon 8060S helper, against two cards](docs/benchmark-single-xtx.svg)

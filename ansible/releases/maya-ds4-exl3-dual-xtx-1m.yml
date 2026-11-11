@@ -450,12 +450,13 @@ strix_qualification:
   answer_quality:
     coding: 10
     gsm8k: 10
-    math: 10
-    total: 30
-    scoring: Reviewed final answers against frozen task gold; established scorer corrections retained in the qualification audit.
+    math: 9
+    total: 29
+    scoring: 29/30 reviewed; math_08 gold corrected; math_10 known 4096-token loop, byte-identical to historical
+      output.
     thinking: false
     math_10_output_cap: 4096
-    measured: '2026-11-10'
+    measured: '2026-11-11'
     perplexity: 7.1973
   retrieval_ladder:
     allocation_tokens: 1048576
@@ -467,16 +468,15 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1423.9
-    first_request_decode_tokens_per_second: 53.999325008437395
+    first_request_prefill_tokens_per_second: 1510.0
+    first_request_decode_tokens_per_second: 56.497590760289846
     reused_prompt_cached_tokens: 130047
-    reused_prompt_decode_tokens_per_second: 51.9274857709031
+    reused_prompt_decode_tokens_per_second: 54.59593611762714
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
     values: 5/5
-    measured: '2026-11-10'
-  qualified_configuration: >-
-    EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark with its blocks' leftover experts in
-    the Radeon 8060S helper's 109 GB pool, the full-rate HIP EXL3 decode kernels, background memory compaction off while
-    serving; 175/175 retrieval values across thirty-five cold loads.
+    measured: '2026-11-11'
+  qualified_configuration: EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark with its
+    blocks' leftover experts in the Radeon 8060S helper's 109 GB pool, the full-rate HIP EXL3 decode kernels, background
+    memory compaction off while serving; 175/175 retrieval values across thirty-five cold loads.
