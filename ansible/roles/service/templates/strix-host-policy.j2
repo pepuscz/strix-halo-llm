@@ -89,6 +89,10 @@ od_restore() {
     while IFS='|' read -r dev cap sclk; do
         printf 'r\n' > "$dev/pp_od_clk_voltage" || true
         printf 'c\n' > "$dev/pp_od_clk_voltage" || true
+        if [ -n "$sclk" ]; then   # (the driver's reset leaves the ceiling +25 MHz: the card's own one back)
+            printf 's 1 %s\n' "$sclk" > "$dev/pp_od_clk_voltage" || true
+            printf 'c\n' > "$dev/pp_od_clk_voltage" || true
+        fi
         h=$(od_hwmon "$dev") && [ -n "$cap" ] && printf '%s\n' "$cap" > "$h/power1_cap" || true
     done < "$STATE/od"
 }
