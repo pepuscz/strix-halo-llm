@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly memory compaction while the model's GPUs are idle
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=30min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

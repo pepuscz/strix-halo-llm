@@ -30,7 +30,12 @@ Stop restores the captured CPU, GPU, and package-power policy, and the kernel's
 memory-compaction settings where a release sets them. The DeepSeek EXL3 release
 turns background compaction off while it serves (`vm.compaction_proactiveness`
 and `vm.watermark_boost_factor` at 0): kcompactd moving pages the GPUs map made
-the driver stop both cards for 100–300 ms early in a request. The cooling
+the driver stop both cards for 100–300 ms early in a request. It compacts memory
+itself where no request waits: once before the engine loads, and nightly from
+`strix-compact-memory.timer` (03:30–04:00 host time) once the GPUs have been
+idle for a minute, so a 24/7 service does not slowly fragment its memory
+(`journalctl -u strix-compact-memory` shows the free 2 MiB blocks before and
+after each pass). The cooling
 dependency returns all three AXB35 fans to firmware-auto. Verify checks API and
 runtime identity, context allocation, model representation, cgroup events,
 memory headroom, memory PSI, temperatures, cooling state, package-power

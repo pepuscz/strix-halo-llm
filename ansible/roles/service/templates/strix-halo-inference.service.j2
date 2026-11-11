@@ -40,6 +40,7 @@ WorkingDirectory={{ strix_paths.release }}/source
 WorkingDirectory={{ strix_rocm.qualified_source_path }}/server
 {% endif %}ExecStartPre=+/usr/local/sbin/strix-host-policy apply
 {% if strix_system.engine == 'maya' %}ExecStartPre=+/usr/local/sbin/strix-drain-ttm-pool
+{% endif %}{% if strix_policy.vm_compaction_proactiveness is defined %}ExecStartPre=+/usr/local/sbin/strix-compact-memory load
 {% endif %}{% if strix_system.engine == 'vulkan' %}
 ExecStart={{ strix_paths.release }}/vulkan/llama-server \
   -m {{ strix_paths.models }}/{{ strix_target.files[0].name }} \

@@ -86,6 +86,14 @@
     - strix_fan.manage | bool
     - strix_fan.governor.enabled | default(false) | bool
 
+- name: Read nightly memory compaction timer state
+  ansible.builtin.command:
+    argv: [systemctl, is-active, strix-compact-memory.timer]
+  register: verify_compact_timer
+  changed_when: false
+  failed_when: false
+  when: strix_policy.vm_compaction_proactiveness is defined
+
 - name: Read maximum current CPU or GPU temperature
   ansible.builtin.shell: |
     set -o pipefail
@@ -160,6 +168,9 @@
         not strix_fan.manage | bool or
         not strix_fan.governor.enabled | default(false) | bool or
         verify_fan_governor.stdout | trim == 'active'
+      - >-
+        strix_policy.vm_compaction_proactiveness is not defined or
+        verify_compact_timer.stdout | trim == 'active'
       - >-
         not strix_verify_api_smoke | bool or
         (verify_api_smoke.json.choices | length == 1 and
