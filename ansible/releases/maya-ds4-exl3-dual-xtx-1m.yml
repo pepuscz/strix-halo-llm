@@ -15,7 +15,7 @@ strix_platform:
   gpu_pci_id: 1002:1586
   board_name: AXB35-02
   minimum_memory_kib: 125000000
-  strict_kernel: true
+  strict_kernel: false
   secure_boot: disabled
   kernel_arguments:
     - amd_pstate=active
