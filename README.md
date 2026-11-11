@@ -61,6 +61,8 @@ The 2K and 32K rows use a 131,072-token allocation; the remaining rows use 524,2
 | [AXAGON EEM2-40G USB4 40 Gbps enclosure](https://www.alza.cz/axagon-eem2-40g-m-2-nvme-ssd-enclosure-usb-c-40gbps-armored-aluminum-d13390080.htm) | 1 | Holds the Samsung SSD |
 | Swissten USB 4.0 USB-C 240W 0.5 m cable | 1 | Connects the enclosure to the M5 |
 
+**GPU tuning used for the DeepSeek EXL3 measurements:** both cards at −100 mV, a 350 W power cap and their stock clock ceilings (2,920 MHz Sapphire, 2,890 MHz Gigabyte), with automatic GPU DPM and CPU boost off. The recipe leaves the cards stock unless you set `strix_gpu_od_enabled: true` ([Operations](docs/OPERATIONS.md#optional-gpu-tuning)).
+
 ### Performance curves
 
 Cold five-phrase retrieval, one request per point. Both models read the same text; token counts vary by model. DeepSeek runs three quants at a 512K allocation throughout; GLM uses 128K–512K, as recorded in the [measurement details](docs/BENCHMARKS.md).
