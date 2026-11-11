@@ -36,7 +36,7 @@ runtime identity, context allocation, model representation, cgroup events,
 memory headroom, memory PSI, temperatures, cooling state, package-power
 readback, kernel errors, and a bounded API request.
 
-For the default, `strix-fan-governor.service` holds fixed level 5 during GPU
+Every release runs `strix-fan-governor.service`. It holds fixed level 5 during GPU
 work and for 300 seconds afterward, then returns the fans to firmware-auto. A
 missing GPU-busy counter, fan-control fault, governor stop, or governor failure
 selects fixed level 5. The controller samples sysfs once per second and never

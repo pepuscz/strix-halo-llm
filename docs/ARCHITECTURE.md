@@ -40,7 +40,7 @@ The single-box comparison selected Strata HIP UD-Q4_K_XL for Qwen and Strix Halo
 | Prefill | 8,192; borrowing disabled | Qualified upstream tuning | Sparse chunk 3,072 |
 | MemoryHigh / MemoryMax | 123G / 125G | 118G / 120G | 118G / 120G |
 | CPU boost / GPU DPM | Off / auto | Off / auto | On / high |
-| Cooling | GPU-demand governor | GPU-demand governor | Maximum while active |
+| Cooling | GPU-demand governor | GPU-demand governor | GPU-demand governor |
 
 ## Strata runtime
 

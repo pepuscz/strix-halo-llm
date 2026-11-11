@@ -395,7 +395,7 @@
       },
       "tool_contract_passed": true,
       "model": "DeepSeek-V4-Flash-0731",
-      "manifest_sha256": "6bf8d354d04dfe8d9e1171535fdaa0de2aa034d8bc5adca50158214675a1cdf0",
+      "manifest_sha256": "5e553378ade5198285cc0df094459a21553bb61834f4b7532e55193d45b75eb7",
       "release_id": "rocm-rocmfpx-128k-v5",
       "selection": "comparison_baseline"
     },
@@ -959,7 +959,7 @@
         "allocation_tokens": 524288
       },
       "model": "GLM-5.3-Flash",
-      "manifest_sha256": "ac4996b2906d433cc8ae5ed6778c7947be197d2d0d7236db53ea29fef2798011",
+      "manifest_sha256": "2d4e6374a8f937f535b53ffe3b874fc2ac4c5da65c4e37bbd1816934251dea49",
       "release_id": "maya-glm-dual-xtx-512k-v1",
       "selection": "added_hardware",
       "context_scaling": [
@@ -1350,7 +1350,7 @@
         },
         "aggregation": "median of three per-load decode means; prefill from the load with that median decode mean"
       },
-      "manifest_sha256": "9a89d9afa5f8edf74b43819d1e086bc7d5c7ec2dbbde4a7aac6e7f11d963f508",
+      "manifest_sha256": "04f7f84ead3ae939cd075f3d7f45898eda9c1498038671ed1af6b0e1bf59bd24",
       "qualification_note": "Pinned v1.1.48 plus RDNA 3 indexer v3 (DS4_INDEX_TC=1), explicit 32768 chunks. One complete retrieval curve, 30 cold reviewed quality cases and PPL on this exact recipe. Real-code and native speed medians from three loads, cached speed the median of three per-load three-answer means. Same pinned GSQ pack, frozen profile, drafter, 512K allocation and memory/power settings. Indexer scores change generated text; cold and cached decode are not stream-matched causal comparisons."
     },
     "maya-ds4-maya-s-dual-xtx": {
@@ -2837,7 +2837,7 @@
         },
         "aggregation": "one load"
       },
-      "manifest_sha256": "3fdc6c7a6f8347b10f0c2781f63bf15fe74307ed7cb22c1e720d2d14f45e1b70",
+      "manifest_sha256": "998f08ef5ebf8f951cee5152273aa5d96f58be1b035444410b2bc25518417645",
       "qualification_note": "30 reviewed quality cases (29 raw; only the established math_08 gold correction), frozen 23-sequence PPL and Lucebox KL, eleven retrieval points with three cold loads each, two longer needles, real code cold plus three cached answers and a same-process three-prompt check. One current median curve with all repetitions retained. Different generated text and draft acceptance; no causal or stream-matched decode claim.",
       "upstream_benchmark": {
         "procedure": "Source-native Project Maya v1.1.56 maya.py --bench: E+ / G / E0 repeated twice, all at 1,048,576 allocation, same actual input token IDs, greedy, thinking off, 256-token answers; each mean is over two independent cold loads. E+ uses the installed release; G and E0 use stock v1.1.56. Both compaction sysctls were zero for every arm.",
@@ -2977,7 +2977,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
       "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
-      "manifest_sha256": "adb9f3b0e3ee4c1a9a39c4d1fbe6b9d7fb841c1103003156d3f00733daba42f6",
+      "manifest_sha256": "15fe136eea447f03dfa92f7a65f77749a37fc4b0517234534fbe8b5c59b507ab",
       "release_id": "maya-ds4-exl3-single-xtx-1m-v1",
       "hardware": {
         "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",
