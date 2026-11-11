@@ -26,17 +26,26 @@ read_limit() {
 save_paths() {
     local destination=$1; shift
     : > "$destination"
-    local path
+    local path value
     for path in "$@"; do
         [ -r "$path" ] || continue
-        printf '%s|%s\n' "$path" "$(cat "$path")" >> "$destination"
+        # A runtime-suspended amdgpu card answers EBUSY (empty read) for its DPM level; record the
+        # driver default then, so restore never writes an empty value and leaves stale state behind.
+        value=$(cat "$path" 2>/dev/null) || value=
+        if [ -z "$value" ]; then
+            case "$path" in
+                */power_dpm_force_performance_level) value=auto ;;
+                *) continue ;;
+            esac
+        fi
+        printf '%s|%s\n' "$path" "$value" >> "$destination"
     done
 }
 restore_paths() {
     local source=$1 path value
     [ -f "$source" ] || return 0
     while IFS='|' read -r path value; do
-        [ -w "$path" ] || continue
+        [ -w "$path" ] && [ -n "$value" ] || continue
         printf '%s\n' "$value" > "$path"
     done < "$source"
 }
