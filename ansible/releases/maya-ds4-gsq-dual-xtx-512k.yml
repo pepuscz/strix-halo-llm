@@ -162,7 +162,14 @@ strix_fan:
   commit: 7a9f372edcaa99e562dece70204c4f609692a778
   dkms_version: 0.1.0_git7a9f372
   sysfs: /sys/class/ec_su_axb35
-  minimum_max_rpm: 2000
+  minimum_max_rpm: 1500
+  governor:
+    enabled: true
+    implementation_sha256: 3747bd714c1614c937bc10b0b8694a59f5e44674e7f73283781b1ca4e36ae4ef
+    interval_seconds: 1
+    idle_seconds: 300
+    busy_threshold_pct: 5
+    fail_safe_state: max
 strix_service:
   name: strix-halo-inference.service
   user: inference

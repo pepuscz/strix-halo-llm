@@ -4,6 +4,8 @@ set -euo pipefail
 readonly SYSFS={{ strix_fan.sysfs | quote }}
 readonly EXPECTED_BOARD={{ strix_platform.board_name | quote }}
 readonly MIN_MAX_RPM={{ strix_fan.minimum_max_rpm }}
+# A fan starting from standstill in a cold room needs well over 5 s to reach full speed.
+readonly SPINUP_SECONDS=60
 
 fail() { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
 restore_auto() {
@@ -56,15 +58,22 @@ for fan in fan1 fan2 fan3; do
     printf 'fixed\n' > "$SYSFS/$fan/mode"
     printf '5\n' > "$SYSFS/$fan/level"
 done
-sleep 5
-for fan in fan1 fan2 fan3; do
-    mode=$(cat "$SYSFS/$fan/mode")
-    level=$(cat "$SYSFS/$fan/level")
-    rpm=$(cat "$SYSFS/$fan/rpm")
-    [ "$mode" = fixed ] || fail_max "$fan mode=$mode"
-    [ "$level" = 5 ] || fail_max "$fan level=$level"
-    case "$rpm" in ''|*[!0-9]*) fail_max "$fan returned invalid RPM: $rpm" ;; esac
-    [ "$rpm" -ge "$MIN_MAX_RPM" ] || fail_max "$fan RPM $rpm is below $MIN_MAX_RPM"
+sleep 3
+deadline=$((SECONDS + SPINUP_SECONDS))
+while :; do
+    slow=
+    for fan in fan1 fan2 fan3; do
+        mode=$(cat "$SYSFS/$fan/mode")
+        level=$(cat "$SYSFS/$fan/level")
+        rpm=$(cat "$SYSFS/$fan/rpm")
+        [ "$mode" = fixed ] || fail_max "$fan mode=$mode"
+        [ "$level" = 5 ] || fail_max "$fan level=$level"
+        case "$rpm" in ''|*[!0-9]*) fail_max "$fan returned invalid RPM: $rpm" ;; esac
+        [ "$rpm" -ge "$MIN_MAX_RPM" ] || slow="$slow $fan=$rpm"
+    done
+    [ -z "$slow" ] && break
+    [ "$SECONDS" -lt "$deadline" ] || fail_max "RPM below $MIN_MAX_RPM after ${SPINUP_SECONDS} s:$slow"
+    sleep 2
 done
 trap - ERR
 show_state

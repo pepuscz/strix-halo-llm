@@ -295,7 +295,7 @@
       },
       "tool_contract_passed": true,
       "model": "DeepSeek-V4-Flash-0731",
-      "manifest_sha256": "8793196283a5ab53f462fe9e868359254d292a851484b119f98c5cee8e1f8251",
+      "manifest_sha256": "6ba74eed25be7ea829405dacce150e0894e31955b7727cfef0dee90af914398a",
       "release_id": "vulkan-iq3xxs-512k-v4",
       "selection": "winning_setup"
     },
@@ -395,7 +395,7 @@
       },
       "tool_contract_passed": true,
       "model": "DeepSeek-V4-Flash-0731",
-      "manifest_sha256": "6bf8d354d04dfe8d9e1171535fdaa0de2aa034d8bc5adca50158214675a1cdf0",
+      "manifest_sha256": "4eab48eb67cdf32400169fca0699b241bab8b0e9c8ca70e09498fab00335dc4b",
       "release_id": "rocm-rocmfpx-128k-v5",
       "selection": "comparison_baseline"
     },
@@ -895,7 +895,7 @@
           "evidence_sha256": "2649375d1a6277e0b8c99e28cc4c83d058a1fa22ff0ca3b9cf0a2fbc74d90afd"
         }
       ],
-      "manifest_sha256": "3bdb1d5044aadfcdf1bbc597772a348bc3ee9d7031ad97c2b9bf8b290d16d671",
+      "manifest_sha256": "7b875950415421e43bb28b7e9137e8b73a18444b74971a0814067e5771493c6f",
       "release_id": "strata-qwen-q4xl-4x256k-v1",
       "selection": "winning_setup"
     },
@@ -959,7 +959,7 @@
         "allocation_tokens": 524288
       },
       "model": "GLM-5.3-Flash",
-      "manifest_sha256": "ac4996b2906d433cc8ae5ed6778c7947be197d2d0d7236db53ea29fef2798011",
+      "manifest_sha256": "958e3562805a9fd3cddf0674432b513e970802bbb682f7b81561fc415c52ea7f",
       "release_id": "maya-glm-dual-xtx-512k-v1",
       "selection": "added_hardware",
       "context_scaling": [
@@ -1350,7 +1350,7 @@
         },
         "aggregation": "median of three per-load decode means; prefill from the load with that median decode mean"
       },
-      "manifest_sha256": "9a89d9afa5f8edf74b43819d1e086bc7d5c7ec2dbbde4a7aac6e7f11d963f508",
+      "manifest_sha256": "ec441ad8b0f21488f08dd20b6b978ca09caec909f6236940a8b07f0415a0af88",
       "qualification_note": "Pinned v1.1.48 plus RDNA 3 indexer v3 (DS4_INDEX_TC=1), explicit 32768 chunks. One complete retrieval curve, 30 cold reviewed quality cases and PPL on this exact recipe. Real-code and native speed medians from three loads, cached speed the median of three per-load three-answer means. Same pinned GSQ pack, frozen profile, drafter, 512K allocation and memory/power settings. Indexer scores change generated text; cold and cached decode are not stream-matched causal comparisons."
     },
     "maya-ds4-maya-s-dual-xtx": {
@@ -2837,7 +2837,7 @@
         },
         "aggregation": "one load"
       },
-      "manifest_sha256": "3fdc6c7a6f8347b10f0c2781f63bf15fe74307ed7cb22c1e720d2d14f45e1b70",
+      "manifest_sha256": "afcbb40a373e75dd1d165135534e30a491b2a983f0df4857a89719553e36f174",
       "qualification_note": "30 reviewed quality cases (29 raw; only the established math_08 gold correction), frozen 23-sequence PPL and Lucebox KL, eleven retrieval points with three cold loads each, two longer needles, real code cold plus three cached answers and a same-process three-prompt check. One current median curve with all repetitions retained. Different generated text and draft acceptance; no causal or stream-matched decode claim.",
       "upstream_benchmark": {
         "procedure": "Source-native Project Maya v1.1.56 maya.py --bench: E+ / G / E0 repeated twice, all at 1,048,576 allocation, same actual input token IDs, greedy, thinking off, 256-token answers; each mean is over two independent cold loads. E+ uses the installed release; G and E0 use stock v1.1.56. Both compaction sysctls were zero for every arm.",
@@ -2977,7 +2977,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
       "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
-      "manifest_sha256": "adb9f3b0e3ee4c1a9a39c4d1fbe6b9d7fb841c1103003156d3f00733daba42f6",
+      "manifest_sha256": "086113e1bb5ccffc9045ab2d7987b9c35347f71e8c9916a9e28d3ae43445c7eb",
       "release_id": "maya-ds4-exl3-single-xtx-1m-v1",
       "hardware": {
         "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",
