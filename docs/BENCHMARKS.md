@@ -113,11 +113,11 @@ A separate source-native `maya.py --bench` comparison used the same actual token
 | GSQ-RCO IQ2_XS, stock v1.1.56 | 60.1 | 215.0 / 582.0 |
 | EXL3 2.25, stock v1.1.56 | 49.8 | 234.5 / 678.0 |
 
-The optimized arm is this release: its binary and recipe (the helper's 109 GB pool with the drafter's leftover experts, ~5 GB read ahead). The stock EXL3 arm keeps the retained stock reference recipe (a 95 GB pool, 14.9 GB read-ahead, no DS4_HELPER_DRAFT), so the rows compare the release with a stock reference, not binaries alone. GSQ uses its recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.
+Optimized EXL3: this release's binary and recipe (a 109 GB helper pool with the drafter's leftover experts, ~5 GB read ahead). Stock EXL3: v1.1.56 with the stock reference recipe (a 95 GB pool, 14.9 GB read ahead, no DS4_HELPER_DRAFT). GSQ: its own recipe at 1M. Each decode mean covers three answers.
 
 ### Quality and teacher comparison
 
-EXL3 scored 29/30 on the cold coding/maths suite; GSQ, Maya-S and Maya-XS scored 30/30. The established math_08 gold-answer correction is retained. The perplexity values in the main table use 23 × 2,048 tokens.
+Cold coding/maths suite: EXL3 29/30; GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the main table: 23 × 2,048 tokens.
 
 The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.
 
@@ -126,13 +126,13 @@ The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 pred
 | **EXL3 2.25 (v1.1.56 fork)** | 0.1631 | 83.27% | 9.0912 |
 | GSQ-RCO IQ2_XS (v1.1.50 indexer) | 0.2272 | 80.51% | 9.6736 |
 
-The EXL3 dump/PPL consistency check differed by 0.51%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).
+Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).
 
 ## Single RX 7900 XTX: DeepSeek-V4.1-Flash-1017
 
 ![One RX 7900 XTX context scaling against two, DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw](benchmark-single-xtx.svg)
 
-**Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the v1.1.56-based engine tag `maya-ds4-exl3-1m-20261107`. The two-card line in the chart is the current dual release, on its newer engine tag `maya-ds4-exl3-1m-20261112`. The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
+**Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the v1.1.56-based engine tag `maya-ds4-exl3-1m-20261107`. The two-card line in the chart is the dual release (engine tag `maya-ds4-exl3-1m-20261112`). The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
 
 Quality **29/30**, perplexity **7.1933** (23 × 2,048 tokens). The 130,048-token real-code prompt: **604** prefill, **40.2** decode cold, **41.4** with the prompt cached. Fixed-input Maya benchmark: **45.9** decode, **116 / 356** prefill at 2K / 8K.
 
@@ -165,7 +165,7 @@ Source-native `maya.py --bench`, the same token IDs as the dual recipe's, two co
 | **This release** | 45.5 | 114.5 / 369.0 |
 | Stock v1.1.56, the same settings without DS4_HELPER_DRAFT | 43.3 | 115.0 / 371.0 |
 
-The lend of #867 runs on a tensor-parallel group only, so on one card the release differs from stock by DS4_HELPER_DRAFT (#904). Changed text and draft acceptance prevent a stream-matched causal claim.
+On one card the release differs from stock by DS4_HELPER_DRAFT (#904).
 
 ## Dual RX 7900 XTX: GLM-5.3-Flash
 

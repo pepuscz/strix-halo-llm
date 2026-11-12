@@ -263,14 +263,14 @@ def render_quant_details(data, text):
     u=e['upstream_benchmark']
     for arm,label in [('E+','**Optimized EXL3 2.25**'),('G',f'GSQ-RCO IQ2_XS, stock {stock_version(e)}'),('E0',f'EXL3 2.25, stock {stock_version(e)}')]:
         v=u['arms'][arm]['mean'];lines.append(f"| {label} | {reading(v['decode'])} | {reading(v['prefill']['2048'])} / {reading(v['prefill']['8192'])} |")
-    lines += ['',"The optimized arm is this release: its binary and recipe (the helper's 109 GB pool with the drafter's leftover experts, ~5 GB read ahead). The stock EXL3 arm keeps the retained stock reference recipe (a 95 GB pool, 14.9 GB read-ahead, no DS4_HELPER_DRAFT), so the rows compare the release with a stock reference, not binaries alone. GSQ uses its recipe at 1M. Each native decode mean covers three answers; changed text and draft acceptance prevent a stream-matched causal claim.",'',
+    lines += ['',"Optimized EXL3: this release's binary and recipe (a 109 GB helper pool with the drafter's leftover experts, ~5 GB read ahead). Stock EXL3: v1.1.56 with the stock reference recipe (a 95 GB pool, 14.9 GB read ahead, no DS4_HELPER_DRAFT). GSQ: its own recipe at 1M. Each decode mean covers three answers.",'',
               '### Quality and teacher comparison','',
-              f"EXL3 scored {e['quality']['total']}/30 on the cold coding/maths suite; GSQ, Maya-S and Maya-XS scored 30/30. The established math_08 gold-answer correction is retained. The perplexity values in the main table use 23 × 2,048 tokens.",'',
+              f"Cold coding/maths suite: EXL3 {e['quality']['total']}/30; GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the main table: 23 × 2,048 tokens.",'',
               'The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.','',
               '| Quant | KL | Top-1 agreement | Held-out PPL |','|---|---:|---:|---:|']
     for sid,label in [(COMPARISONS[0],f'**EXL3 2.25 ({fork_version(e)} fork)**'),(COMPARISONS[1],'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
         z=systems[sid]['quality']['lucebox_kl']['all'];lines.append(f"| {label} | {z['kl_top256']:.4f} | {z['top1_agree']*100:.2f}% | {z['ppl']:.4f} |")
-    lines += ['', f"The EXL3 dump/PPL consistency check differed by {e['quality']['lucebox_kl']['ppl_check']['relative_difference']*100:.2f}%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).",'']
+    lines += ['', "Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).",'']
     if SINGLE in systems:
         lines += single_details(data)
     a=text.index('## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017');b=text.index('## Dual RX 7900 XTX: GLM-5.3-Flash',a)
@@ -283,7 +283,7 @@ def single_details(data):
     lines=['## Single RX 7900 XTX: DeepSeek-V4.1-Flash-1017','',
            '![One RX 7900 XTX context scaling against two, DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw](benchmark-single-xtx.svg)','',
            (f"**{v['name']}** runs the same EXL3 2.25 bpw model and {fork_version(v)}-based engine as the dual recipe on one card, for a host without a second one." if same_exl3_engine(data) else
-            f"**{v['name']}** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the {fork_version(v)}-based engine tag `{v['runtime']['release_tag']}`. The two-card line in the chart is the current dual release, on its newer engine tag `{data['systems'][SINGLE.replace('single', 'dual')]['runtime']['release_tag']}`.") +
+            f"**{v['name']}** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the {fork_version(v)}-based engine tag `{v['runtime']['release_tag']}`. The two-card line in the chart is the dual release (engine tag `{data['systems'][SINGLE.replace('single', 'dual')]['runtime']['release_tag']}`).") +
            f" The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).",'',
            f"Quality **{q['total']}/30**, perplexity **{reading(q['perplexity']['value'],4)}** (23 × 2,048 tokens). The 130,048-token real-code prompt: **{reading(c['prefill_tokens_per_second'],0)}** prefill, **{reading(c['decode_tokens_per_second'])}** decode cold, **{reading(c['reused_prompt']['decode_tokens_per_second'])}** with the prompt cached. Fixed-input Maya benchmark: **{reading(b['decode_mean_tokens_per_second'])}** decode, **{reading(b['prefill_tokens_per_second']['2048'],0)} / {reading(b['prefill_tokens_per_second']['8192'],0)}** prefill at 2K / 8K.",'',
            'One fresh load per point, the same eleven prompts as the dual recipe, zero cached input, thinking off.','',
@@ -298,7 +298,7 @@ def single_details(data):
               '| Setup | Decode mean (tok/s) | Prefill 2K / 8K (tok/s) |','|---|---:|---:|']
     for arm,label in [('S+','**This release**'),('S0',f'Stock {stock_version(v)}, the same settings without DS4_HELPER_DRAFT')]:
         m=u['arms'][arm]['mean'];lines.append(f"| {label} | {reading(m['decode'])} | {reading(m['prefill']['2048'])} / {reading(m['prefill']['8192'])} |")
-    lines += ['','The lend of #867 runs on a tensor-parallel group only, so on one card the release differs from stock by DS4_HELPER_DRAFT (#904). Changed text and draft acceptance prevent a stream-matched causal claim.','']
+    lines += ['','On one card the release differs from stock by DS4_HELPER_DRAFT (#904).','']
     return lines
 
 
