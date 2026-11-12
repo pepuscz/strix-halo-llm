@@ -442,6 +442,8 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         for key in ("DS4_AR2", "DS4_AR2_DECODE", "DS4_YOCO_TP", "DS4_TP_CHECK", "DS4_EXL3_LEND"):
             del expected_env[key]
         expected_env.update({"DS4_HELPER": "1", "DS4_DRAFT_DEV": "0,0,0", **SINGLE_ENV})
+    if exl3 and not single:
+        expected_env["MAYA_DS4_PROMPT_LIGHT"] = "64"
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
         fail("qualified Maya DS4 environment drifted: " + ", ".join(drifted))
