@@ -265,7 +265,7 @@ def render_quant_details(data, text):
               '| Quant | KL | Top-1 agreement | Held-out PPL |','|---|---:|---:|---:|']
     for sid,label in [(COMPARISONS[0],f'**EXL3 2.25 ({fork_version(e)} fork)**'),(COMPARISONS[1],'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
         z=systems[sid]['quality']['lucebox_kl']['all'];lines.append(f"| {label} | {z['kl_top256']:.4f} | {z['top1_agree']*100:.2f}% | {z['ppl']:.4f} |")
-    lines += ['', 'The EXL3 dump/PPL consistency check differed by 0.27%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).','']
+    lines += ['', f"The EXL3 dump/PPL consistency check differed by {e['quality']['lucebox_kl']['ppl_check']['relative_difference']*100:.2f}%, within the fixed 2% tolerance. Maya-S and Maya-XS were not measured with this KL driver. [Exact data and input hashes](../benchmarks/results.json).",'']
     if SINGLE in systems:
         lines += single_details(data)
     a=text.index('## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017');b=text.index('## Dual RX 7900 XTX: GLM-5.3-Flash',a)

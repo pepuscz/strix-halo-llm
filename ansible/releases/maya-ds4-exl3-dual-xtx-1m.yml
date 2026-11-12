@@ -46,7 +46,7 @@ strix_runtime:
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.56
   upstream_commit: 22fc101f2c109b7e7174c975ff3c2d8e9ce0a867
-  server_sha256: 156be377c2132379fb08c5a5e95526e58c811748e89ab1729a53ca8af980c8f4
+  server_sha256: 0c532f5161435e4b07d2f19a375978a51d48d74f67fc244567e0af1de648f353
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -453,12 +453,12 @@ strix_qualification:
     gsm8k: 10
     math: 9
     total: 29
-    scoring: 29/30 reviewed; math_08 gold corrected; math_10 known 4096-token loop, byte-identical to historical
-      output.
+    scoring: 29/30 reviewed; math_08 gold corrected; math_10 known 4096-token loop byte-identical to historical output,
+      accepted by independent review.
     thinking: false
     math_10_output_cap: 4096
-    measured: '2026-11-11'
-    perplexity: 7.1973
+    measured: '2026-11-12'
+    perplexity: 7.1924
   retrieval_ladder:
     allocation_tokens: 1048576
     points: 11
@@ -469,15 +469,14 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1510.0
-    first_request_decode_tokens_per_second: 56.497590760289846
+    first_request_prefill_tokens_per_second: 1535.3
+    first_request_decode_tokens_per_second: 56.68900764711093
     reused_prompt_cached_tokens: 130047
-    reused_prompt_decode_tokens_per_second: 54.59593611762714
+    reused_prompt_decode_tokens_per_second: 57.455104936551855
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
     values: 5/5
-    measured: '2026-11-11'
-  qualified_configuration: EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark with its
-    blocks' leftover experts in the Radeon 8060S helper's 109 GB pool, the full-rate HIP EXL3 decode kernels, background
-    memory compaction off while serving; 175/175 retrieval values across thirty-five cold loads.
+    measured: '2026-11-12'
+  qualified_configuration: "EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark and the\
+    \ helper\u2019s 109 GB pool, PROMPT_LIGHT=64 and optimized HIP EXL3 kernels; 175/175 cold retrieval values."

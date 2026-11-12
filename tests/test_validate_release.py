@@ -242,6 +242,17 @@ class ReleaseValidatorTest(unittest.TestCase):
                 with self.assertRaisesRegex(SystemExit, message):
                     VALIDATOR.validate_benchmarks(root)
 
+    def test_exl3_prompt_light_is_pinned(self) -> None:
+        data = yaml.safe_load(EXL3.read_text())
+        self.validate(data)
+        for value in (None, "0", "63", "128"):
+            changed = copy.deepcopy(data)
+            if value is None:
+                del changed["strix_maya"]["server"]["env"]["MAYA_DS4_PROMPT_LIGHT"]
+            else:
+                changed["strix_maya"]["server"]["env"]["MAYA_DS4_PROMPT_LIGHT"] = value
+            self.assert_fails(changed, "environment drifted")
+
     def test_exl3_reporting_matches_qualification(self) -> None:
         import json
         mutations = (
