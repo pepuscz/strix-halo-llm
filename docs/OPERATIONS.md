@@ -51,6 +51,17 @@ Set `strix_verify_full_model_hashes=true` for an explicit full model scrub.
 Normal operation verifies immutable download markers and byte sizes to avoid
 rehashing the model files (about 100–380 GB, depending on the setup) on each run.
 
+## Optional GPU tuning
+
+The Maya DS4 EXL3 releases carry an OverDrive profile, off by default. With
+`strix_gpu_od_enabled: true` the platform role adds
+`amdgpu.ppfeaturemask=0xfff7ffff` (a reboot applies it) and the host policy sets
+on every RX 7900 XTX: a −100 mV voltage offset, a 350 W power cap, each card's
+own stock clock ceiling, automatic GPU DPM, and CPU boost off. Stop restores the
+cards' stock values. `strix_gpu_od.per_card` sets a different offset for one
+card model, keyed by its PCI subsystem id. The reference host's published
+results use this profile.
+
 ## Updates and rollback
 
 Persistent model service changes are made through release manifests and roles.

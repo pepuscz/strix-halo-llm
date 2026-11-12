@@ -24,11 +24,11 @@ EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; Maya-XS
 | Longest input | 1M | 512K | 512K | 512K |
 | Model size, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (lower is better) | 7.20 | 7.37 | 7.25 | 7.94 |
-| Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 |
-| Decode, short prompt | 60 | 61 | 42 | 81 |
-| Decode, 128K input | 75 | 56 | 26 | 96 |
-| Prefill, 8K input | 627 | 537 | 478 | 661 |
-| Prefill, 128K input | 1,654 | 1,673 | 1,669 | 1,762 |
+| Quality checks passed | 29/30 | 30/30 | 30/30 | 30/30 |
+| Decode, short prompt | 67 | 61 | 42 | 81 |
+| Decode, 128K input | 82 | 56 | 26 | 96 |
+| Prefill, 8K input | 654 | 537 | 478 | 661 |
+| Prefill, 128K input | 1,777 | 1,673 | 1,669 | 1,762 |
 <!-- /quant-comparison-table -->
 
 GSQ-RCO keeps its own [recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml); Maya-S and Maya-XS v2 were measured for comparison only. [All measurements and methods](docs/BENCHMARKS.md#dual-rx-7900-xtx-deepseek-v41-flash-1017).
@@ -60,6 +60,8 @@ The 2K and 32K rows use a 131,072-token allocation; the remaining rows use 524,2
 | Samsung 990 PRO 1 TB M.2 NVMe SSD | 1 | External storage over USB4 |
 | [AXAGON EEM2-40G USB4 40 Gbps enclosure](https://www.alza.cz/axagon-eem2-40g-m-2-nvme-ssd-enclosure-usb-c-40gbps-armored-aluminum-d13390080.htm) | 1 | Holds the Samsung SSD |
 | Swissten USB 4.0 USB-C 240W 0.5 m cable | 1 | Connects the enclosure to the M5 |
+
+**GPU tuning used for the DeepSeek EXL3 measurements:** both cards at −100 mV, a 350 W power cap and their stock clock ceilings (2,920 MHz Sapphire, 2,890 MHz Gigabyte), with automatic GPU DPM and CPU boost off. The recipe leaves the cards stock unless you set `strix_gpu_od_enabled: true` ([Operations](docs/OPERATIONS.md#optional-gpu-tuning)).
 
 ### Performance curves
 
@@ -97,19 +99,19 @@ The installer verifies the hardware and artifacts, builds the runtime, and enabl
 
 ## Single RX 7900 XTX setup
 
-For a host with **one RX 7900 XTX** (24 GB VRAM) beside the M5's Radeon 8060S and 128 GiB RAM: the same EXL3 2.25 bpw model and engine as the dual recipe, with the 8060S holding a 113 GB expert pool, inputs up to **1M tokens**. [Ansible recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
+For a host with **one RX 7900 XTX** (24 GB VRAM) beside the M5's Radeon 8060S and 128 GiB RAM: the same EXL3 2.25 bpw model as the dual recipe on the dual recipe's v1.1.56-based engine without the full-rate decode kernels, with the 8060S holding a 113 GB expert pool, inputs up to **1M tokens**. [Ansible recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
 
 <!-- single-xtx-table -->
 | | **1 × RX 7900 XTX** | 2 × RX 7900 XTX |
 |---|---:|---:|
 | Longest input | 1M | 1M |
-| Quality checks passed | 29/30 | 30/30 |
+| Quality checks passed | 29/30 | 29/30 |
 | Perplexity (lower is better) | 7.19 | 7.20 |
-| Decode, short prompt | 46 | 60 |
-| Decode, 128K input | 55 | 75 |
-| Prefill, 8K input | 356 | 627 |
-| Prefill, 128K input | 942 | 1,654 |
-| Real code, 130K tokens: prefill / decode | 604 / 40.2 | 1,434 / 50.3 |
+| Decode, short prompt | 46 | 67 |
+| Decode, 128K input | 55 | 82 |
+| Prefill, 8K input | 356 | 654 |
+| Prefill, 128K input | 942 | 1,777 |
+| Real code, 130K tokens: prefill / decode | 604 / 40.2 | 1,510 / 56.5 |
 <!-- /single-xtx-table -->
 
 ![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds with one RX 7900 XTX and a Radeon 8060S helper, against two cards](docs/benchmark-single-xtx.svg)

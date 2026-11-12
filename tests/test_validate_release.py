@@ -250,7 +250,7 @@ class ReleaseValidatorTest(unittest.TestCase):
             lambda d: d["context_scaling"][0].update(cached_tokens=1),
             lambda d: d["near_capacity_needle"].update(actual_input_tokens=520000),
             lambda d: d["long_context"]["reused_prompt"].update(cached_tokens=0),
-            lambda d: d["quality"].update(total=29),
+            lambda d: d["quality"].update(total=d["quality"]["total"] - 1),
             lambda d: d["quality"]["perplexity"].update(value=7.8),
             lambda d: d["runtime"].update(source_commit="0" * 40),
             lambda d: d["maya_bench"].update(inputs_sha256="0" * 64),

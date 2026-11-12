@@ -1620,7 +1620,7 @@
           "needle_passes": 5
         }
       ],
-      "context_scaling_note": "Each point is one fresh load from this quantization’s frozen expert profile, thinking off, 256-token cap and zero cached input at 524,288-token allocation. Identical prompt bytes and benchmark driver across the three DeepSeek quantizations.",
+      "context_scaling_note": "Each point is one fresh load from this quantization\u2019s frozen expert profile, thinking off, 256-token cap and zero cached input at 524,288-token allocation. Identical prompt bytes and benchmark driver across the three DeepSeek quantizations.",
       "deep_needle": {
         "workload": "deep_retrieval",
         "allocation_tokens": 524288,
@@ -1919,7 +1919,7 @@
           "needle_passes": 5
         }
       ],
-      "context_scaling_note": "Each point is one fresh load from this quantization’s frozen expert profile, thinking off, 256-token cap and zero cached input at 524,288-token allocation. Identical prompt bytes and benchmark driver across the three DeepSeek quantizations.",
+      "context_scaling_note": "Each point is one fresh load from this quantization\u2019s frozen expert profile, thinking off, 256-token cap and zero cached input at 524,288-token allocation. Identical prompt bytes and benchmark driver across the three DeepSeek quantizations.",
       "deep_needle": {
         "workload": "deep_retrieval",
         "allocation_tokens": 524288,
@@ -1969,11 +1969,11 @@
       },
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-exl3-1m-20261107",
-        "source_commit": "f5aa4cb9a0347aabd9062801ece97885861c0a68",
-        "source_tree": "e5de6895f0174cd52f3bae99ab18673a9dfa86b4",
-        "upstream": "Project Maya v1.1.56 plus #867 and DS4_HELPER_DRAFT",
-        "benchmark_binary_sha256": "b95d7c4c570549de55d9aaed2ebe965007f975bf224a27ba6c1b41b2522a3667"
+        "release_tag": "maya-ds4-exl3-1m-20261110",
+        "source_commit": "1418acdf763c33069cf7e28eaff5d0b7350df607",
+        "source_tree": "c0f2a074376739624b35b90a4f96d7f50fed8e14",
+        "upstream": "Project Maya v1.1.56 plus #867, DS4_HELPER_DRAFT and three bit-exact HIP EXL3 full-rate decode optimizations",
+        "benchmark_binary_sha256": "f9c16850c70ab8c8e633fe103e4a2fa6b89ee0a5eddfc5cefc8a2da571dd2572"
       },
       "power_watts": {
         "stapm": 120,
@@ -1983,9 +1983,9 @@
       "cpu": {
         "governor": "performance",
         "minimum_khz": 2000000,
-        "boost": true
+        "boost": false
       },
-      "gpu_dpm": "high",
+      "gpu_dpm": "auto",
       "context_allocation": 1048576,
       "target": {
         "repository": "turboderp/DeepSeek-V4.1-Flash-1017-exl3",
@@ -2004,9 +2004,9 @@
       "quality": {
         "coding": 10,
         "gsm8k": 10,
-        "math": 10,
-        "total": 30,
-        "raw_total": 29,
+        "math": 9,
+        "total": 29,
+        "raw_total": 28,
         "thinking": false,
         "math_10_output_cap": 4096,
         "perplexity": {
@@ -2016,7 +2016,7 @@
           "scored_tokens": 47081,
           "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
         },
-        "scoring": "Coding execution and reviewed final answers; frozen math_08 reference 20/3.",
+        "scoring": "Frozen 30-case suite; 29/30 reviewed, math_10 known4096token loop identical to historical output; reviewed corrections: math_08",
         "lucebox_kl": {
           "all": {
             "tokens": 8184,
@@ -2043,7 +2043,7 @@
             "teacher_idx.i32": "ed0fade255c0b6c4a8606e3b21a9c52b024a0d5f37e5c69ff548486c16a8ffb1",
             "teacher_lp.f32": "e689eabd99c20cdf2edc1d24fc6516121b34fd8e05b3fedcefbe12a36004350d"
           },
-          "runtime_source_commit": "f5aa4cb9a0347aabd9062801ece97885861c0a68",
+          "runtime_source_commit": "1418acdf763c33069cf7e28eaff5d0b7350df607",
           "allocation_tokens": 1048576
         }
       },
@@ -2051,26 +2051,26 @@
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 1434.3,
-        "decode_tokens_per_second": 50.3,
+        "prefill_tokens_per_second": 1510.0,
+        "decode_tokens_per_second": 56.497590760289846,
         "allocation_tokens": 1048576,
         "reused_prompt": {
           "cached_tokens": 130047,
-          "decode_tokens_per_second": 48.4,
+          "decode_tokens_per_second": 54.59593611762714,
           "samples": 3,
           "loads": 1,
           "answers_per_load": 3,
           "per_sample": [
-            48.86988393402565,
-            48.00720108016203,
-            48.364852354952674
+            55.11421128549592,
+            54.254913319298645,
+            54.41868374808685
           ],
           "aggregation": "mean of three consecutive cached answers from one load"
         },
         "prompt_sha256": "5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a"
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "release_id": "maya-ds4-exl3-dual-xtx-1m-v2",
+      "release_id": "maya-ds4-exl3-dual-xtx-1m-v3",
       "selection": "added_hardware",
       "context_scaling": [
         {
@@ -2078,62 +2078,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 2040,
           "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 280.1,
+          "prefill_tokens_per_second": 279.1,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 79.20792079207921,
+          "decode_tokens_per_second": 86.00994489987905,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 2040,
               "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-              "prefill_tokens_per_second": 281.3,
+              "prefill_tokens_per_second": 276.4,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 78.94412236338965,
+              "decode_tokens_per_second": 86.0446356547459,
               "load": 1,
-              "http_to_first_text_ms": 7262.326541123912,
+              "http_to_first_text_ms": 7396.610189000057,
               "handback_ms": [
-                170.0
+                89.0
               ],
-              "minimum_non_cma_gib": 8.021202087402344
+              "minimum_non_cma_gib": 9.281501770019531
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 2040,
               "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-              "prefill_tokens_per_second": 278.7,
+              "prefill_tokens_per_second": 279.1,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 79.20792079207921,
+              "decode_tokens_per_second": 86.00994489987905,
               "load": 2,
-              "http_to_first_text_ms": 7330.435217823833,
+              "http_to_first_text_ms": 7324.664966000455,
               "handback_ms": [
-                240.0
+                83.0
               ],
-              "minimum_non_cma_gib": 7.851036071777344
+              "minimum_non_cma_gib": 9.599597930908203
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 2040,
               "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-              "prefill_tokens_per_second": 280.1,
+              "prefill_tokens_per_second": 285.1,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 79.69119661312415,
+              "decode_tokens_per_second": 85.9175728285676,
               "load": 3,
-              "http_to_first_text_ms": 7292.56852902472,
+              "http_to_first_text_ms": 7169.230728000002,
               "handback_ms": [
-                163.0
+                76.0
               ],
-              "minimum_non_cma_gib": 7.889606475830078
+              "minimum_non_cma_gib": 9.644783020019531
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2143,62 +2143,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 3840,
           "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-          "prefill_tokens_per_second": 467.6,
+          "prefill_tokens_per_second": 483.2,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 79.10023482882215,
+          "decode_tokens_per_second": 86.2417463953645,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 3840,
               "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-              "prefill_tokens_per_second": 464.0,
+              "prefill_tokens_per_second": 483.2,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 79.10023482882215,
+              "decode_tokens_per_second": 86.18367896579585,
               "load": 1,
-              "http_to_first_text_ms": 8286.865788977593,
+              "http_to_first_text_ms": 7963.05447100076,
               "handback_ms": [
-                273.0
+                119.0
               ],
-              "minimum_non_cma_gib": 7.5580902099609375
+              "minimum_non_cma_gib": 8.54422378540039
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 3840,
               "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-              "prefill_tokens_per_second": 475.3,
+              "prefill_tokens_per_second": 488.5,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 79.23734059675621,
+              "decode_tokens_per_second": 86.79142934635205,
               "load": 2,
-              "http_to_first_text_ms": 8090.779886115342,
+              "http_to_first_text_ms": 7877.4141429994415,
               "handback_ms": [
-                191.0
+                117.0
               ],
-              "minimum_non_cma_gib": 8.31551742553711
+              "minimum_non_cma_gib": 8.080696105957031
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 3840,
               "prompt_sha256": "0138aecad1e2535387f5279f59f6218520bb4bbe73d144e2953e303bd9afa5a0",
-              "prefill_tokens_per_second": 467.6,
+              "prefill_tokens_per_second": 474.2,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 78.18226239921817,
+              "decode_tokens_per_second": 86.2417463953645,
               "load": 3,
-              "http_to_first_text_ms": 8224.704048130661,
+              "http_to_first_text_ms": 8113.507049999498,
               "handback_ms": [
-                274.0
+                118.0
               ],
-              "minimum_non_cma_gib": 7.796791076660156
+              "minimum_non_cma_gib": 8.400482177734375
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2208,62 +2208,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 7680,
           "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 749.2,
+          "prefill_tokens_per_second": 782.7,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 78.09640024405125,
+          "decode_tokens_per_second": 86.2766244270693,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 7680,
               "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-              "prefill_tokens_per_second": 755.7,
+              "prefill_tokens_per_second": 785.6,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 78.239608801956,
+              "decode_tokens_per_second": 85.7449088960343,
               "load": 1,
-              "http_to_first_text_ms": 10176.970718195662,
+              "http_to_first_text_ms": 9799.009911999747,
               "handback_ms": [
-                371.0
+                296.0
               ],
-              "minimum_non_cma_gib": 7.11016845703125
+              "minimum_non_cma_gib": 8.695724487304688
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 7680,
               "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-              "prefill_tokens_per_second": 739.3,
+              "prefill_tokens_per_second": 759.8,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 77.99171338045332,
+              "decode_tokens_per_second": 86.2766244270693,
               "load": 2,
-              "http_to_first_text_ms": 10403.873978881165,
+              "http_to_first_text_ms": 10131.573515999662,
               "handback_ms": [
-                548.0
+                271.0
               ],
-              "minimum_non_cma_gib": 7.1132659912109375
+              "minimum_non_cma_gib": 8.29732894897461
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 7680,
               "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-              "prefill_tokens_per_second": 749.2,
+              "prefill_tokens_per_second": 782.7,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 78.09640024405125,
+              "decode_tokens_per_second": 86.56837549032869,
               "load": 3,
-              "http_to_first_text_ms": 10266.032240120694,
+              "http_to_first_text_ms": 9834.861588999956,
               "handback_ms": [
-                524.0
+                277.0
               ],
-              "minimum_non_cma_gib": 7.720645904541016
+              "minimum_non_cma_gib": 8.479236602783203
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2273,62 +2273,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 15359,
           "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-          "prefill_tokens_per_second": 1007.1,
+          "prefill_tokens_per_second": 1108.5,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 76.38142976488841,
+          "decode_tokens_per_second": 84.14409676571128,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 15359,
               "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-              "prefill_tokens_per_second": 1007.1,
+              "prefill_tokens_per_second": 1135.7,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.56972487897036,
+              "decode_tokens_per_second": 83.54000783187573,
               "load": 1,
-              "http_to_first_text_ms": 15273.657586192712,
+              "http_to_first_text_ms": 13557.534107999345,
               "handback_ms": [
-                1394.0
+                584.0
               ],
-              "minimum_non_cma_gib": 6.933502197265625
+              "minimum_non_cma_gib": 8.927459716796875
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 15359,
               "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-              "prefill_tokens_per_second": 1003.9,
+              "prefill_tokens_per_second": 1101.5,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 76.38142976488841,
+              "decode_tokens_per_second": 84.14409676571128,
               "load": 2,
-              "http_to_first_text_ms": 15320.342503953725,
+              "http_to_first_text_ms": 13977.723938999588,
               "handback_ms": [
-                1390.0
+                642.0
               ],
-              "minimum_non_cma_gib": 7.437496185302734
+              "minimum_non_cma_gib": 9.081825256347656
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 15359,
               "prompt_sha256": "e8054cf1e41b9d503f4fec0bbdba3a40c864c23d7c782526d6def07a4844a386",
-              "prefill_tokens_per_second": 1014.7,
+              "prefill_tokens_per_second": 1108.5,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 76.4909764551213,
+              "decode_tokens_per_second": 84.6784863720561,
               "load": 3,
-              "http_to_first_text_ms": 15159.181020921096,
+              "http_to_first_text_ms": 13887.856593000834,
               "handback_ms": [
-                1334.0
+                614.0
               ],
-              "minimum_non_cma_gib": 6.818309783935547
+              "minimum_non_cma_gib": 9.128009796142578
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2338,62 +2338,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 30720,
           "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 1365.8,
+          "prefill_tokens_per_second": 1457.4,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 77.60397720383169,
+          "decode_tokens_per_second": 84.34370057986294,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 30720,
               "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-              "prefill_tokens_per_second": 1367.6,
+              "prefill_tokens_per_second": 1473.2,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 77.61338830948338,
+              "decode_tokens_per_second": 84.34370057986294,
               "load": 1,
-              "http_to_first_text_ms": 22495.73201709427,
+              "http_to_first_text_ms": 20905.271704999905,
               "handback_ms": [
-                1223.0
+                647.0
               ],
-              "minimum_non_cma_gib": 6.96136474609375
+              "minimum_non_cma_gib": 8.706241607666016
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 30720,
               "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-              "prefill_tokens_per_second": 1365.8,
+              "prefill_tokens_per_second": 1457.4,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 77.57575757575758,
+              "decode_tokens_per_second": 84.03361344537815,
               "load": 2,
-              "http_to_first_text_ms": 22526.12605295144,
+              "http_to_first_text_ms": 21132.587077000608,
               "handback_ms": [
-                1249.0
+                617.0
               ],
-              "minimum_non_cma_gib": 7.133228302001953
+              "minimum_non_cma_gib": 8.549701690673828
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 30720,
               "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-              "prefill_tokens_per_second": 1357.0,
+              "prefill_tokens_per_second": 1453.1,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 77.60397720383169,
+              "decode_tokens_per_second": 84.9144221838928,
               "load": 3,
-              "http_to_first_text_ms": 22670.846187043935,
+              "http_to_first_text_ms": 21194.320585999776,
               "handback_ms": [
-                1245.0
+                574.0
               ],
-              "minimum_non_cma_gib": 6.9852294921875
+              "minimum_non_cma_gib": 9.512420654296875
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2403,62 +2403,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 59933,
           "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-          "prefill_tokens_per_second": 1566.0,
+          "prefill_tokens_per_second": 1683.6,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 77.76427703523694,
+          "decode_tokens_per_second": 83.95644759281123,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 59933,
               "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-              "prefill_tokens_per_second": 1566.0,
+              "prefill_tokens_per_second": 1683.6,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 77.55695588948133,
+              "decode_tokens_per_second": 83.95644759281123,
               "load": 1,
-              "http_to_first_text_ms": 38328.630693024024,
+              "http_to_first_text_ms": 35690.97960799991,
               "handback_ms": [
-                1007.0
+                625.0
               ],
-              "minimum_non_cma_gib": 7.122833251953125
+              "minimum_non_cma_gib": 9.079299926757812
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 59933,
               "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-              "prefill_tokens_per_second": 1578.2,
+              "prefill_tokens_per_second": 1686.5,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 77.76427703523694,
+              "decode_tokens_per_second": 85.0837543206594,
               "load": 2,
-              "http_to_first_text_ms": 38030.604678206146,
+              "http_to_first_text_ms": 35627.26790200031,
               "handback_ms": [
-                818.0
+                569.0
               ],
-              "minimum_non_cma_gib": 8.173702239990234
+              "minimum_non_cma_gib": 8.846565246582031
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 59933,
               "prompt_sha256": "106bb660430f97f3ca13aa51b43664fef77cbd3cf910b0d08dbcb204f0e82cc1",
-              "prefill_tokens_per_second": 1562.2,
+              "prefill_tokens_per_second": 1677.3,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 77.92524047242178,
+              "decode_tokens_per_second": 83.81351492928235,
               "load": 3,
-              "http_to_first_text_ms": 38419.66932709329,
+              "http_to_first_text_ms": 35822.762404999594,
               "handback_ms": [
-                1053.0
+                607.0
               ],
-              "minimum_non_cma_gib": 7.142719268798828
+              "minimum_non_cma_gib": 8.854156494140625
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2468,62 +2468,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 122879,
           "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 1654.2,
+          "prefill_tokens_per_second": 1777.0,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 75.34730397927949,
+          "decode_tokens_per_second": 82.17770929635337,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 122879,
               "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-              "prefill_tokens_per_second": 1651.6,
+              "prefill_tokens_per_second": 1777.0,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.34730397927949,
+              "decode_tokens_per_second": 81.98821419420958,
               "load": 1,
-              "http_to_first_text_ms": 74505.3292340599,
+              "http_to_first_text_ms": 69327.9254299996,
               "handback_ms": [
-                1050.0
+                625.0
               ],
-              "minimum_non_cma_gib": 7.311820983886719
+              "minimum_non_cma_gib": 8.996036529541016
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 122879,
               "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-              "prefill_tokens_per_second": 1654.2,
+              "prefill_tokens_per_second": 1775.5,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.20564042303172,
+              "decode_tokens_per_second": 82.17770929635337,
               "load": 2,
-              "http_to_first_text_ms": 74389.86826315522,
+              "http_to_first_text_ms": 69380.24458800009,
               "handback_ms": [
-                929.0
+                591.0
               ],
-              "minimum_non_cma_gib": 6.580280303955078
+              "minimum_non_cma_gib": 9.297470092773438
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 122879,
               "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-              "prefill_tokens_per_second": 1656.1,
+              "prefill_tokens_per_second": 1784.1,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.68590350047303,
+              "decode_tokens_per_second": 83.22496749024707,
               "load": 3,
-              "http_to_first_text_ms": 74306.83422507718,
+              "http_to_first_text_ms": 69046.35624399998,
               "handback_ms": [
-                1103.0
+                610.0
               ],
-              "minimum_non_cma_gib": 7.0620574951171875
+              "minimum_non_cma_gib": 8.858417510986328
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2533,62 +2533,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 163840,
           "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-          "prefill_tokens_per_second": 1655.7,
+          "prefill_tokens_per_second": 1784.1,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 75.9914509617668,
+          "decode_tokens_per_second": 82.92303705623219,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 163840,
               "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-              "prefill_tokens_per_second": 1660.0,
+              "prefill_tokens_per_second": 1780.7,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.9914509617668,
+              "decode_tokens_per_second": 82.4317362184441,
               "load": 1,
-              "http_to_first_text_ms": 98837.59018103592,
+              "http_to_first_text_ms": 92241.5514510003,
               "handback_ms": [
-                975.0
+                676.0
               ],
-              "minimum_non_cma_gib": 6.9667205810546875
+              "minimum_non_cma_gib": 9.013534545898438
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 163840,
               "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-              "prefill_tokens_per_second": 1655.6,
+              "prefill_tokens_per_second": 1784.1,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.82938388625593,
+              "decode_tokens_per_second": 82.92303705623219,
               "load": 2,
-              "http_to_first_text_ms": 99097.68320200965,
+              "http_to_first_text_ms": 92067.07742399976,
               "handback_ms": [
-                1130.0
+                676.0
               ],
-              "minimum_non_cma_gib": 7.404911041259766
+              "minimum_non_cma_gib": 9.62038803100586
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 163840,
               "prompt_sha256": "2df7bd978960015d35c9e4efe5025aabf9e8e13954ef6ab7bf94b2d06950fa3b",
-              "prefill_tokens_per_second": 1655.7,
+              "prefill_tokens_per_second": 1785.9,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 76.50926479378363,
+              "decode_tokens_per_second": 83.19251267385935,
               "load": 3,
-              "http_to_first_text_ms": 99090.14110686257,
+              "http_to_first_text_ms": 91973.58443000031,
               "handback_ms": [
-                1276.0
+                652.0
               ],
-              "minimum_non_cma_gib": 6.670009613037109
+              "minimum_non_cma_gib": 8.686416625976562
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2598,62 +2598,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 212992,
           "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-          "prefill_tokens_per_second": 1618.4,
+          "prefill_tokens_per_second": 1756.7,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 75.78448786264062,
+          "decode_tokens_per_second": 81.99871877001922,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 212992,
               "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-              "prefill_tokens_per_second": 1617.0,
+              "prefill_tokens_per_second": 1750.0,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.78448786264062,
+              "decode_tokens_per_second": 81.99871877001922,
               "load": 1,
-              "http_to_first_text_ms": 131897.35726686195,
+              "http_to_first_text_ms": 122002.07884700011,
               "handback_ms": [
-                1406.0
+                693.0
               ],
-              "minimum_non_cma_gib": 6.956626892089844
+              "minimum_non_cma_gib": 9.692852020263672
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 212992,
               "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-              "prefill_tokens_per_second": 1621.8,
+              "prefill_tokens_per_second": 1756.7,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 75.82040042648975,
+              "decode_tokens_per_second": 82.9445308449974,
               "load": 2,
-              "http_to_first_text_ms": 131504.66979807243,
+              "http_to_first_text_ms": 121545.9745899998,
               "handback_ms": [
-                1165.0
+                587.0
               ],
-              "minimum_non_cma_gib": 6.346050262451172
+              "minimum_non_cma_gib": 9.385700225830078
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 212992,
               "prompt_sha256": "2c012ddee01827965c890f3c5a57d219f5c429c41bb2609bbf3859146deb5147",
-              "prefill_tokens_per_second": 1618.4,
+              "prefill_tokens_per_second": 1760.9,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 74.74889044615743,
+              "decode_tokens_per_second": 81.8100472964336,
               "load": 3,
-              "http_to_first_text_ms": 131785.66897497512,
+              "http_to_first_text_ms": 121258.10877799995,
               "handback_ms": [
-                1248.0
+                639.0
               ],
-              "minimum_non_cma_gib": 7.3610992431640625
+              "minimum_non_cma_gib": 9.240516662597656
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2663,62 +2663,62 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 245760,
           "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-          "prefill_tokens_per_second": 1595.2,
+          "prefill_tokens_per_second": 1723.2,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 74.28040854224697,
+          "decode_tokens_per_second": 80.54366977095394,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 245760,
               "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-              "prefill_tokens_per_second": 1595.2,
+              "prefill_tokens_per_second": 1718.5,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 74.28040854224697,
+              "decode_tokens_per_second": 80.3616273229533,
               "load": 1,
-              "http_to_first_text_ms": 154266.4339740295,
+              "http_to_first_text_ms": 143348.8143149998,
               "handback_ms": [
-                1035.0
+                665.0
               ],
-              "minimum_non_cma_gib": 6.840213775634766
+              "minimum_non_cma_gib": 8.82040786743164
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 245760,
               "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-              "prefill_tokens_per_second": 1596.6,
+              "prefill_tokens_per_second": 1723.2,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 74.35808063204368,
+              "decode_tokens_per_second": 80.87956527233666,
               "load": 2,
-              "http_to_first_text_ms": 154128.20228887722,
+              "http_to_first_text_ms": 142955.77797499936,
               "handback_ms": [
-                1152.0
+                607.0
               ],
-              "minimum_non_cma_gib": 6.9791107177734375
+              "minimum_non_cma_gib": 9.039871215820312
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 245760,
               "prompt_sha256": "a014dfcb38f2cc4a2ba34c0bb6d357afa3ed706b807dca7e1386a37d9886639d",
-              "prefill_tokens_per_second": 1589.7,
+              "prefill_tokens_per_second": 1723.2,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 74.15131502722744,
+              "decode_tokens_per_second": 80.54366977095394,
               "load": 3,
-              "http_to_first_text_ms": 154803.61255491152,
+              "http_to_first_text_ms": 142945.9561170006,
               "handback_ms": [
-                1194.0
+                623.0
               ],
-              "minimum_non_cma_gib": 7.492404937744141
+              "minimum_non_cma_gib": 9.88665771484375
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
@@ -2728,81 +2728,81 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 491520,
           "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-          "prefill_tokens_per_second": 1361.1,
+          "prefill_tokens_per_second": 1466.5,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 73.32722273143905,
+          "decode_tokens_per_second": 79.07091672844082,
           "per_load": [
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 491520,
               "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-              "prefill_tokens_per_second": 1356.4,
+              "prefill_tokens_per_second": 1465.4,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 72.34908433190142,
+              "decode_tokens_per_second": 79.25696594427245,
               "load": 1,
-              "http_to_first_text_ms": 362768.25657999143,
+              "http_to_first_text_ms": 336075.9814110006,
               "handback_ms": [
-                1519.0
+                621.0
               ],
-              "minimum_non_cma_gib": 7.174938201904297
+              "minimum_non_cma_gib": 9.16070556640625
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 491520,
               "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-              "prefill_tokens_per_second": 1361.5,
+              "prefill_tokens_per_second": 1469.0,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 73.40291317811676,
+              "decode_tokens_per_second": 78.79832553558236,
               "load": 2,
-              "http_to_first_text_ms": 361397.1272809431,
+              "http_to_first_text_ms": 335267.250425999,
               "handback_ms": [
-                915.0
+                714.0
               ],
-              "minimum_non_cma_gib": 7.312358856201172
+              "minimum_non_cma_gib": 9.928348541259766
             },
             {
               "workload": "deep_retrieval",
               "allocation_tokens": 1048576,
               "actual_input_tokens": 491520,
               "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-              "prefill_tokens_per_second": 1361.1,
+              "prefill_tokens_per_second": 1466.5,
               "completion_tokens": 64,
               "cached_tokens": 0,
               "needle_passes": 5,
-              "decode_tokens_per_second": 73.32722273143905,
+              "decode_tokens_per_second": 79.07091672844082,
               "load": 3,
-              "http_to_first_text_ms": 361509.92205599323,
+              "http_to_first_text_ms": 335847.04091499955,
               "handback_ms": [
-                1125.0
+                591.0
               ],
-              "minimum_non_cma_gib": 6.847957611083984
+              "minimum_non_cma_gib": 9.037593841552734
             }
           ],
           "aggregation": "median of three independent fresh cold loads"
         }
       ],
-      "context_scaling_note": "Eleven matched five-phrase prompts, three fresh loads per point; the curve is each metric's median and per_load retains all repeats. Frozen expert profile, no saved conversation, thinking off, 256-token cap (all answers used 64 tokens), zero cached input. EXL3 allocates 1,048,576 tokens; the historical GSQ, Maya-S and Maya-XS curves allocate 524,288. Separate 520,000- and 1,040,000-token checks are retained. Different generated text and draft acceptance; no causal or stream-matched decode claim.",
+      "context_scaling_note": "1M allocation at every point; medians of three fresh cold loads. Every load recovered 5/5 retrieval values. Changed answer text and draft acceptance prevent a stream-matched causal decode claim.",
       "deep_needle": {
         "workload": "deep_retrieval",
         "allocation_tokens": 1048576,
         "actual_input_tokens": 520000,
         "prompt_sha256": "a66b924eb0fbeb6330383ac2aa21fc50a73fc06af10f18ff33b3293370a4adcd",
-        "prefill_tokens_per_second": 1314.5,
+        "prefill_tokens_per_second": 1411.6,
         "completion_tokens": 64,
         "cached_tokens": 0,
         "needle_passes": 5,
-        "decode_tokens_per_second": 71.89395641428892,
-        "http_to_first_text_ms": 396014.2671370413,
+        "decode_tokens_per_second": 79.28642220019822,
+        "http_to_first_text_ms": 369093.174257001,
         "handback_ms": [
-          923.0
+          610.0
         ]
       },
       "near_capacity_needle": {
@@ -2810,111 +2810,110 @@
         "allocation_tokens": 1048576,
         "actual_input_tokens": 1040000,
         "prompt_sha256": "1420bcb32be6877eae9e491927e03654d25bafab3a4c0ea0241cf8953ca59881",
-        "prefill_tokens_per_second": 979.6,
+        "prefill_tokens_per_second": 1063.1,
         "completion_tokens": 64,
         "cached_tokens": 0,
         "needle_passes": 5,
-        "decode_tokens_per_second": 67.36842105263158,
-        "http_to_first_text_ms": 1062549.8225169722,
+        "decode_tokens_per_second": 73.06770179244207,
+        "http_to_first_text_ms": 979753.9370809991,
         "handback_ms": [
-          1113.0
+          696.0
         ]
       },
       "maya_bench": {
         "procedure": "Frozen Project Maya v1.1.28 maya.py --bench procedure on the installed E+ engine: three 256-token greedy answers, thinking off; decode is their arithmetic mean, followed by fixed 2,048- and 8,192-token prompts. One engine load; the published fixture is unchanged.",
         "inputs_sha256": "0c9ad680a6081cc8d4894d019db357b501c560d0d1721469e5a1b9dc41039bcf",
         "this_release": {
-          "decode_mean_tokens_per_second": 60.2957043225939,
+          "decode_mean_tokens_per_second": 67.27942015023994,
           "decode_question_tokens_per_second": [
-            63.27236777063766,
-            49.45713071365095,
-            68.15761448349308
+            70.59342598720494,
+            55.293965182081294,
+            75.95086928143357
           ],
           "prefill_tokens_per_second": {
-            "2048": 251.0665424410337,
-            "8192": 626.7740874209072
+            "2048": 252.69911777407611,
+            "8192": 653.6604827448633
           }
         },
         "aggregation": "one load"
       },
-      "manifest_sha256": "afcbb40a373e75dd1d165135534e30a491b2a983f0df4857a89719553e36f174",
-      "qualification_note": "30 reviewed quality cases (29 raw; only the established math_08 gold correction), frozen 23-sequence PPL and Lucebox KL, eleven retrieval points with three cold loads each, two longer needles, real code cold plus three cached answers and a same-process three-prompt check. One current median curve with all repetitions retained. Different generated text and draft acceptance; no causal or stream-matched decode claim.",
+      "qualification_note": "Qualified opt-in tuned full-rate EXL3 V3 at 1M allocation: 33 fresh ladder loads plus both deep needles recovered 175/175 values; quality 29/30 reviewed, identical to historical outputs, PPL and Lucebox KL passed. Same quant, FP8 Engram, drafter and recipe. All measured repetitions are included; decode changes are not stream-matched causal comparisons.",
       "upstream_benchmark": {
         "procedure": "Source-native Project Maya v1.1.56 maya.py --bench: E+ / G / E0 repeated twice, all at 1,048,576 allocation, same actual input token IDs, greedy, thinking off, 256-token answers; each mean is over two independent cold loads. E+ uses the installed release; G and E0 use stock v1.1.56. Both compaction sysctls were zero for every arm.",
         "source_stock": "22fc101f2c109b7e7174c975ff3c2d8e9ce0a867",
-        "source_optimized": "f5aa4cb9a0347aabd9062801ece97885861c0a68",
+        "source_optimized": "1418acdf763c33069cf7e28eaff5d0b7350df607",
         "arms": {
           "E+": {
             "mean": {
-              "decode": 59.6,
+              "decode": 66.6,
               "prefill": {
-                "2048": 244.5,
-                "8192": 651.5
+                "2048": 250.5,
+                "8192": 684.0
               }
             },
             "loads": [
               {
-                "decode_mean_tokens_per_second": 59.7,
+                "decode_mean_tokens_per_second": 66.3,
                 "prefill_tokens_per_second": {
-                  "2048": 250.0,
-                  "8192": 653.0
+                  "2048": 251.0,
+                  "8192": 686.0
                 }
               },
               {
-                "decode_mean_tokens_per_second": 59.5,
+                "decode_mean_tokens_per_second": 66.9,
                 "prefill_tokens_per_second": {
-                  "2048": 239.0,
-                  "8192": 650.0
+                  "2048": 250.0,
+                  "8192": 682.0
                 }
               }
             ]
           },
           "G": {
             "mean": {
-              "decode": 58.900000000000006,
+              "decode": 62.900000000000006,
               "prefill": {
-                "2048": 199.5,
-                "8192": 538.0
+                "2048": 215.0,
+                "8192": 583.5
               }
             },
             "loads": [
               {
-                "decode_mean_tokens_per_second": 57.7,
+                "decode_mean_tokens_per_second": 63.1,
                 "prefill_tokens_per_second": {
-                  "2048": 197.0,
-                  "8192": 538.0
+                  "2048": 215.0,
+                  "8192": 584.0
                 }
               },
               {
-                "decode_mean_tokens_per_second": 60.1,
+                "decode_mean_tokens_per_second": 62.7,
                 "prefill_tokens_per_second": {
-                  "2048": 202.0,
-                  "8192": 538.0
+                  "2048": 215.0,
+                  "8192": 583.0
                 }
               }
             ]
           },
           "E0": {
             "mean": {
-              "decode": 48.599999999999994,
+              "decode": 49.6,
               "prefill": {
-                "2048": 230.5,
-                "8192": 650.0
+                "2048": 233.0,
+                "8192": 678.0
               }
             },
             "loads": [
               {
-                "decode_mean_tokens_per_second": 48.8,
+                "decode_mean_tokens_per_second": 49.6,
                 "prefill_tokens_per_second": {
-                  "2048": 230.0,
-                  "8192": 654.0
+                  "2048": 233.0,
+                  "8192": 675.0
                 }
               },
               {
-                "decode_mean_tokens_per_second": 48.4,
+                "decode_mean_tokens_per_second": 49.6,
                 "prefill_tokens_per_second": {
-                  "2048": 231.0,
-                  "8192": 646.0
+                  "2048": 233.0,
+                  "8192": 681.0
                 }
               }
             ]
@@ -2936,6 +2935,25 @@
           "E0"
         ],
         "loads_per_arm": 2
+      },
+      "manifest_sha256": "061906b0886faddc7a80e85e88d724474a5102607dbda53b256c04ffadfbdad9",
+      "measurement_profile": {
+        "strix_gpu_od_enabled": true,
+        "public_default_enabled": false,
+        "voltage_offset_mv": -100,
+        "power_cap_w_per_xtx": 350,
+        "sclk_ceilings_mhz": [
+          2920,
+          2890
+        ],
+        "mclk_ceilings_mhz": [
+          1250,
+          1250
+        ],
+        "gpu_dpm": "auto",
+        "cpu_boost": 0,
+        "public_policy_source_commit": "b8adb09be08cff2f014d4abd82288f0553bdac41",
+        "engine_unchanged_from_269": true
       }
     },
     "maya-ds4-exl3-single-xtx": {
@@ -2977,7 +2995,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
       "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
-      "manifest_sha256": "086113e1bb5ccffc9045ab2d7987b9c35347f71e8c9916a9e28d3ae43445c7eb",
+      "manifest_sha256": "961596a74de5f28ed4954a1ce115dd2b14fc1f177ce500700382f1c944389b09",
       "release_id": "maya-ds4-exl3-single-xtx-1m-v1",
       "hardware": {
         "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",

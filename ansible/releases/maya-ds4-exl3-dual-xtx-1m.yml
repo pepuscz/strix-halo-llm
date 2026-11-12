@@ -1,5 +1,5 @@
 ---
-strix_release_id: maya-ds4-exl3-dual-xtx-1m-v2
+strix_release_id: maya-ds4-exl3-dual-xtx-1m-v3
 strix_release_schema: 1
 strix_system:
   id: maya-ds4-exl3-dual-xtx
@@ -15,7 +15,7 @@ strix_platform:
   gpu_pci_id: 1002:1586
   board_name: AXB35-02
   minimum_memory_kib: 125000000
-  strict_kernel: true
+  strict_kernel: false
   secure_boot: disabled
   kernel_arguments:
     - amd_pstate=active
@@ -32,21 +32,21 @@ strix_paths:
   root: /opt/strix-halo
   source: /opt/strix-halo/src
   bin: /opt/strix-halo/bin
-  downloads: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v2/downloads
-  release: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v2
+  downloads: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v3/downloads
+  release: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v3
   models: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3
   state: /var/lib/strix-halo-inference-exl3
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
-  release_tag: maya-ds4-exl3-1m-20261107
-  tag_object: efdb189fa30fa31811bab9fcbdaaf64acc276592
+  release_tag: maya-ds4-exl3-1m-20261110
+  tag_object: 2cb0fd56140cb584f74de4081ceed9149f5cd557
   tag_object_type: tag
-  source_commit: f5aa4cb9a0347aabd9062801ece97885861c0a68
-  source_tree: e5de6895f0174cd52f3bae99ab18673a9dfa86b4
+  source_commit: 1418acdf763c33069cf7e28eaff5d0b7350df607
+  source_tree: c0f2a074376739624b35b90a4f96d7f50fed8e14
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.56
   upstream_commit: 22fc101f2c109b7e7174c975ff3c2d8e9ce0a867
-  server_sha256: b95d7c4c570549de55d9aaed2ebe965007f975bf224a27ba6c1b41b2522a3667
+  server_sha256: f9c16850c70ab8c8e633fe103e4a2fa6b89ee0a5eddfc5cefc8a2da571dd2572
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -305,6 +305,14 @@ strix_policy:
   expected_watts: '120.000'
   vm_compaction_proactiveness: 0
   vm_watermark_boost_factor: 0
+# Optional tuning (off by default; set strix_gpu_od_enabled: true in the inventory to use it): GPU OverDrive on both
+# RX 7900 XTX plus GPU DPM auto and CPU boost off, as qualified on the reference host. Enabling it adds amdgpu.ppfeaturemask=0xfff7ffff (OverDrive).
+strix_gpu_od:
+  pci_id: '1002:744c'
+  voltage_offset_mv: -100
+  power_cap_w: 350
+  gpu_dpm: auto
+  cpu_boost: 0
 strix_allow_reboot: false
 strix_verify_full_model_hashes: false
 strix_verify_api_smoke: true
@@ -350,7 +358,7 @@ strix_maya:
     sha256: f384b25188569368d420fa12c072f2cef8152b3bbd66f90154e896a66bb70d7a
   server:
     model_management: false
-    exe: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v2/source/build-hip/maya-ds4
+    exe: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v3/source/build-hip/maya-ds4
     args:
       - --pack
       - /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4
@@ -372,7 +380,7 @@ strix_maya:
       - '16384'
       - --suffix-draft
       - '0'
-    cwd: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v2/source
+    cwd: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v3/source
     tokenizer: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4/tokenizer
     backend: hip
     model_name: deepseek-v4.1-flash
@@ -385,8 +393,8 @@ strix_maya:
       top_p: 1.0
     reasoning_effort: high
     lib_dirs:
-      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v2/rocblas/install/lib
-      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v2/rocm/lib
+      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v3/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v3/rocm/lib
     port: 18109
     log: /var/lib/strix-halo-inference-exl3/native.log
     installer:
@@ -430,7 +438,7 @@ strix_maya:
       MAYA_DS4_SLOT_GB: '16'
       MAYA_DS4_SLOT_KEEP: '1'
       MAYA_DS4_SLOT_RAM_GB: '1'
-      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v2/rocm/lib/rocblas/library
+      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v3/rocm/lib/rocblas/library
       ROCBLAS_USE_HIPBLASLT: '0'
       MAYA_DS4_HELPER_EXL3: '1'
       DS4_FLOW_STATS: '1'
@@ -442,12 +450,13 @@ strix_qualification:
   answer_quality:
     coding: 10
     gsm8k: 10
-    math: 10
-    total: 30
-    scoring: Reviewed final answers against frozen task gold; established scorer corrections retained in the qualification audit.
+    math: 9
+    total: 29
+    scoring: 29/30 reviewed; math_08 gold corrected; math_10 known 4096-token loop, byte-identical to historical
+      output.
     thinking: false
     math_10_output_cap: 4096
-    measured: '2026-11-07'
+    measured: '2026-11-11'
     perplexity: 7.1973
   retrieval_ladder:
     allocation_tokens: 1048576
@@ -459,16 +468,15 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1434.3
-    first_request_decode_tokens_per_second: 50.3
+    first_request_prefill_tokens_per_second: 1510.0
+    first_request_decode_tokens_per_second: 56.497590760289846
     reused_prompt_cached_tokens: 130047
-    reused_prompt_decode_tokens_per_second: 48.4
+    reused_prompt_decode_tokens_per_second: 54.59593611762714
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
     values: 5/5
-    measured: '2026-11-07'
-  qualified_configuration: >-
-    EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark with its blocks' leftover experts in
-    the Radeon 8060S helper's 109 GB pool, background memory compaction off while serving; 175/175 retrieval values
-    across thirty-five cold loads.
+    measured: '2026-11-11'
+  qualified_configuration: EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark with its
+    blocks' leftover experts in the Radeon 8060S helper's 109 GB pool, the full-rate HIP EXL3 decode kernels, background
+    memory compaction off while serving; 175/175 retrieval values across thirty-five cold loads.

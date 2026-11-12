@@ -31,6 +31,12 @@
     fail_msg: Disable Secure Boot in firmware, boot Ubuntu, and rerun the playbook.
   when: strix_platform.secure_boot == 'disabled'
 
+- name: Select the kernel arguments (the release's, plus the OverDrive bit when GPU tuning is enabled)
+  ansible.builtin.set_fact:
+    platform_kernel_arguments: >-
+      {{ strix_platform.kernel_arguments +
+         (['amdgpu.ppfeaturemask=0xfff7ffff'] if strix_gpu_od_enabled | default(false) | bool else []) }}
+
 - name: Install the tested GRUB command-line drop-in
   ansible.builtin.template:
     src: 99-strix-halo.cfg.j2
@@ -52,7 +58,7 @@
 - name: Calculate missing live kernel arguments
   ansible.builtin.set_fact:
     platform_missing_kernel_arguments: "{{ platform_missing_kernel_arguments + [item] }}"
-  loop: "{{ strix_platform.kernel_arguments }}"
+  loop: "{{ platform_kernel_arguments }}"
   when: >-
     item.split('=', 1)[0] not in ansible_facts.cmdline or
     ansible_facts.cmdline[item.split('=', 1)[0]] | string != item.split('=', 1)[1]
