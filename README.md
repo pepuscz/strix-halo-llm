@@ -15,7 +15,7 @@ Each setup serves **one conversation at a time**. Speeds are tokens per second: 
 **Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** runs [turboderp's EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3) with inputs up to **1M tokens**. [Ansible recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).
 
 <!-- quant-comparison-note -->
-EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; Maya-XS v2 is the fastest, with higher perplexity.
+EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity.
 <!-- /quant-comparison-note -->
 
 <!-- quant-comparison-table -->

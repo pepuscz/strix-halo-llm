@@ -194,6 +194,11 @@ def xs_summary(data, detailed=False):
     x=data['systems']['maya-ds4-exl3-dual-xtx'];g=data['systems']['maya-ds4-gsq-dual-xtx']
     lead=("EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; " if at_128k(x)>at_128k(g)
           else "EXL3 supports 1M context. GSQ-RCO decodes faster at long inputs; ")
+    xs=data['systems']['maya-ds4-maya-xs-dual-xtx']
+    pre=lambda v:(v['maya_bench']['this_release']['prefill_tokens_per_second']['8192'],
+                  [p for p in v['context_scaling'] if p['actual_input_tokens']==122879][0]['prefill_tokens_per_second'])
+    if all(a>b for a,b in zip(pre(x),pre(xs))):   # (EXL3 reads prompts faster at 8K and 128K: XS keeps decode only)
+        return lead+"it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity."
     return lead+"Maya-XS v2 is the fastest, with higher perplexity."
 
 
