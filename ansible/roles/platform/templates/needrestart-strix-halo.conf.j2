@@ -1,0 +1,4 @@
+# {{ ansible_managed | default('Managed by strix-halo-llm') }}
+# needrestart leaves the model stack (every strix-* unit) running after library updates; restart it with
+# bin/strixctl stop / start when no request runs.
+$nrconf{override_rc}->{qr(^strix-)} = 0;

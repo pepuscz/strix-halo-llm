@@ -94,6 +94,22 @@
     fail_msg: "Kernel argument {{ item }} is not live after the platform stage."
   loop: "{{ strix_platform.kernel_arguments }}"
 
+- name: Create the needrestart drop-in directory
+  ansible.builtin.file:
+    path: /etc/needrestart/conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Keep needrestart from restarting the model stack after library updates
+  ansible.builtin.template:
+    src: needrestart-strix-halo.conf.j2
+    dest: /etc/needrestart/conf.d/strix-halo.conf
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Create the model service system group
   ansible.builtin.group:
     name: "{{ strix_service.group }}"
