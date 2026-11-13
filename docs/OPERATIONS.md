@@ -64,6 +64,11 @@ results use this profile.
 
 ## Updates and rollback
 
+Package updates never restart the model service: needrestart leaves every
+`strix-*` unit running after a library update
+(`/etc/needrestart/conf.d/strix-halo.conf`). Restart it with `bin/strixctl stop`
+and `bin/strixctl start` when no request runs.
+
 Persistent model service changes are made through release manifests and roles.
 Do not edit the active systemd unit, GRUB drop-in, hardware policy, DKMS files,
 or immutable release-directory content manually.
