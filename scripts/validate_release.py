@@ -22,6 +22,7 @@ SYSTEMS = {
     "vulkan-iq3xxs": ("Strix Halo llama.cpp Vulkan IQ3_XXS", "vulkan"),
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
     "maya-ds4-gsq-dual-xtx": ("Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX", "maya"),
+    "maya-ds4-exl3-dual-xtx": ("Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
 # A pin or result the qualified host has yet to supply. A manifest holding one, alone or in a sentence, is a draft:
@@ -29,7 +30,14 @@ SYSTEMS = {
 PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
-MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-ds4-exl3-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+# turboderp's EXL3 repo: 26 shards, its Engram tables (FP8) and the files the engine source's pack.py reads; the
+# DSpark drafter and its markov head are inside the shards.
+EXL3_SHARDS = tuple(f"model-{i:05d}-of-00026.safetensors" for i in range(1, 27))
+EXL3_FILES = {*EXL3_SHARDS, "ngram_embedding.safetensors", "model.safetensors.index.json", "config.json",
+              "quantization_config.json", "tokenizer.json", "tokenizer_config.json", "chat_template.jinja", "LICENSE",
+              "README.md"}
+EXL3_PACK_TOOLS = ("tools/ds4/pack.py", "tools/ds4/st.py", "tools/ds4/engram_hash.py", "tools/ds4/chat_template.jinja")
 MAYA_FILES = Path("ansible/roles/maya_runtime/files")
 # compat-bf16.json is not here: it names the model shard it was packed from, so it is pinned normalized.
 GLM_PACK_FILES = {
@@ -90,6 +98,8 @@ def validate_manifest(path: Path, root: Path) -> dict:
 
     service = data["strix_service"]
     required_context = {"vulkan": 524288, "rocm": 131072, "strata": 262144, "maya": 524288}[system["engine"]]
+    if system["id"] == "maya-ds4-exl3-dual-xtx":
+        required_context = 1048576   # the EXL3 release is qualified at 1M
     if service["context"] != required_context:
         fail(f"{system['name']} release must allocate exactly {required_context} tokens")
     if service["minimum_effective_non_cma_kib"] < 2 * 1024 * 1024:
@@ -298,13 +308,19 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     service, files = data["strix_service"], data["strix_target"]["files"]
     rocblas, maya, paths = data["strix_rocblas"], data["strix_maya"], data["strix_paths"]
     release, state = paths["release"], paths["state"]
-    if len(files) != 4 or service["parallel_slots"] != 1:
+    exl3 = data["strix_system"]["id"] == "maya-ds4-exl3-dual-xtx"
+    if exl3:
+        if {file["name"] for file in files} != EXL3_FILES or len(files) != len(EXL3_FILES) or \
+                service["parallel_slots"] != 1:
+            fail("Maya DS4 EXL3 requires turboderp's pinned files and one session")
+    elif len(files) != 4 or service["parallel_slots"] != 1:
         fail("Maya DS4 dual RX 7900 XTX requires four target shards and one session")
     # The quant's folder under strix_paths.models (Maya-S's release predates the key), and its pack inside it.
     model_subdirectory = maya.get("model_subdirectory", "Maya-S")
     if not isinstance(model_subdirectory, str) or not model_subdirectory or \
             any(file.get("local_subdirectory") != model_subdirectory for file in files) or \
             maya["pack"] != paths["models"] + "/" + model_subdirectory + "/" + (
+                "maya-ds4" if exl3 else
                 "maya-ds4-dspark-hybrid" if data["strix_system"]["id"] == "maya-ds4-gsq-dual-xtx" else "maya-ds4-dspark"):
         fail("Maya DS4 target shards and pack must live in strix_maya.model_subdirectory under strix_paths.models")
     geometry = maya.get("ds4_geometry", {})
@@ -332,16 +348,26 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     if (files_dir / maya["expert_profile"]["file"]).stat().st_size != maya["expert_profile"]["size"]:
         fail("expert profile size drifted")
     tool = maya["pack_tool"]
-    require_url(tool["repository"], "pack tool repository")
-    require_sha(tool["commit"], "pack tool commit", HEX40)
-    for digest in (tool["pack_gguf_sha256"], tool["chat_template_sha256"], maya["pack_ds4_normalized_sha256"],
-                   *maya["pack_files"].values()):
+    if exl3:
+        # The EXL3 pack is built by the engine source's own tools at the pinned tag (the markov head's names included).
+        if set(tool) != {"files"} or set(tool["files"]) != set(EXL3_PACK_TOOLS):
+            fail("the EXL3 pack is built with the engine source's tools/ds4/pack.py and its helpers")
+        for digest in tool["files"].values():
+            require_sha(digest, "EXL3 pack tool")
+        if dense is not None:
+            fail("the EXL3 release has no dense_q8_0 side file")
+    else:
+        require_url(tool["repository"], "pack tool repository")
+        require_sha(tool["commit"], "pack tool commit", HEX40)
+        require_sha(tool["pack_gguf_sha256"], "pack")
+        require_sha(tool["chat_template_sha256"], "pack")
+    for digest in (maya["pack_ds4_normalized_sha256"], *maya["pack_files"].values()):
         require_sha(digest, "pack")
     cfg = maya["server"]
-    expected_args = ["--pack", maya["pack"], "--max-context", "524288", "--tp", "2", "--vision", "off", "--dspark", "on",
-                     "--threads", "on", "--mmap-experts", "on", "--expert-profile", state + "/expert-profile.bin",
-                     "--prefill-chunk", "32768"]
-    if data["strix_system"]["id"] == "maya-ds4-gsq-dual-xtx":
+    expected_args = ["--pack", maya["pack"], "--max-context", str(service["context"]), "--tp", "2", "--vision", "off",
+                     "--dspark", "on", "--threads", "on", "--mmap-experts", "on",
+                     "--expert-profile", state + "/expert-profile.bin", "--prefill-chunk", "16384" if exl3 else "32768"]
+    if data["strix_system"]["id"] in ("maya-ds4-gsq-dual-xtx", "maya-ds4-exl3-dual-xtx"):
         expected_args += ["--suffix-draft", "0"]
     if cfg["args"] != expected_args:
         fail("qualified Maya DS4 arguments drifted")
@@ -365,6 +391,18 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         expected_env["MAYA_DS4_DSPARK_CUM"] = "0.35"
         expected_env["MAYA_DS4_RESTORE_TAIL"] = "0"
         expected_env["DS4_INDEX_TC"] = "1"
+    if exl3:
+        # turboderp's EXL3 read in place: the helper's pool, the lookahead and the lend for EXL3 (the release's PRs),
+        # no GGUF-only flow / Q8 / borrow settings.
+        for key in ("DS4_Q8_BATCH", "DS4_Q8_CHECK", "DS4_TP_GGUF_UNEVEN", "DS4_FLOW_TP", "DS4_HC_FUSE", "DS4_FLOW_HELPER",
+                    "DS4_FLOW_PUMP_WAIT", "DS4_TP_BORROW", "DS4_FLOW_DOWN_SHARE", "DS4_FLOW_DOWN_PART",
+                    "DS4_HELPER_RECENT"):
+            del expected_env[key]
+        expected_env.update({
+            "DS4_DECODE_TRIM": "12", "DS4_INDEX_TC": "1", "MAYA_DS4_DSPARK_CUM": "0.35", "MAYA_DS4_RESTORE_TAIL": "0",
+            "MAYA_DS4_HELPER_EXL3": "1", "MAYA_DS4_FLOW_HELPER": "1", "DS4_AHEAD_EXL3": "1", "DS4_EXL3_LEND": "1",
+            "DS4_FLOW_STATS": "1",
+        })
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
         fail("qualified Maya DS4 environment drifted: " + ", ".join(drifted))
@@ -377,7 +415,11 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     for key, value in expected_identity.items():
         if cfg.get(key) != value:
             fail("qualified Maya DS4 server setting drifted: " + key)
-    if service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
+    if exl3:
+        # (the EXL3 floor is the effective non-CMA memory the qualified run measured after its load, less a margin)
+        if not 2 * 1024 * 1024 <= service["minimum_effective_non_cma_kib"] <= 14 * 1024 * 1024:
+            fail("the EXL3 release's non-CMA floor must lie between 2 and 14 GiB")
+    elif service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
         fail("Maya requires the qualified 14 GiB non-CMA floor")
     validate_deepseek_qualification(data["strix_qualification"], service["context"])
 
@@ -621,6 +663,59 @@ def validate_benchmarks(root: Path) -> None:
             fail("GSQ benchmark and release quality readings differ")
         if gsq["runtime"]["source_commit"] != gsq_manifest["strix_runtime"]["source_commit"]:
             fail("GSQ benchmark engine differs from the release")
+    exl3_path = root / "ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml"
+    if exl3_path.exists():
+        manifest = yaml.safe_load(exl3_path.read_text())
+        if not pending_fields(manifest):
+            e = data["systems"]["maya-ds4-exl3-dual-xtx"]
+            q = manifest["strix_qualification"]
+            context = manifest["strix_service"]["context"]
+            curve = e["context_scaling"]
+            common = data["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"]
+            if len(curve) != q["retrieval_ladder"]["points"] or len(curve) != len(common) or \
+                    max(p["actual_input_tokens"] for p in curve) != q["retrieval_ladder"]["largest_input_tokens"]:
+                fail("EXL3 retrieval ladder differs from qualification")
+            for point, reference in zip(curve, common):
+                if any(point[k] != reference[k] for k in ("actual_input_tokens", "prompt_sha256")) or \
+                        point["allocation_tokens"] != context or point["cached_tokens"] != 0 or point["needle_passes"] != 5:
+                    fail("EXL3 retrieval workload identity or allocation differs")
+            if q["retrieval_ladder"]["values"] != f"{sum(p['needle_passes'] for p in curve)}/{5 * len(curve)}":
+                fail("EXL3 retrieval values differ from qualification")
+            needle = e["near_capacity_needle"]
+            if needle["actual_input_tokens"] != q["deep_needle"]["input_tokens"] or \
+                    needle["allocation_tokens"] != context or needle["cached_tokens"] != 0 or \
+                    f"{needle['needle_passes']}/5" != q["deep_needle"]["values"]:
+                fail("EXL3 near-capacity retrieval differs from qualification")
+            require_sha(needle["prompt_sha256"], "EXL3 near-capacity prompt")
+            c, qc = e["long_context"], q["long_context"]
+            pairs = {"prefill_tokens_per_second": "first_request_prefill_tokens_per_second",
+                     "decode_tokens_per_second": "first_request_decode_tokens_per_second"}
+            if c["cached_tokens"] != 0 or any(c[k] != qc[k] for k in
+                    ("input_tokens", "output_tokens", "allocation_tokens", "prompt_sha256")) or \
+                    any(c[k] != qc[v] for k, v in pairs.items()) or \
+                    c["reused_prompt"]["cached_tokens"] != qc["reused_prompt_cached_tokens"] or \
+                    c["reused_prompt"]["decode_tokens_per_second"] != qc["reused_prompt_decode_tokens_per_second"]:
+                fail("EXL3 long-context readings differ from qualification")
+            if any(e["quality"][k] != q["answer_quality"][k] for k in
+                   ("coding", "gsm8k", "math", "total", "thinking")) or \
+                    e["quality"]["perplexity"]["value"] != q["answer_quality"]["perplexity"]:
+                fail("EXL3 quality readings differ from qualification")
+            if e["runtime"]["source_commit"] != manifest["strix_runtime"]["source_commit"] or \
+                    e["runtime"]["benchmark_binary_sha256"] != manifest["strix_runtime"]["server_sha256"]:
+                fail("EXL3 engine identity differs from qualification")
+            fixture = root / "benchmarks/maya-bench-inputs.json"
+            if e["maya_bench"]["inputs_sha256"] != hashlib.sha256(fixture.read_bytes()).hexdigest():
+                fail("EXL3 benchmark inputs differ from the published fixture")
+            native = e["upstream_benchmark"]
+            if native["allocation_tokens"] != context or native["order"] != ["E+", "G", "E0", "E+", "G", "E0"]:
+                fail("EXL3 native comparison procedure drifted")
+            for arm in native["arms"].values():
+                loads = arm["loads"]
+                if len(loads) != native["loads_per_arm"] or len(loads) != 2 or \
+                        abs(arm["mean"]["decode"] - sum(x["decode_mean_tokens_per_second"] for x in loads) / 2) > 1e-9 or \
+                        any(abs(arm["mean"]["prefill"][k] - sum(x["prefill_tokens_per_second"][k] for x in loads) / 2) > 1e-9
+                            for k in ("2048", "8192")):
+                    fail("EXL3 native comparison means differ from its loads")
     baseline = data["systems"]["qwen-vulkan-q4xl"]["context_scaling"]
     strata = data["systems"]["strata-qwen-q4xl"]
     curve = strata["context_scaling"]

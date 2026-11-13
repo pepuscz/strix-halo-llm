@@ -182,8 +182,8 @@
           - strix_maya.server.env.DS4_HELPER == '2'
           - strix_maya.server.env.DS4_DRAFT_VRAM == '96,48,32'
           - strix_maya.server.env.DS4_DRAFT_DEV == '1,0,0'
-          - strix_maya.server.env.DS4_DECODE_TRIM == '15'
-          - strix_maya.server.args[:4] == ['--pack', strix_maya.pack, '--max-context', '524288']
+          - strix_maya.server.env.DS4_DECODE_TRIM == ('12' if strix_system.id == 'maya-ds4-exl3-dual-xtx' else '15')
+          - strix_maya.server.args[:4] == ['--pack', strix_maya.pack, '--max-context', strix_service.context | string]
           - strix_maya.server.env.MAYA_DS4_SLOT_DIR == strix_paths.state + '/ds4-slots'
           - strix_maya.server.env.MAYA_DS4_SLOT_KEEP == '1'
           - strix_maya.server.env.MAYA_DS4_SLOT_DIR != strix_paths.state + '/slots'
@@ -195,7 +195,7 @@
           - "('ConditionPathExists=' + strix_paths.release + '/source/build-hip/maya-ds4') in rendered_unit_text"
           - "('ConditionPathExists=' + strix_maya.pack + '/ds4.txt') in rendered_unit_text"
           - "'--target maya-ds4 ' in (rendered_maya_build.content | b64decode)"
-          - "'packtool/tools/ds4/pack_gguf.py' in (rendered_maya_build.content | b64decode)"
+          - "('source/tools/ds4/pack.py --model' if (strix_maya.pack_kind | default('gguf')) == 'exl3' else 'packtool/tools/ds4/pack_gguf.py') in (rendered_maya_build.content | b64decode)"
       when:
         - strix_system.engine == 'maya'
         - (strix_maya.family | default('deepseek')) == 'deepseek'
