@@ -30,7 +30,12 @@ Stop restores the captured CPU, GPU, and package-power policy, and the kernel's
 memory-compaction settings where a release sets them. The DeepSeek EXL3 release
 turns background compaction off while it serves (`vm.compaction_proactiveness`
 and `vm.watermark_boost_factor` at 0): kcompactd moving pages the GPUs map made
-the driver stop both cards for 100–300 ms early in a request. It compacts memory
+the driver stop both cards for 100–300 ms early in a request. The dual-XTX
+release also sets `vm.extfrag_threshold` at 1000, so the kernel does not compact
+on demand for allocations of 64 KiB and larger either: the page cache's large
+folios fall back to smaller pages instead of moving pages the GPUs map, each of
+which stopped all three GPUs (~85–90 % less GPU stop time, the same speed; 130K
+prompts +1.8 %). Smaller allocations still compact on demand. It compacts memory
 itself where no request waits: once before the engine loads, and nightly from
 `strix-compact-memory.timer` (03:30–04:00 host time) once the GPUs have been
 idle for a minute, so a 24/7 service does not slowly fragment its memory

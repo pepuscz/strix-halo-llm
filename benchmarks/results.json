@@ -2943,7 +2943,7 @@
         ],
         "loads_per_arm": 2
       },
-      "manifest_sha256": "f3947475d3675171e24016abfd23be164a3b6f6963aa8216d05dbb8cc98c4127",
+      "manifest_sha256": "f3f546a39c590efef99aad4656b94eb880d47295cc0fbe1c078f2b92a58090e9",
       "measurement_profile": {
         "strix_gpu_od_enabled": true,
         "public_default_enabled": false,
