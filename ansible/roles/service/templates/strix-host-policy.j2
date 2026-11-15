@@ -17,6 +17,11 @@ readonly EXPECTED_W={{ strix_policy.expected_watts | quote }}
 # right after its load). Empty: left as the host has it
 readonly VM_COMPACTION_PROACTIVENESS={{ strix_policy.vm_compaction_proactiveness | default('') }}
 readonly VM_WATERMARK_BOOST_FACTOR={{ strix_policy.vm_watermark_boost_factor | default('') }}
+# (optional) no compaction on demand for allocations of order 4 and up (64 KiB and larger): the page cache's large
+# folios and other such allocations fall back to smaller pages instead of compacting memory under the GPUs' mapped pages
+# (each page moved stops every queue of the process on every GPU). Order 3 and below compact as before, and so do
+# strix-compact-memory's passes (/proc/sys/vm/compact_memory). Empty: left as the host has it
+readonly VM_EXTFRAG_THRESHOLD={{ strix_policy.vm_extfrag_threshold | default('') }}
 # (optional, strix_gpu_od_enabled) discrete-GPU OverDrive while the service runs: a voltage offset on the whole V/F curve and a power cap for
 # every card with this PCI id (needs amdgpu.ppfeaturemask with bit 0x4000). Empty PCI id: cards left as the host has them
 readonly GPU_OD_PCI_ID={{ ((strix_gpu_od | default({})) if (strix_gpu_od_enabled | default(false) | bool) else {}).pci_id | default('') | quote }}
@@ -133,7 +138,8 @@ capture() {
         /sys/class/drm/card*/device/power_dpm_force_performance_level
     save_paths "$STATE/vm" \
         ${VM_COMPACTION_PROACTIVENESS:+/proc/sys/vm/compaction_proactiveness} \
-        ${VM_WATERMARK_BOOST_FACTOR:+/proc/sys/vm/watermark_boost_factor}
+        ${VM_WATERMARK_BOOST_FACTOR:+/proc/sys/vm/watermark_boost_factor} \
+        ${VM_EXTFRAG_THRESHOLD:+/proc/sys/vm/extfrag_threshold}
     "$RYZENADJ" --info > "$STATE/power"
 }
 restore_state() {
@@ -180,6 +186,10 @@ verify() {
         [ "$(cat /proc/sys/vm/watermark_boost_factor)" = "$VM_WATERMARK_BOOST_FACTOR" ] ||
             fail 'vm.watermark_boost_factor mismatch.'
     fi
+    if [ -n "$VM_EXTFRAG_THRESHOLD" ]; then
+        [ "$(cat /proc/sys/vm/extfrag_threshold)" = "$VM_EXTFRAG_THRESHOLD" ] ||
+            fail 'vm.extfrag_threshold mismatch.'
+    fi
     od_verify
     info=$(mktemp /run/strix-power.XXXXXX)
     trap 'rm -f -- "$info"' RETURN
@@ -211,6 +221,7 @@ apply() {
     od_apply
     [ -z "$VM_COMPACTION_PROACTIVENESS" ] || printf '%s\n' "$VM_COMPACTION_PROACTIVENESS" > /proc/sys/vm/compaction_proactiveness
     [ -z "$VM_WATERMARK_BOOST_FACTOR" ] || printf '%s\n' "$VM_WATERMARK_BOOST_FACTOR" > /proc/sys/vm/watermark_boost_factor
+    [ -z "$VM_EXTFRAG_THRESHOLD" ] || printf '%s\n' "$VM_EXTFRAG_THRESHOLD" > /proc/sys/vm/extfrag_threshold
     "$RYZENADJ" --stapm-limit="$STAPM" --fast-limit="$FAST" --slow-limit="$SLOW"
     sleep 2
     verify
