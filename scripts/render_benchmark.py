@@ -12,23 +12,24 @@ DATA = ROOT / 'benchmarks/results.json'
 M5 = 'BOSGAME M5 (Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM)'
 # One chart per model: its file, the hardware in plain words, its curves (system, colour, dashed) and an optional note.
 CHARTS = [
-    ('docs/benchmark-deepseek-v41-hardware.svg', f'EXL3 2.25 bpw · {M5} with one or two RX 7900 XTX cards',
+    ('docs/benchmark-deepseek-v41-hardware.svg', f'EXL3 2.25 bpw · {M5} alone, or with one or two RX 7900 XTX cards',
      [('maya-ds4-exl3-dual-xtx', '#cf222e', False), ('maya-ds4-exl3-single-xtx', '#bc4c00', False),
       ('maya-ds4-exl3-apu', '#0969da', False)],
-     '1M allocation · runtime versions and full protocol in BENCHMARKS.md'),
+     '1M allocation · runtime versions and full protocol in BENCHMARKS.md', True),
     ('docs/benchmark-deepseek-v41-quants.svg', f'{M5} with two RX 7900 XTX cards',
      [('maya-ds4-exl3-dual-xtx', '#cf222e', False), ('maya-ds4-gsq-dual-xtx', '#8250df', False),
       ('maya-ds4-maya-s-dual-xtx', '#0969da', False), ('maya-ds4-maya-xs-dual-xtx', '#bc4c00', False)],
-     'EXL3: 1M allocation · other quants: 512K · runtime versions and full protocol in BENCHMARKS.md'),
+     'EXL3: 1M allocation · other quants: 512K · runtime versions and full protocol in BENCHMARKS.md', False),
     ('docs/benchmark-glm.svg', f'{M5} with two RX 7900 XTX cards', [('maya-glm-dual-xtx', '#1a7f37', False)],
-     'Allocation: the smallest of 128K, 256K and 512K that holds the input · full protocol in BENCHMARKS.md'),
+     'Allocation: the smallest of 128K, 256K and 512K that holds the input · full protocol in BENCHMARKS.md', False),
     ('docs/benchmark-qwen.svg', f'{M5} alone',
-     [('strata-qwen-q4xl', '#0969da', False), ('qwen-vulkan-q4xl', '#008577', False)], None),
+     [('strata-qwen-q4xl', '#0969da', False), ('qwen-vulkan-q4xl', '#008577', False)], None, False),
     ('docs/benchmark-deepseek-v4-0731.svg', f'{M5} alone',
-     [('vulkan-iq3xxs', '#8957e5', False), ('rocm-rocmfpx', '#bc4c00', False)], None),
+     [('vulkan-iq3xxs', '#8957e5', False), ('rocm-rocmfpx', '#bc4c00', False)], None, False),
 ]
 # DeepSeek-V4.1-Flash-1017: the EXL3 2.25 bpw setup on each hardware option, and the quants compared on two cards
-EXL3_HARDWARE = [('maya-ds4-exl3-dual-xtx', '2 × RX 7900 XTX'), ('maya-ds4-exl3-single-xtx', '1 × RX 7900 XTX')]
+EXL3_HARDWARE = [('maya-ds4-exl3-apu', 'M5 alone'), ('maya-ds4-exl3-single-xtx', '1 × RX 7900 XTX'),
+                 ('maya-ds4-exl3-dual-xtx', '2 × RX 7900 XTX')]
 QUANTS = [('maya-ds4-exl3-dual-xtx', 'EXL3 2.25 bpw'), ('maya-ds4-gsq-dual-xtx', 'GSQ-RCO IQ2_XS'),
           ('maya-ds4-maya-s-dual-xtx', 'Maya-S IQ2_XXS'), ('maya-ds4-maya-xs-dual-xtx', 'Maya-XS v2 IQ1_S')]
 SINGLE = 'maya-ds4-exl3-single-xtx'
@@ -57,10 +58,20 @@ def spread(labels, top, bottom):
     return [y - max(0, placed[-1] - bottom - 8) for y in placed]
 
 
-def chart(data, hardware, series, note):
-    """Prefill and decode against input length for one model's setups, the winning setup bold in the legend."""
+def second(point):
+    """A point's second run (the same request again after 60 s idle, in the same load), as a point; None: not run."""
+    run = point.get('second_run')
+    return {**run, 'actual_input_tokens': point['actual_input_tokens']} if run else None
+
+
+def chart(data, hardware, series, note, seconds=False):
+    """Prefill and decode against input length for one model's setups, the winning setup bold in the legend;
+    seconds: each setup's second runs as a dashed curve of its colour."""
     systems = data['systems']
     series = [x for x in series if x[0] in systems]   # (a hardware option without a release yet: no curve)
+    seconds = seconds and any(second(p) for sid, *_ in series for p in systems[sid]['context_scaling'])
+    if seconds:
+        note = 'Solid: first run on a fresh load · dashed: the same request again after 60 s idle · ' + note
     model = systems[series[0][0]]['model']
     left, right, height, xmin, xmax = 80, 1020, 165, 1800, 524288
     first = 139 + 24 * len(series)   # the first panel's top, below the legend
@@ -87,6 +98,11 @@ def chart(data, hardware, series, note):
                             ('Writing the answer (tokens/second) · higher is better', 'decode_tokens_per_second', first + 245)):
         curves = [(color, dashed, [p for p in systems[sid]['context_scaling'] if isinstance(p.get(key), (int, float))])
                   for sid, color, dashed in series]
+        if seconds:
+            curves += [(color, True, [q for q in map(second, systems[sid]['context_scaling'])
+                                      if q and isinstance(q.get(key), (int, float))])
+                       for sid, color, _ in series]
+            curves = [c for c in curves if c[2]]
         maximum = nice_max([p[key] for *_, points in curves for p in points])
         bottom = top + height
 
@@ -143,6 +159,7 @@ def bench(system):
 def table(data, corner, columns, rows):
     """One column per (system, heading), the winning setup's heading bold; one row per (label, cell function)."""
     winners = set(data['winning_setups'].values())
+    columns = [(sid, name) for sid, name in columns if sid in data['systems']]
     systems = [data['systems'][sid] for sid, _ in columns]
     head = [f'**{name}**' if sid in winners else name for sid, name in columns]
     return (['| ' + ' | '.join([corner, *head]) + ' |', '|---' + '|---:' * len(columns) + '|'] +
@@ -159,10 +176,27 @@ SPEED_ROWS = [('Decode, short prompt', lambda v: f"{bench(v)['decode_mean_tokens
               ('Prefill, 128K input', lambda v: f"{at(v)['prefill_tokens_per_second']:,.0f}")]
 
 
+def runs(first, again, fmt):
+    """A cell: the first run, and the second run after 60 s idle when there is one."""
+    return fmt(first) + (' / ' + fmt(again) if again is not None else '')
+
+
 def hardware_table(data):
-    return table(data, 'EXL3 2.25 bpw', EXL3_HARDWARE, SPEED_ROWS + [
+    """EXL3 2.25 bpw on each hardware option; first / second run where the release measured both."""
+    two = any('second_run' in bench(data['systems'][sid]) for sid, _ in EXL3_HARDWARE if sid in data['systems'])
+    lab = ' (first / second run)' if two else ''
+    b2 = lambda v: bench(v).get('second_run') or {}
+    c2 = lambda v: v['long_context'].get('second_run') or {}
+    a2 = lambda v: at(v).get('second_run') or {}
+    whole = lambda x: f'{x:,.0f}'
+    return table(data, 'EXL3 2.25 bpw', EXL3_HARDWARE, [
+        ('Decode, short prompt' + lab, lambda v: runs(bench(v)['decode_mean_tokens_per_second'], b2(v).get('decode_mean_tokens_per_second'), whole)),
+        ('Decode, 128K input' + lab, lambda v: runs(at(v)['decode_tokens_per_second'], a2(v).get('decode_tokens_per_second'), whole)),
+        ('Prefill, 8K input' + lab, lambda v: runs(bench(v)['prefill_tokens_per_second']['8192'], (b2(v).get('prefill_tokens_per_second') or {}).get('8192'), whole)),
+        ('Prefill, 128K input' + lab, lambda v: runs(at(v)['prefill_tokens_per_second'], a2(v).get('prefill_tokens_per_second'), whole)),
         ('Real code, 130K tokens: prefill / decode',
-         lambda v: f"{v['long_context']['prefill_tokens_per_second']:,.0f} / {v['long_context']['decode_tokens_per_second']:.0f}"),
+         lambda v: f"{v['long_context']['prefill_tokens_per_second']:,.0f} / {v['long_context']['decode_tokens_per_second']:.0f}" +
+                   (f" (second run {c2(v)['prefill_tokens_per_second']:,.0f} / {c2(v)['decode_tokens_per_second']:.0f})" if c2(v) else '')),
         ('Ansible recipe', lambda v: f"[recipe]({v['manifest']})")])
 
 
@@ -332,7 +366,7 @@ def main():
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
     data = json.loads(DATA.read_text())
-    outputs = [(ROOT / path, chart(data, hardware, series, note)) for path, hardware, series, note in CHARTS]
+    outputs = [(ROOT / path, chart(data, hardware, series, note, seconds)) for path, hardware, series, note, seconds in CHARTS]
     outputs += [(ROOT / 'README.md', render_readme(data, (ROOT / 'README.md').read_text())),
                 (ROOT / 'docs/BENCHMARKS.md', render_deepseek_details(data, (ROOT / 'docs/BENCHMARKS.md').read_text()))]
     for output, expected in outputs:

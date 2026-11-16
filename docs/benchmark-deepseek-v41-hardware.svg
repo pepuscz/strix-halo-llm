@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 752" role="img" aria-labelledby="title desc">
 <title id="title">DeepSeek-V4.1-Flash-1017 throughput</title>
-<desc id="desc">Reading and answer-writing speeds of DeepSeek-V4.1-Flash-1017 on the EXL3 2.25 bpw · BOSGAME M5 (Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM) with one or two RX 7900 XTX cards. The test asks the model to find five labelled phrases placed in a long text. Every run found all five correctly. Each point measures one request at the input length shown. Each horizontal tick doubles the input length.</desc>
+<desc id="desc">Reading and answer-writing speeds of DeepSeek-V4.1-Flash-1017 on the EXL3 2.25 bpw · BOSGAME M5 (Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM) alone, or with one or two RX 7900 XTX cards. The test asks the model to find five labelled phrases placed in a long text. Every run found all five correctly. Each point measures one request at the input length shown. Each horizontal tick doubles the input length.</desc>
 <style>text{font-family:Arial,sans-serif;fill:#24292f}.title{font-size:26px;font-weight:700}.sub{font-size:15px;fill:#57606a}.label{font-size:16px}.tick{font-size:13px;fill:#57606a}.panel{font-size:18px;font-weight:700}.grid{stroke:#d8dee4;stroke-dasharray:3 5}.value{font-size:14px;font-weight:700}</style>
 <rect width="1100" height="752" fill="white"/>
 <text x="70" y="40" class="title">DeepSeek-V4.1-Flash-1017</text>
-<text x="70" y="67" class="sub">EXL3 2.25 bpw · BOSGAME M5 (Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM) with one or two RX 7900 XTX cards · thinking off</text>
+<text x="70" y="67" class="sub">EXL3 2.25 bpw · BOSGAME M5 (Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM) alone, or with one or two RX 7900 XTX cards · thinking off</text>
 <line x1="70" y1="99" x2="98" y2="99" stroke="#cf222e" stroke-width="3"/>
 <text x="110" y="104" class="label" style="font-weight:700">Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX</text>
 <line x1="70" y1="123" x2="98" y2="123" stroke="#bc4c00" stroke-width="3"/>

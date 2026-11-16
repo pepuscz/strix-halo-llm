@@ -9,14 +9,14 @@ Installable recipes, measured results and pinned sources for four models on a **
 Needs the M5 with two [RX 7900 XTX cards](#hardware), or one, and serves one conversation at a time. **Maya DS4 HIP EXL3 2.25 bpw** runs [turboderp's EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3) with inputs up to **1M tokens**.
 
 <!-- exl3-hardware-table -->
-| EXL3 2.25 bpw | **2 × RX 7900 XTX** | 1 × RX 7900 XTX |
+| EXL3 2.25 bpw | 1 × RX 7900 XTX | **2 × RX 7900 XTX** |
 |---|---:|---:|
-| Decode, short prompt | 70 | 46 |
-| Decode, 128K input | 83 | 55 |
-| Prefill, 8K input | 893 | 356 |
-| Prefill, 128K input | 1,801 | 942 |
-| Real code, 130K tokens: prefill / decode | 1,535 / 57 | 604 / 40 |
-| Ansible recipe | [recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml) |
+| Decode, short prompt | 46 | 70 |
+| Decode, 128K input | 55 | 83 |
+| Prefill, 8K input | 356 | 893 |
+| Prefill, 128K input | 942 | 1,801 |
+| Real code, 130K tokens: prefill / decode | 604 / 40 | 1,535 / 57 |
+| Ansible recipe | [recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) |
 <!-- /exl3-hardware-table -->
 
 ![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw reading and answer-writing speeds on each hardware option](docs/benchmark-deepseek-v41-hardware.svg)
