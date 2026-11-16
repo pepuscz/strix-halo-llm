@@ -339,8 +339,8 @@ strix_maya:
   pack_kind: exl3
   pack_tool:
     files:
-      tools/ds4/pack.py: 13d7ee3778b991d5aa059968f302a6a24bc30be951e212f12c3232d0448a618c
-      tools/ds4/st.py: e72bafa8304c2a04f9ab7f4a66790798dd1c8b3153262dfa09f94e82d0f65c38
+      tools/ds4/pack.py: e81c38760499f07e305266b8a7c1e59094c7d0d18d83012f9d3375ceacdb94e9
+      tools/ds4/st.py: 951a4333a12ab521d31730d0af011683e50d2f54fd1dc6256cefcca736cb6ae8
       tools/ds4/engram_hash.py: 764106d9c4c48c0a16f2357903806872333775bda374690a21e08bb5430ecba4
       tools/ds4/chat_template.jinja: e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa
   pack_files:

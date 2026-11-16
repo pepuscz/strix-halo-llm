@@ -2183,7 +2183,7 @@
         "aggregation": "one load"
       },
       "qualification_note": "EXL3 v5 at 1M: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.1934 on this engine; answer quality and Lucebox KL from the v4 engine.",
-      "manifest_sha256": "d2e3ca9541e6098e6b4f7d47d35d1a252667f1a8fd54c7ea56616028d75a7496",
+      "manifest_sha256": "86a5a07dd145291f0e6063b9529ed45cdc73286754bac4e5ae9fab45a4280769",
       "measurement_profile": {
         "strix_gpu_od_enabled": true,
         "public_default_enabled": false,
@@ -2265,7 +2265,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
       "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
-      "manifest_sha256": "853ad067d99d800892bdedac79f968d40e40ea6f691348f18b659bd85dd8cbd5",
+      "manifest_sha256": "819b0b507e3e421484928abb3aa4760b800966083eed13ee23056242b8e59471",
       "release_id": "maya-ds4-exl3-single-xtx-1m-v2",
       "hardware": {
         "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",
@@ -2470,7 +2470,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw Radeon 8060S",
       "manifest": "ansible/releases/maya-ds4-exl3-apu-1m.yml",
-      "manifest_sha256": "360872caa34c489e9979a8207d3b8303e9feca6c39980e48db9584ac5be87625",
+      "manifest_sha256": "38d7e3ed934303af8ad5c470b2f1d0b4eb2c78ab4f66e5ec9006b630aaeebfeb",
       "release_id": "maya-ds4-exl3-apu-1m-v1",
       "hardware": {
         "added_gpus": "none",
