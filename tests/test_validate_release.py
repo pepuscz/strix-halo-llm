@@ -226,6 +226,8 @@ class ReleaseValidatorTest(unittest.TestCase):
             (lambda d: d["strix_maya"]["server"]["env"].update(DS4_HELPER="1"), "environment drifted"),
             (lambda d: d["strix_maya"].pop("apu_from_topology"), "topology-derived APU"),
             (lambda d: d["strix_qualification"]["answer_quality"].update(reference="unmeasured"), "quality references"),
+            (lambda d: d["strix_policy"].update(cpu_boost=1), "APU policy"),
+            (lambda d: d["strix_policy"].update(vm_extfrag_threshold=500), "extfrag_threshold"),
         ):
             broken = copy.deepcopy(data)
             change(broken)

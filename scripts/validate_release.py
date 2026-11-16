@@ -471,8 +471,10 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         # no background compaction while it serves: kcompactd moving pages the GPUs map stopped both XTX for 100-300 ms
         # in the first request after a load (the driver binds the process's host memory again)
         if data["strix_policy"].get("vm_compaction_proactiveness") != 0 or \
-                data["strix_policy"].get("vm_watermark_boost_factor") != 0:
-            fail("the EXL3 release runs with vm.compaction_proactiveness and vm.watermark_boost_factor at 0")
+                data["strix_policy"].get("vm_watermark_boost_factor") != 0 or data["strix_policy"].get("vm_extfrag_threshold") != 1000:
+            fail("the EXL3 release runs with vm.compaction_proactiveness and vm.watermark_boost_factor at 0 and extfrag_threshold at 1000")
+        if apu and (data["strix_policy"].get("cpu_boost") != 0 or data["strix_policy"].get("gpu_dpm") != "auto"):
+            fail("EXL3 APU policy must use CPU boost off and GPU DPM auto as measured")
         # (the EXL3 floor is the effective non-CMA memory the qualified run measured after its load, less a margin)
         if not 2 * 1024 * 1024 <= service["minimum_effective_non_cma_kib"] <= 14 * 1024 * 1024:
             fail("the EXL3 release's non-CMA floor must lie between 2 and 14 GiB")
