@@ -1,15 +1,14 @@
 # Architecture
 
-## Dual RX 7900 XTX
+## DeepSeek-V4.1-Flash-1017
 
-The current dual-card setup runs one recipe at a time. Each RX 7900 XTX has its own PCIe 4.0 ×4 M.2-to-OCuLink link; the Radeon 8060S serves routed experts held in the M5's RAM. An external SSD connects over USB4.
+Each RX 7900 XTX has its own PCIe 4.0 ×4 M.2-to-OCuLink link; the Radeon 8060S serves routed experts held in the M5's RAM. An external SSD connects over USB4.
 
-| Model | Stack | Context | Parallel work |
-|---|---|---:|---|
-| DeepSeek-V4.1-Flash-1017 GSQ-RCO IQ2_XS | **Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX** | 1 × 512K | Tensor parallel across the cards; DSpark drafter split across them; 522 native Q5_K dense tensors; embedding and head use Q8_0 |
-| GLM-5.3-Flash Maya-M IQ2_S | **Maya HIP Maya-M IQ2_S dual RX 7900 XTX** | 1 × 512K | Layers split across the cards; model MTP drafts tokens |
+| Stack | Context | Parallel work |
+|---|---:|---|
+| Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX | 1 × 512K | Tensor parallel across the cards; DSpark drafter split across them; 522 native Q5_K dense tensors; embedding and head use Q8_0 |
 
-The [DeepSeek GSQ-RCO recipe](../ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) and the [GLM recipe](../ansible/releases/maya-glm-dual-xtx-512k.yml) pin the runtime and serving settings.
+The [DeepSeek GSQ-RCO recipe](../ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) pins the runtime and serving settings.
 
 ### The DeepSeek engine's settings
 
@@ -24,25 +23,33 @@ The model (about 178 GB, plus a 203 GB Engram shard read in place) is far larger
 - **Writing an answer.** Each step verifies the drafter's guesses in one pass of about 1,600 kernel launches on the lead card. The recipe fuses the small ones (`DS4_HC_FUSE`, `DS4_ROUTE_FUSE`, `DS4_DECODE_TRIM`) and routes the step's all-reduces through the same pipelined kernel (`DS4_AR2_DECODE`). All four give the same bits as the unfused path; the engine compares them at every load.
 - **Kept conversations.** A conversation set aside for another is saved to disk (up to 16 of them in 16 GB) and comes back without re-reading its prompt.
 
-## BOSGAME M5 only
+## GLM-5.3-Flash
 
-The single-box comparison selected Strata HIP UD-Q4_K_XL for Qwen and Strix Halo llama.cpp Vulkan IQ3_XXS for DeepSeek. This table describes the three published Ansible recipes; the measured Qwen Vulkan baseline settings are recorded in [BENCHMARKS.md](BENCHMARKS.md#qwen-context-scaling).
+| Stack | Context | Parallel work |
+|---|---:|---|
+| **Maya HIP Maya-M IQ2_S dual RX 7900 XTX** | 1 × 512K | Layers split across the cards; model MTP drafts tokens |
 
-| Layer | **Qwen / Strata HIP UD-Q4_K_XL** | **DeepSeek / Strix Halo llama.cpp Vulkan IQ3_XXS** | DeepSeek / Lucebox ROCm ROCmFPX |
-|---|---|---|---|
-| Runtime | Strata v0.1.40, unmodified pinned source | Official strix-halo-llamacpp v0.7.0 portable release | Unmodified Lucebox commit `5eb4fbe` |
-| GPU | HIP gfx1151, isolated ROCm 7.14.1 SDK | Bundled Mesa RADV / Vulkan | Ubuntu ROCm 7.1, HIP gfx1151, rocWMMA |
-| Target | Native UD-Q4_K_XL expert/PLE tensors; BF16-compatible dense pack | Unsloth UD-IQ3_XXS | ROCmFPX MIX |
-| Draft | Q2_0 routed MTP experts; Q8_0/BF16/F32 dense pack; runtime Q4 projection/head | DSpark Q2_K/Q8_0 | DSpark Q4RMFP4 dense-F16 |
-| KV | int8 | q8_0 K/V | q4_0 K/V |
-| Context | 4 × 262,144 | 1 × 524,288 | 1 × 131,072 |
-| Speculation | Solo MTP length 4; lookup chain 3; batched MTP disabled | DSpark maximum length 4 | Q=4 fused verification |
-| Prefill | 8,192; borrowing disabled | Qualified upstream tuning | Sparse chunk 3,072 |
-| MemoryHigh / MemoryMax | 123G / 125G | 118G / 120G | 118G / 120G |
-| CPU boost / GPU DPM | Off / auto | Off / auto | On / high |
-| Cooling | GPU-demand governor | GPU-demand governor | GPU-demand governor |
+The [GLM recipe](../ansible/releases/maya-glm-dual-xtx-512k.yml) pins the runtime and serving settings.
 
-## Strata runtime
+## Qwen3.8-Flash-Next
+
+The measured Qwen Vulkan baseline settings are recorded in [BENCHMARKS.md](BENCHMARKS.md#qwen-context-scaling).
+
+| Layer | **Strata HIP UD-Q4_K_XL** |
+|---|---|
+| Runtime | Strata v0.1.40, unmodified pinned source |
+| GPU | HIP gfx1151, isolated ROCm 7.14.1 SDK |
+| Target | Native UD-Q4_K_XL expert/PLE tensors; BF16-compatible dense pack |
+| Draft | Q2_0 routed MTP experts; Q8_0/BF16/F32 dense pack; runtime Q4 projection/head |
+| KV | int8 |
+| Context | 4 × 262,144 |
+| Speculation | Solo MTP length 4; lookup chain 3; batched MTP disabled |
+| Prefill | 8,192; borrowing disabled |
+| MemoryHigh / MemoryMax | 123G / 125G |
+| CPU boost / GPU DPM | Off / auto |
+| Cooling | GPU-demand governor |
+
+### Strata runtime
 
 Native expert mmap and a 24 GiB expert cache preserve the target's UD-Q4_K_XL representation. `iq_pack --compat-bf16` prepares compatible dense tensors. Derived tensors and tokenizer files are checked against the qualified SHA-256 values. The 31 MTP tensors are fetched from an immutable BF16 model revision and checked individually before conversion.
 
@@ -50,11 +57,27 @@ The serving profile follows the pinned upstream gfx1151 fast paths: fused/GEMM p
 
 Four independent long-context conversations pass. Strict token parity for one interleaved continued conversation is a current limit of the fast numerical profile; answer quality is graded separately. Structured outputs use prompt-and-validate rather than constrained decoding. Higher slot counts are unqualified.
 
-## Vulkan runtime
+## DeepSeek-V4-Flash-0731
+
+| Layer | **Strix Halo llama.cpp Vulkan IQ3_XXS** | Lucebox ROCm ROCmFPX |
+|---|---|---|
+| Runtime | Official strix-halo-llamacpp v0.7.0 portable release | Unmodified Lucebox commit `5eb4fbe` |
+| GPU | Bundled Mesa RADV / Vulkan | Ubuntu ROCm 7.1, HIP gfx1151, rocWMMA |
+| Target | Unsloth UD-IQ3_XXS | ROCmFPX MIX |
+| Draft | DSpark Q2_K/Q8_0 | DSpark Q4RMFP4 dense-F16 |
+| KV | q8_0 K/V | q4_0 K/V |
+| Context | 1 × 524,288 | 1 × 131,072 |
+| Speculation | DSpark maximum length 4 | Q=4 fused verification |
+| Prefill | Qualified upstream tuning | Sparse chunk 3,072 |
+| MemoryHigh / MemoryMax | 118G / 120G | 118G / 120G |
+| CPU boost / GPU DPM | Off / auto | On / high |
+| Cooling | GPU-demand governor | GPU-demand governor |
+
+### Vulkan runtime
 
 The DeepSeek stack uses the official v0.7.0 archive unchanged. Launcher, server, Vulkan backend, RADV driver, and libraries are pinned by SHA-256. The upstream environment includes `GGML_VK_MMID_M128=1` and `GGML_VK_FA_WAVE32=1`.
 
-## Lucebox runtime
+### Lucebox runtime
 
 The pinned clean source includes gfx1151 split-KV indexed MLA, Q4 MMVF projection, ROCmFP2/3 Wave32 kernels, four-row activation reuse, sparse verifier attention, incremental verification masks, and exact block-radix top-k selection. Server, feature-gate, DeepSeek 4, ROCmFPX numerical, grouped-dispatch, and top-k tests run during the build.
 

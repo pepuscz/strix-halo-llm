@@ -1,18 +1,18 @@
 # Benchmarks
 
-The dual RX 7900 XTX setups and the BOSGAME M5-only setups use different models and hardware. Their speeds are not a matched comparison. Prefill means reading the input; decode means writing the answer. Input tokens are model-specific counts, while context allocation is the memory reserved for a conversation.
+Prefill means reading the input; decode means writing the answer. Input tokens are model-specific counts, while context allocation is the memory reserved for a conversation.
 
 The cold retrieval test places five labelled phrases at different positions in an input and asks the model to find them. Every recorded speed-test request found all five. Each point measures one request with no cached input. Detailed sources, settings and result data are linked below.
 
-## Dual RX 7900 XTX: DeepSeek-V4.1-Flash-1017
+## DeepSeek-V4.1-Flash-1017
 
-![Dual RX 7900 XTX context scaling: DeepSeek-V4.1-Flash-1017 and GLM-5.3-Flash](benchmark-dual-xtx.svg)
+![DeepSeek-V4.1-Flash-1017 context scaling, four quants on two RX 7900 XTX cards](benchmark-deepseek-v41-quants.svg)
 
 **Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified v1.1.56-based fork, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).
 
 GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL3 uses 1M. The eleven curve points share identical input bytes, zero cached input, thinking off and a 256-token cap; each load is fresh, from the frozen profile. All five values were found at every point.
 
-| | **EXL3 2.25 bpw** | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
+| 2 × RX 7900 XTX | **EXL3 2.25 bpw** | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
 |---|---:|---:|---:|---:|
 | Context allocation | 1M | 512K | 512K | 512K |
 | Model shards, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
@@ -128,9 +128,9 @@ The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 pred
 
 Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).
 
-## Single RX 7900 XTX: DeepSeek-V4.1-Flash-1017
+### One RX 7900 XTX
 
-![One RX 7900 XTX context scaling against two, DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw](benchmark-single-xtx.svg)
+![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw context scaling on each hardware option](benchmark-deepseek-v41-hardware.svg)
 
 **Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the v1.1.56-based engine tag `maya-ds4-exl3-1m-20261107`. The two-card line in the chart is the dual release (engine tag `maya-ds4-exl3-1m-20261112`). The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
 
@@ -156,7 +156,7 @@ The deep **520,000-token** check found **5/5** values with zero cached input: **
 
 The near-capacity **1,040,000-token** check found **5/5** values with zero cached input: **718.2 prefill / 51.1 decode tok/s**.
 
-### Upstream v1.1.56 benchmark, one card
+#### Upstream v1.1.56 benchmark
 
 Source-native `maya.py --bench`, the same token IDs as the dual recipe's, two cold loads per arm, interleaved.
 
@@ -167,7 +167,9 @@ Source-native `maya.py --bench`, the same token IDs as the dual recipe's, two co
 
 On one card the release differs from stock by DS4_HELPER_DRAFT (#904).
 
-## Dual RX 7900 XTX: GLM-5.3-Flash
+## GLM-5.3-Flash
+
+![GLM-5.3-Flash context scaling on two RX 7900 XTX cards](benchmark-glm.svg)
 
 **Maya HIP Maya-M IQ2_S dual RX 7900 XTX**, on the same two cards and Radeon 8060S as the DeepSeek rows above, with the same five-phrase prompts (identical bytes, pinned by SHA-256). GLM's tokenizer counts about 7 % fewer tokens for the same text, so its input counts are lower at each length. The layers are split between the cards (0-24 on the first, the rest on the second). The 8060S computes each card's routed experts held in RAM, and the model's own MTP layer drafts the next token. Each point is a fresh load, with thinking off, a 256-token cap (answers used 52-61 tokens) and zero cached input. The release allocates 524,288 tokens; each point ran at the smallest of 131,072, 262,144 and 524,288 that holds it. At 128K the two smaller allocations read at 907.1 and 895.3 tok/s and both wrote at 55.8.
 
@@ -201,15 +203,13 @@ The issue also reports 152,129–456,403-token prompts and the 28/30 quality res
 | 228,197 | 262,144 | 1,032.3 | 53.4 | 5/5 |
 | 456,403 | 524,288 | 1,021.3 | 50.1 | 5/5 |
 
-The installed 512K service read the 128K prompt (114,093 tokens) at 891.2 tok/s and wrote at 54.9, slightly below the 262,144-token row. The test text routes to few experts and reads faster than real documents. The DeepSeek row's 130,048-token real-code prompt (124,103 GLM tokens) read at 651.7 tok/s on that service. It wrote 768 tokens at 54.2 tok/s, and at 55.4 tok/s with that input already cached. Quality: 28/30 with the same coding and maths questions (math_08 and math_09 missed), measured at a 131,072-token allocation. This is a different model and quantization from the DeepSeek rows, so it is not a matched comparison.
+The installed 512K service read the 128K prompt (114,093 tokens) at 891.2 tok/s and wrote at 54.9, slightly below the 262,144-token row. The test text routes to few experts and reads faster than real documents. The DeepSeek row's 130,048-token real-code prompt (124,103 GLM tokens) read at 651.7 tok/s on that service. It wrote 768 tokens at 54.2 tok/s, and at 55.4 tok/s with that input already cached. Quality: 28/30 with the same coding and maths questions (math_08 and math_09 missed), measured at a 131,072-token allocation.
 
 The service holds one conversation at a time. When another conversation arrives, the current one is set aside on disk, up to four of them in 32 GB, and dropped after seven days. In the qualification run, a 114,129-token conversation set aside this way came back for its next turn in 3.0 s (114,128 tokens from disk), and that turn took 10.7 s against 128.2 s cold. Set-aside conversations also survive a service restart. After a stop and start of the installed service, a 28,554-token conversation came back from disk in 0.1 s, and its next turn took 4.9 s.
 
-## BOSGAME M5 only
+## Qwen3.8-Flash-Next
 
-The sections below compare the single-box setups on the Radeon 8060S, without the external cards. Qwen and DeepSeek-V4-Flash-0731 were benchmarked with different models and quantizations from the dual-card releases above.
-
-## Qwen3.8-Flash-Next UD-Q4_K_XL
+![Qwen3.8-Flash-Next context scaling on the BOSGAME M5 alone](benchmark-qwen.svg)
 
 **Winning setup for Qwen: Strata HIP UD-Q4_K_XL.** The comparison baseline is Strix Halo llama.cpp Vulkan UD-Q4_K_XL.
 
@@ -220,8 +220,6 @@ The sections below compare the single-box setups on the Radeon 8060S, without th
 | **Strata HIP UD-Q4_K_XL · capacity for four conversations** | **114,089** | **683.50 tok/s** | **43.60 tok/s** | **168.31 s** | **30/30** |
 
 The recipe with capacity for four conversations reduces request time by **48.9% (1.96× faster)** versus Vulkan. The one-conversation profile is **2.26× faster** at this matched workload.
-
-![Matched Qwen and DeepSeek single-session throughput curves](benchmark.svg)
 
 ### Qwen context scaling
 
@@ -245,6 +243,8 @@ The curves use one session with 131,072-token allocation through the 128K worklo
 Four conversations each received a different long prompt containing 228,244 tokens. All four found their own requested phrases, kept their contents separate, and answered a follow-up correctly. All four generated answers simultaneously. At least 14,921,348 KiB (14.23 GiB) of memory remained available outside the reserved CMA pool. Four simultaneous conversations are tested; higher counts are not tested.
 
 ## DeepSeek-V4-Flash-0731
+
+![DeepSeek-V4-Flash-0731 context scaling on the BOSGAME M5 alone](benchmark-deepseek-v4-0731.svg)
 
 **Winning setup for DeepSeek: Strix Halo llama.cpp Vulkan IQ3_XXS.** The comparison baseline is Lucebox ROCm ROCmFPX.
 
@@ -293,4 +293,4 @@ The four-slot Strata quality checkpoint uses a 16K prefill cap and prompts of at
 
 [results.json](../benchmarks/results.json) contains source/model identities, prompt hashes, request parameters, exact token counts, all measured points, and qualification aggregates. Ansible manifests pin artifacts and build inputs. The published Strata recipe preserves the qualified serving flags and tensor hashes with portable installation paths; the reference executable hash identifies the measured build, and each portable build is sealed locally.
 
-Qwen uses kernel `7.0.0-31-generic`; DeepSeek uses `7.0.0-29-generic`. Strata and Vulkan run with CPU boost off and GPU DPM auto. Lucebox runs with CPU boost on and GPU DPM high. The demand fan controller samples once per second, returns to firmware-auto after 300 idle seconds, and uses maximum cooling on failure. Its measured activation latency is 1.520 seconds; prefill/decode/end-to-end ratios against fixed fans are 1.0000/1.0018/1.0018.
+Qwen uses kernel `7.0.0-31-generic`; DeepSeek-V4-Flash-0731 uses `7.0.0-29-generic`. Strata and Vulkan run with CPU boost off and GPU DPM auto. Lucebox runs with CPU boost on and GPU DPM high. The demand fan controller samples once per second, returns to firmware-auto after 300 idle seconds, and uses maximum cooling on failure. Its measured activation latency is 1.520 seconds; prefill/decode/end-to-end ratios against fixed fans are 1.0000/1.0018/1.0018.

@@ -1,6 +1,8 @@
 # Sources and provenance
 
-## Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX
+## DeepSeek-V4.1-Flash-1017
+
+### Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX
 
 | Component | Pinned source |
 |---|---|
@@ -20,27 +22,7 @@ python tools/ds4/pack.py --model "$MODELS/EXL3-2.25" --out "$MODELS/EXL3-2.25/ma
 
 The engine source maps `markov_w1` to `embed` and `markov_w2` to `head`. Model tensors remain in their source files. The rebuilt pack matched the qualification pack byte for byte; `ds4.txt` is checked with its model directory normalized and at the published directory. GSQ’s GGUF/hybrid packing path is unchanged.
 
-## Maya HIP Maya-M IQ2_S dual RX 7900 XTX
-
-Every source and setting below is pinned from the qualified host. The
-from-scratch 512K installation and verification are recorded in the release
-manifest.
-
-| Component | Pinned source |
-|---|---|
-| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya) commit `3e054700b4fbfc9d31499f4f1c5f2a1c0399b9b4`, [tag `maya-glm-dual-xtx-512k-20261024`](https://github.com/pepuscz/project-maya/tree/maya-glm-dual-xtx-512k-20261024), tree `b5d18000fc985e468dbcda999e868b206fb52b5f`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.25` (commit `94878e25e3860e22ea29b4fff506ade8c477a57b`) plus the expert helper beside a layer split, its load-time self-check, the tuned RDNA IQ2_S expert kernel and the take-two decode-attention kernels for the indexer scores and MLA |
-| Pack tool | The engine source's own `tools/iq_pack.py` (SHA-256 pinned), run without a GPU with `--compat-bf16` |
-| Python | 3.14 with the engine's packages hash-locked ([lock](../ansible/roles/maya_runtime/files/requirements-glm.lock)): the wheels the qualified host's pip cache held for its installed versions |
-| GGML | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d), commit `3cf03257f219afbe7334045ff7c6a06ac68c627d`, archive SHA-256 and tree fingerprint pinned |
-| ROCm | The same AMD ROCm 7.2.4 runfile userspace as the DeepSeek GSQ-RCO recipe below |
-| rocBLAS | The same `rocm-7.2.4` rocBLAS as the DeepSeek GSQ-RCO recipe below |
-| Target | [`peasantsmith/GLM-5.3-Flash-Maya-GGUF`](https://huggingface.co/peasantsmith/GLM-5.3-Flash-Maya-GGUF), revision `f16ee4ba50d8fd2bb726ea1862ca6ca14ba188da`, Maya-M IQ2_S (3 shards) |
-| Draft | None: the engine drafts with the model's own MTP layer |
-| Expert profile | `data/expert-profile-glm.bin` in the engine source, SHA-256 and size pinned; the engine only reads it |
-
-[`maya-glm-dual-xtx-512k.yml`](../ansible/releases/maya-glm-dual-xtx-512k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes, and its `compat-bf16.json`, which names the model shard it was packed from, against a digest with that path normalized.
-
-## Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX
+### Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX
 
 | Component | Pinned source |
 |---|---|
@@ -57,7 +39,7 @@ manifest.
 
 [`maya-ds4-gsq-dual-xtx-512k.yml`](../ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml) records every identity. The pack is checked against the qualified pack's hashes (its `tensors.txt` after the conversion included); the converted side file is checked at its pinned size and sealed with the pack by the digest the install produced.
 
-## Benchmark-only comparisons
+### Benchmark-only comparisons
 
 Maya-S IQ2_XXS and Maya-XS v2 IQ1_S use the GSQ engine tag above and its environment. These entries are measurements, with no installer. The file digests below are published Hugging Face LFS oids at revision `c33d87b8c7a3b7d55e71324dc82395587a870b0b`; sizes match the verified download receipts.
 
@@ -91,9 +73,31 @@ Maya DS4 HIP Maya-XS v2 IQ1_S dual RX 7900 XTX
 python3 tools/ds4/pack_gguf.py --model Maya-XS-v2 --out pack --vision vision --engram Engram-Q6_K --drafter dspark/dspark-xs2.json --shards DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00001-of-00003.gguf DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00002-of-00003.gguf DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00003-of-00003.gguf
 ```
 
-## BOSGAME M5 only
+## GLM-5.3-Flash
 
-## Strata HIP UD-Q4_K_XL / Qwen
+### Maya HIP Maya-M IQ2_S dual RX 7900 XTX
+
+Every source and setting below is pinned from the qualified host. The
+from-scratch 512K installation and verification are recorded in the release
+manifest.
+
+| Component | Pinned source |
+|---|---|
+| Runtime | [`pepuscz/project-maya`](https://github.com/pepuscz/project-maya) commit `3e054700b4fbfc9d31499f4f1c5f2a1c0399b9b4`, [tag `maya-glm-dual-xtx-512k-20261024`](https://github.com/pepuscz/project-maya/tree/maya-glm-dual-xtx-512k-20261024), tree `b5d18000fc985e468dbcda999e868b206fb52b5f`: [`mw00/project-maya`](https://github.com/mw00/project-maya) `v1.1.25` (commit `94878e25e3860e22ea29b4fff506ade8c477a57b`) plus the expert helper beside a layer split, its load-time self-check, the tuned RDNA IQ2_S expert kernel and the take-two decode-attention kernels for the indexer scores and MLA |
+| Pack tool | The engine source's own `tools/iq_pack.py` (SHA-256 pinned), run without a GPU with `--compat-bf16` |
+| Python | 3.14 with the engine's packages hash-locked ([lock](../ansible/roles/maya_runtime/files/requirements-glm.lock)): the wheels the qualified host's pip cache held for its installed versions |
+| GGML | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d), commit `3cf03257f219afbe7334045ff7c6a06ac68c627d`, archive SHA-256 and tree fingerprint pinned |
+| ROCm | The same AMD ROCm 7.2.4 runfile userspace as the DeepSeek GSQ-RCO recipe above |
+| rocBLAS | The same `rocm-7.2.4` rocBLAS as the DeepSeek GSQ-RCO recipe above |
+| Target | [`peasantsmith/GLM-5.3-Flash-Maya-GGUF`](https://huggingface.co/peasantsmith/GLM-5.3-Flash-Maya-GGUF), revision `f16ee4ba50d8fd2bb726ea1862ca6ca14ba188da`, Maya-M IQ2_S (3 shards) |
+| Draft | None: the engine drafts with the model's own MTP layer |
+| Expert profile | `data/expert-profile-glm.bin` in the engine source, SHA-256 and size pinned; the engine only reads it |
+
+[`maya-glm-dual-xtx-512k.yml`](../ansible/releases/maya-glm-dual-xtx-512k.yml) records every identity. The engine compiles for the host CPU, so an installation seals its own executable; the pack is checked against the qualified pack's hashes, and its `compat-bf16.json`, which names the model shard it was packed from, against a digest with that path normalized.
+
+## Qwen3.8-Flash-Next
+
+### Strata HIP UD-Q4_K_XL
 
 | Component | Pinned source |
 |---|---|
@@ -109,7 +113,9 @@ python3 tools/ds4/pack_gguf.py --model Maya-XS-v2 --out pack --vision vision --e
 
 The Qwen Vulkan comparison uses official `strix-halo-llamacpp` v0.7.6.1, payload `b02cb35f2`, and the same UD-Q4_K_XL target revision. Its archive, server, MTP draft, and measurement settings are recorded in [results.json](../benchmarks/results.json).
 
-## Strix Halo llama.cpp Vulkan IQ3_XXS
+## DeepSeek-V4-Flash-0731
+
+### Strix Halo llama.cpp Vulkan IQ3_XXS
 
 | Component | Pinned source |
 |---|---|
@@ -122,7 +128,7 @@ The exact upstream runtime archive, manifest, launcher, executable, Vulkan
 backend, loader, and model identities are in
 [`vulkan-iq3xxs-512k.yml`](../ansible/releases/vulkan-iq3xxs-512k.yml).
 
-## Lucebox ROCm ROCmFPX
+### Lucebox ROCm ROCmFPX
 
 | Component | Pinned source |
 |---|---|
