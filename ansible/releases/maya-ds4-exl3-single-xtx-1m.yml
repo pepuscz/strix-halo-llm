@@ -447,18 +447,18 @@ strix_qualification:
     reference: maya-ds4-exl3-dual-xtx
   retrieval_ladder:
     allocation_tokens: 1048576
-    points: PENDING
-    values: PENDING
+    points: 5
+    values: 25/25
     largest_input_tokens: 491520
   long_context:
     prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: PENDING
-    first_request_decode_tokens_per_second: PENDING
-    reused_prompt_cached_tokens: PENDING
-    reused_prompt_decode_tokens_per_second: PENDING
+    first_request_prefill_tokens_per_second: 900.2390983210508
+    first_request_decode_tokens_per_second: 46.173825212832476
+    reused_prompt_cached_tokens: 0
+    reused_prompt_decode_tokens_per_second: 60.6802828586102
   qualified_configuration: EXL3 2.25 bpw with original FP8 Engram, 1M context, 8K chunks, one RX 7900 XTX (the first
     of a host's cards, or strix_xtx_pci), DSpark with every one of its blocks' experts in the Radeon 8060S helper's
     113 GB pool, background memory compaction off while serving, PROMPT_LIGHT=64 and idle expert re-placement.
