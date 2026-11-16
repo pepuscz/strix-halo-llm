@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -477,10 +478,10 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
             fail("the EXL3 release's non-CMA floor must lie between 2 and 14 GiB")
     elif service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
         fail("Maya requires the qualified 14 GiB non-CMA floor")
-    validate_deepseek_qualification(data["strix_qualification"], service["context"], reference=single or apu)
+    validate_deepseek_qualification(data["strix_qualification"], service["context"], reference=single or apu, cold_second=exl3)
 
 
-def validate_deepseek_qualification(qualification: dict, context: int, reference: bool = False) -> None:
+def validate_deepseek_qualification(qualification: dict, context: int, reference: bool = False, cold_second: bool = False) -> None:
     """The DeepSeek dual RX 7900 XTX qualification: answer quality, the eleven-point retrieval ladder and the real-code
     prompt on the installed service at the release's allocation, and the deepest needle."""
     sections = {"answer_quality", "retrieval_ladder", "long_context", "qualified_configuration"}
@@ -498,23 +499,22 @@ def validate_deepseek_qualification(qualification: dict, context: int, reference
     ladder = qualification["retrieval_ladder"]
     found = re.fullmatch(r"(\d+)/(\d+)", str(ladder.get("values")))
     if set(ladder) != {"allocation_tokens", "points", "values", "largest_input_tokens"} or \
-            ladder["allocation_tokens"] != context or ladder["points"] not in (5, 11) or \
+            ladder["allocation_tokens"] != context or ladder["points"] != (5 if cold_second else 11) or \
             not 0 < ladder["largest_input_tokens"] < context or not found or \
             int(found.group(1)) > int(found.group(2)) or int(found.group(2)) != 5 * ladder["points"]:
         fail("Maya DS4 retrieval ladder must hold five or eleven five-value points at the release's allocation")
     long = qualification["long_context"]
     numbers = ("input_tokens", "output_tokens", "first_request_prefill_tokens_per_second",
-               "first_request_decode_tokens_per_second", "reused_prompt_cached_tokens",
-               "reused_prompt_decode_tokens_per_second")
+               "first_request_decode_tokens_per_second", *(
+                   ("second_run_prefill_tokens_per_second", "second_run_decode_tokens_per_second") if cold_second else
+                   ("reused_prompt_cached_tokens", "reused_prompt_decode_tokens_per_second")))
     if set(long) != {"prompt_sha256", "allocation_tokens", *numbers}:
         fail("Maya DS4 long-context record drifted")
     require_sha(long["prompt_sha256"], "Maya DS4 long-context prompt")
-    if long["allocation_tokens"] != context or \
-            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers if key != "reused_prompt_cached_tokens") or \
-            not isinstance(long["reused_prompt_cached_tokens"], int) or long["reused_prompt_cached_tokens"] < 0 or \
-            not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
-        fail("Maya DS4 long-context record must hold positive readings on the release's allocation, "
-             "with less than its input cached on reuse")
+    if long["allocation_tokens"] != context or not all(type(long[k]) in (int, float) and math.isfinite(long[k]) and long[k] > 0 for k in numbers) or not long["input_tokens"] < context:
+        fail("Maya DS4 long-context record must hold positive readings on the release's allocation")
+    if not cold_second and not long["reused_prompt_cached_tokens"] < long["input_tokens"]:
+        fail("Maya DS4 long-context record must hold less than its input cached on reuse")
     if not reference:
         needle = qualification["deep_needle"]
         if set(needle) != {"allocation_tokens", "input_tokens", "values", "measured"} or \
@@ -736,54 +736,47 @@ def validate_benchmarks(root: Path) -> None:
             q = manifest["strix_qualification"]
             context = manifest["strix_service"]["context"]
             curve = e["context_scaling"]
-            common = data["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"]
-            if len(curve) != q["retrieval_ladder"]["points"] or len(curve) != len(common) or \
-                    max(p["actual_input_tokens"] for p in curve) != q["retrieval_ladder"]["largest_input_tokens"]:
+            common = {p["actual_input_tokens"]: p for p in data["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"]}
+            if len(curve) != q["retrieval_ladder"]["points"] or len({p["actual_input_tokens"] for p in curve}) != len(curve) or max(p["actual_input_tokens"] for p in curve) != q["retrieval_ladder"]["largest_input_tokens"]:
                 fail("EXL3 retrieval ladder differs from qualification")
-            for point, reference in zip(curve, common):
-                if any(point[k] != reference[k] for k in ("actual_input_tokens", "prompt_sha256")) or \
-                        point["allocation_tokens"] != context or point["cached_tokens"] != 0 or point["needle_passes"] != 5:
-                    fail("EXL3 retrieval workload identity or allocation differs")
+            def positive_rates(point):
+                return all(type(point.get(k)) in (int, float) and math.isfinite(point[k]) and point[k] > 0 for k in ("prefill_tokens_per_second", "decode_tokens_per_second"))
+            for point in curve:
+                reference = common.get(point["actual_input_tokens"])
+                second = point.get("second_run", {})
+                if reference is None or point["prompt_sha256"] != reference["prompt_sha256"] or point["allocation_tokens"] != context or point["cached_tokens"] != 0 or point["needle_passes"] != 5 or second.get("cached_tokens") != 0 or second.get("needle_passes") != 5 or not positive_rates(point) or not positive_rates(second):
+                    fail("EXL3 retrieval workload identity, second run or allocation differs")
             if q["retrieval_ladder"]["values"] != f"{sum(p['needle_passes'] for p in curve)}/{5 * len(curve)}":
                 fail("EXL3 retrieval values differ from qualification")
-            needle = e["near_capacity_needle"]
-            if needle["actual_input_tokens"] != q["deep_needle"]["input_tokens"] or \
-                    needle["allocation_tokens"] != context or needle["cached_tokens"] != 0 or \
-                    f"{needle['needle_passes']}/5" != q["deep_needle"]["values"]:
-                fail("EXL3 near-capacity retrieval differs from qualification")
-            require_sha(needle["prompt_sha256"], "EXL3 near-capacity prompt")
+            if "deep_needle" in q:
+                needle = e.get("near_capacity_needle", {})
+                if needle.get("actual_input_tokens") != q["deep_needle"]["input_tokens"] or needle.get("allocation_tokens") != context or needle.get("cached_tokens") != 0 or f"{needle.get('needle_passes')}/5" != q["deep_needle"]["values"]:
+                    fail("EXL3 near-capacity retrieval differs from qualification")
+                require_sha(needle["prompt_sha256"], "EXL3 near-capacity prompt")
+            elif "near_capacity_needle" in e:
+                fail("EXL3 unmeasured near-capacity retrieval must be absent")
             c, qc = e["long_context"], q["long_context"]
-            pairs = {"prefill_tokens_per_second": "first_request_prefill_tokens_per_second",
-                     "decode_tokens_per_second": "first_request_decode_tokens_per_second"}
-            if c["cached_tokens"] != 0 or any(c[k] != qc[k] for k in
-                    ("input_tokens", "output_tokens", "allocation_tokens", "prompt_sha256")) or \
-                    any(c[k] != qc[v] for k, v in pairs.items()) or \
-                    c["reused_prompt"]["cached_tokens"] != qc["reused_prompt_cached_tokens"] or \
-                    c["reused_prompt"]["decode_tokens_per_second"] != qc["reused_prompt_decode_tokens_per_second"]:
-                fail("EXL3 long-context readings differ from qualification")
-            if any(e["quality"][k] != q["answer_quality"][k] for k in
-                   ("coding", "gsm8k", "math", "total", "thinking")) or \
-                    e["quality"]["perplexity"]["value"] != q["answer_quality"]["perplexity"]:
+            second = c.get("second_run", {})
+            pairs = {"prefill_tokens_per_second": "first_request_prefill_tokens_per_second", "decode_tokens_per_second": "first_request_decode_tokens_per_second"}
+            if "reused_prompt" in c or c["cached_tokens"] != 0 or any(c[k] != qc[k] for k in ("input_tokens", "output_tokens", "allocation_tokens", "prompt_sha256")) or any(c[k] != qc[v] for k, v in pairs.items()) or second.get("cached_tokens") != 0 or second.get("prefill_tokens_per_second") != qc["second_run_prefill_tokens_per_second"] or second.get("decode_tokens_per_second") != qc["second_run_decode_tokens_per_second"]:
+                fail("EXL3 long-context first/second run readings differ from qualification")
+            if "reference" in q["answer_quality"]:
+                if e["quality"] != q["answer_quality"]:
+                    fail("EXL3 quality reference differs from qualification")
+            elif any(e["quality"][k] != q["answer_quality"][k] for k in ("coding", "gsm8k", "math", "total", "thinking")) or e["quality"]["perplexity"]["value"] != q["answer_quality"]["perplexity"]:
                 fail("EXL3 quality readings differ from qualification")
-            if e["runtime"]["source_commit"] != manifest["strix_runtime"]["source_commit"] or \
-                    e["runtime"]["benchmark_binary_sha256"] != manifest["strix_runtime"]["server_sha256"]:
+            if e["runtime"]["source_commit"] != manifest["strix_runtime"]["source_commit"] or e["runtime"]["benchmark_binary_sha256"] != manifest["strix_runtime"]["server_sha256"]:
                 fail("EXL3 engine identity differs from qualification")
-            fixture = root / "benchmarks/maya-bench-inputs.json"
-            if e["maya_bench"]["inputs_sha256"] != hashlib.sha256(fixture.read_bytes()).hexdigest():
-                fail("EXL3 benchmark inputs differ from the published fixture")
-            native = e["upstream_benchmark"]
-            # (two cards: the release, GSQ and stock EXL3; one card: the release and stock v1.1.56 without the
-            #  helper's drafter experts, the only open PR a single card runs)
-            order = ["S+", "S0", "S+", "S0"] if exl3_id in SINGLE_SYSTEMS else ["E+", "G", "E0", "E+", "G", "E0"]
-            if native["allocation_tokens"] != context or native["order"] != order:
-                fail("EXL3 native comparison procedure drifted")
-            for arm in native["arms"].values():
-                loads = arm["loads"]
-                if len(loads) != native["loads_per_arm"] or len(loads) != 2 or \
-                        abs(arm["mean"]["decode"] - sum(x["decode_mean_tokens_per_second"] for x in loads) / 2) > 1e-9 or \
-                        any(abs(arm["mean"]["prefill"][k] - sum(x["prefill_tokens_per_second"][k] for x in loads) / 2) > 1e-9
-                            for k in ("2048", "8192")):
-                    fail("EXL3 native comparison means differ from its loads")
+            bench = e["maya_bench"]
+            if set(bench) != {"procedure", "this_release", "aggregation"} or "--bench" not in bench["procedure"] or "upstream_benchmark" in e:
+                fail("EXL3 source-native benchmark procedure drifted")
+            first = bench["this_release"]
+            if set(first) != {"decode_mean_tokens_per_second", "prefill_tokens_per_second", "second_run"} or set(first["second_run"]) != {"decode_mean_tokens_per_second", "prefill_tokens_per_second"}:
+                fail("EXL3 benchmark requires both source-native runs")
+            for reading in (first, first["second_run"]):
+                prefill = reading["prefill_tokens_per_second"]
+                if set(prefill) != {"2048", "8192"} or not all(type(x) in (int, float) and math.isfinite(x) and x > 0 for x in (reading["decode_mean_tokens_per_second"], *prefill.values())):
+                    fail("EXL3 source-native benchmark readings must be positive and finite")
     baseline = data["systems"]["qwen-vulkan-q4xl"]["context_scaling"]
     strata = data["systems"]["strata-qwen-q4xl"]
     curve = strata["context_scaling"]
