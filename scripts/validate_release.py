@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -23,6 +24,7 @@ SYSTEMS = {
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
     "maya-ds4-gsq-dual-xtx": ("Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX", "maya"),
     "maya-ds4-exl3-dual-xtx": ("Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX", "maya"),
+    "maya-ds4-exl3-apu": ("Maya DS4 HIP EXL3 2.25 bpw Radeon 8060S", "maya"),
     "maya-ds4-exl3-single-xtx": ("Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
@@ -32,9 +34,9 @@ PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
 MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-ds4-exl3-dual-xtx": "deepseek",
-                 "maya-ds4-exl3-single-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+                 "maya-ds4-exl3-single-xtx": "deepseek", "maya-ds4-exl3-apu": "deepseek", "maya-glm-dual-xtx": "glm"}
 # turboderp's EXL3 on two cards (tensor parallel) and on one (for a host without a second card), and their manifests
-EXL3_SYSTEMS = {"maya-ds4-exl3-dual-xtx": "maya-ds4-exl3-dual-xtx-1m.yml",
+EXL3_SYSTEMS = {"maya-ds4-exl3-apu": "maya-ds4-exl3-apu-1m.yml","maya-ds4-exl3-dual-xtx": "maya-ds4-exl3-dual-xtx-1m.yml",
                 "maya-ds4-exl3-single-xtx": "maya-ds4-exl3-single-xtx-1m.yml"}
 SINGLE_SYSTEMS = {"maya-ds4-exl3-single-xtx"}
 # the single-card release's prompt chunk and what its tuning changed from the dual release's settings (one card lends
@@ -280,17 +282,20 @@ def validate_maya(data: dict, root: Path) -> None:
     service, runtime = data["strix_service"], data["strix_runtime"]
     rocm, rocblas, maya = data["strix_rocm724"], data["strix_rocblas"], data["strix_maya"]
     single = data["strix_system"]["id"] in SINGLE_SYSTEMS
+    apu = data["strix_system"]["id"] == "maya-ds4-exl3-apu"
     # one card: a host with more installs it too and serves on one of them (preflight's at_least, the service's
     # gpu_from_topology); two cards: exactly two
     xtx = {"name": "AMD Radeon RX 7900 XTX", "pci_id": "1002:744c", "count": 1 if single else 2}
     if single:
         xtx["at_least"] = True
-    if data["strix_platform"].get("discrete_gpus") != [xtx]:
+    if data["strix_platform"].get("discrete_gpus") != ([] if apu else [xtx]):
         fail("Maya single RX 7900 XTX requires at least one RX 7900 XTX card" if single else
              "Maya dual RX 7900 XTX requires exactly two RX 7900 XTX cards")
     if single != (maya.get("gpu_from_topology") is True) or (not single and "gpu_from_topology" in maya):
         fail("a single-card release numbers its GPUs from the host's topology (strix_maya.gpu_from_topology), "
              "a dual-card release by its fixed order")
+    if apu != (maya.get("apu_from_topology") is True):
+        fail("APU-only release requires topology-derived APU selection")
     require_sha(data["strix_target"]["revision"], "target revision", HEX40)
     require_url(runtime["repository"], "Maya repository")
     for key in ("tag_object", "source_tree", "upstream_commit", "ggml_commit"):
@@ -315,7 +320,7 @@ def validate_maya(data: dict, root: Path) -> None:
     if hashlib.sha256(patch.read_bytes()).hexdigest() != rocblas["patch"]["sha256"]:
         fail("rocBLAS backport patch hash drifted")
     cfg = maya["server"]
-    if cfg["gpu"] != ([0, 1] if single else [0, 1, 2]) or cfg["port"] != service["port"] or \
+    if cfg["gpu"] != ([0] if apu else [0, 1] if single else [0, 1, 2]) or cfg["port"] != service["port"] or \
             cfg["model_name"] != service["alias"]:
         fail("Maya server identity differs from the service contract")
     if cfg["lib_dirs"][0] != data["strix_paths"]["release"] + "/rocblas/install/lib":
@@ -333,6 +338,7 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     release, state = paths["release"], paths["state"]
     exl3 = data["strix_system"]["id"] in EXL3_SYSTEMS
     single = data["strix_system"]["id"] in SINGLE_SYSTEMS
+    apu = data["strix_system"]["id"] == "maya-ds4-exl3-apu"
     if exl3:
         if {file["name"] for file in files} != EXL3_FILES or len(files) != len(EXL3_FILES) or \
                 service["parallel_slots"] != 1:
@@ -389,12 +395,13 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         require_sha(digest, "pack")
     cfg = maya["server"]
     expected_args = ["--pack", maya["pack"], "--max-context", str(service["context"]),
-                     *([] if single else ["--tp", "2"]), "--vision", "off",
+                     *([] if single or apu else ["--tp", "2"]), "--vision", "off",
                      "--dspark", "on", "--threads", "on", "--mmap-experts", "on",
                      "--expert-profile", state + "/expert-profile.bin",
                      "--prefill-chunk", SINGLE_CHUNK if single else "16384" if exl3 else "32768"]
     if data["strix_system"]["id"] in ("maya-ds4-gsq-dual-xtx", *EXL3_SYSTEMS):
         expected_args += ["--suffix-draft", "0"]
+    if apu:expected_args += ["--reserve-mib", "20480"]
     if cfg["args"] != expected_args:
         fail("qualified Maya DS4 arguments drifted")
     expected_env = {
@@ -442,7 +449,11 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         for key in ("DS4_AR2", "DS4_AR2_DECODE", "DS4_YOCO_TP", "DS4_TP_CHECK", "DS4_EXL3_LEND"):
             del expected_env[key]
         expected_env.update({"DS4_HELPER": "1", "DS4_DRAFT_DEV": "0,0,0", **SINGLE_ENV})
-    if exl3 and not single:
+    if exl3:
+        expected_env.update({"DS4_DSPARK_SAMPLE":"1", "DS4_HC_FUSE":"2", "DS4_LIGHT_WIN":"8", "DS4_SETTLE_IDLE_MS":"500", "DS4_CHUNK_MIN":"128", "MAYA_DS4_PROMPT_LIGHT":"64"})
+    if apu:
+        expected_env = {k:v for k,v in expected_env.items() if "HELPER" not in k and k not in ("DS4_AR2", "DS4_AR2_DECODE", "DS4_YOCO_TP", "DS4_TP_CHECK", "DS4_EXL3_LEND", "DS4_DRAFT_DEV", "DS4_DRAFT_VRAM")}
+    if exl3 and not single and not apu:
         expected_env["MAYA_DS4_PROMPT_LIGHT"] = "64"
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
@@ -460,51 +471,58 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         # no background compaction while it serves: kcompactd moving pages the GPUs map stopped both XTX for 100-300 ms
         # in the first request after a load (the driver binds the process's host memory again)
         if data["strix_policy"].get("vm_compaction_proactiveness") != 0 or \
-                data["strix_policy"].get("vm_watermark_boost_factor") != 0:
-            fail("the EXL3 release runs with vm.compaction_proactiveness and vm.watermark_boost_factor at 0")
+                data["strix_policy"].get("vm_watermark_boost_factor") != 0 or data["strix_policy"].get("vm_extfrag_threshold") != 1000:
+            fail("the EXL3 release runs with vm.compaction_proactiveness and vm.watermark_boost_factor at 0 and extfrag_threshold at 1000")
+        if apu and (data["strix_policy"].get("cpu_boost") != 0 or data["strix_policy"].get("gpu_dpm") != "auto"):
+            fail("EXL3 APU policy must use CPU boost off and GPU DPM auto as measured")
         # (the EXL3 floor is the effective non-CMA memory the qualified run measured after its load, less a margin)
         if not 2 * 1024 * 1024 <= service["minimum_effective_non_cma_kib"] <= 14 * 1024 * 1024:
             fail("the EXL3 release's non-CMA floor must lie between 2 and 14 GiB")
     elif service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
         fail("Maya requires the qualified 14 GiB non-CMA floor")
-    validate_deepseek_qualification(data["strix_qualification"], service["context"])
+    validate_deepseek_qualification(data["strix_qualification"], service["context"], reference=single or apu, cold_second=exl3)
 
 
-def validate_deepseek_qualification(qualification: dict, context: int) -> None:
+def validate_deepseek_qualification(qualification: dict, context: int, reference: bool = False, cold_second: bool = False) -> None:
     """The DeepSeek dual RX 7900 XTX qualification: answer quality, the eleven-point retrieval ladder and the real-code
     prompt on the installed service at the release's allocation, and the deepest needle."""
-    if set(qualification) != {"answer_quality", "retrieval_ladder", "long_context", "deep_needle",
-                              "qualified_configuration"}:
+    sections = {"answer_quality", "retrieval_ladder", "long_context", "qualified_configuration"}
+    if not reference:sections.add("deep_needle")
+    if set(qualification) != sections:
         fail("Maya DS4 qualification sections drifted")
     quality = qualification["answer_quality"]
-    scores = [quality.get(key) for key in ("coding", "gsm8k", "math", "total")]
-    if not all(type(score) is int and 0 <= score <= 30 for score in scores) or sum(scores[:3]) != scores[3] or \
-            quality.get("thinking") is not False:
-        fail("Maya DS4 answer-quality scores must be integers that sum to the total, without thinking")
+    if reference:
+        if quality != {"reference": "maya-ds4-exl3-dual-xtx"}:
+            fail("APU/single quality references the measured dual-card EXL3 qualification only")
+    else:
+        scores = [quality.get(key) for key in ("coding", "gsm8k", "math", "total")]
+        if not all(type(score) is int and 0 <= score <= 30 for score in scores) or sum(scores[:3]) != scores[3] or quality.get("thinking") is not False:
+            fail("Maya DS4 answer-quality scores must be integers that sum to the total, without thinking")
     ladder = qualification["retrieval_ladder"]
     found = re.fullmatch(r"(\d+)/(\d+)", str(ladder.get("values")))
     if set(ladder) != {"allocation_tokens", "points", "values", "largest_input_tokens"} or \
-            ladder["allocation_tokens"] != context or ladder["points"] != 11 or \
+            ladder["allocation_tokens"] != context or ladder["points"] != (5 if cold_second else 11) or \
             not 0 < ladder["largest_input_tokens"] < context or not found or \
             int(found.group(1)) > int(found.group(2)) or int(found.group(2)) != 5 * ladder["points"]:
-        fail("Maya DS4 retrieval ladder must hold eleven five-value points at the release's allocation")
+        fail("Maya DS4 retrieval ladder must hold five or eleven five-value points at the release's allocation")
     long = qualification["long_context"]
     numbers = ("input_tokens", "output_tokens", "first_request_prefill_tokens_per_second",
-               "first_request_decode_tokens_per_second", "reused_prompt_cached_tokens",
-               "reused_prompt_decode_tokens_per_second")
+               "first_request_decode_tokens_per_second", *(
+                   ("second_run_prefill_tokens_per_second", "second_run_decode_tokens_per_second") if cold_second else
+                   ("reused_prompt_cached_tokens", "reused_prompt_decode_tokens_per_second")))
     if set(long) != {"prompt_sha256", "allocation_tokens", *numbers}:
         fail("Maya DS4 long-context record drifted")
     require_sha(long["prompt_sha256"], "Maya DS4 long-context prompt")
-    if long["allocation_tokens"] != context or \
-            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers) or \
-            not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
-        fail("Maya DS4 long-context record must hold positive readings on the release's allocation, "
-             "with less than its input cached on reuse")
-    needle = qualification["deep_needle"]
-    if set(needle) != {"allocation_tokens", "input_tokens", "values", "measured"} or \
-            needle["allocation_tokens"] != context or not 0 < needle["input_tokens"] < context or \
-            not re.fullmatch(r"\d+/5", str(needle["values"])):
-        fail("Maya DS4 deep-needle record drifted")
+    if long["allocation_tokens"] != context or not all(type(long[k]) in (int, float) and math.isfinite(long[k]) and long[k] > 0 for k in numbers) or not long["input_tokens"] < context:
+        fail("Maya DS4 long-context record must hold positive readings on the release's allocation")
+    if not cold_second and not long["reused_prompt_cached_tokens"] < long["input_tokens"]:
+        fail("Maya DS4 long-context record must hold less than its input cached on reuse")
+    if not reference:
+        needle = qualification["deep_needle"]
+        if set(needle) != {"allocation_tokens", "input_tokens", "values", "measured"} or \
+                needle["allocation_tokens"] != context or not 0 < needle["input_tokens"] < context or \
+                not re.fullmatch(r"\d+/5", str(needle["values"])):
+            fail("Maya DS4 deep-needle record drifted")
     if not isinstance(qualification["qualified_configuration"], str) or not qualification["qualified_configuration"]:
         fail("Maya DS4 qualification must state its qualified_configuration")
 
@@ -629,7 +647,8 @@ def validate_maya_glm(data: dict, root: Path) -> None:
         fail("Maya GLM long-context record drifted")
     require_sha(long["prompt_sha256"], "Maya GLM long-context prompt")
     if long["allocation_tokens"] != service["context"] or \
-            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers) or \
+            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers if key != "reused_prompt_cached_tokens") or \
+            not isinstance(long["reused_prompt_cached_tokens"], int) or long["reused_prompt_cached_tokens"] < 0 or \
             not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
         fail("Maya GLM long-context record must hold positive readings on the release's allocation, "
              "with less than its input cached on reuse")
@@ -719,54 +738,47 @@ def validate_benchmarks(root: Path) -> None:
             q = manifest["strix_qualification"]
             context = manifest["strix_service"]["context"]
             curve = e["context_scaling"]
-            common = data["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"]
-            if len(curve) != q["retrieval_ladder"]["points"] or len(curve) != len(common) or \
-                    max(p["actual_input_tokens"] for p in curve) != q["retrieval_ladder"]["largest_input_tokens"]:
+            common = {p["actual_input_tokens"]: p for p in data["systems"]["maya-ds4-gsq-dual-xtx"]["context_scaling"]}
+            if len(curve) != q["retrieval_ladder"]["points"] or len({p["actual_input_tokens"] for p in curve}) != len(curve) or max(p["actual_input_tokens"] for p in curve) != q["retrieval_ladder"]["largest_input_tokens"]:
                 fail("EXL3 retrieval ladder differs from qualification")
-            for point, reference in zip(curve, common):
-                if any(point[k] != reference[k] for k in ("actual_input_tokens", "prompt_sha256")) or \
-                        point["allocation_tokens"] != context or point["cached_tokens"] != 0 or point["needle_passes"] != 5:
-                    fail("EXL3 retrieval workload identity or allocation differs")
+            def positive_rates(point):
+                return all(type(point.get(k)) in (int, float) and math.isfinite(point[k]) and point[k] > 0 for k in ("prefill_tokens_per_second", "decode_tokens_per_second"))
+            for point in curve:
+                reference = common.get(point["actual_input_tokens"])
+                second = point.get("second_run", {})
+                if reference is None or point["prompt_sha256"] != reference["prompt_sha256"] or point["allocation_tokens"] != context or point["cached_tokens"] != 0 or point["needle_passes"] != 5 or second.get("cached_tokens") != 0 or second.get("needle_passes") != 5 or not positive_rates(point) or not positive_rates(second):
+                    fail("EXL3 retrieval workload identity, second run or allocation differs")
             if q["retrieval_ladder"]["values"] != f"{sum(p['needle_passes'] for p in curve)}/{5 * len(curve)}":
                 fail("EXL3 retrieval values differ from qualification")
-            needle = e["near_capacity_needle"]
-            if needle["actual_input_tokens"] != q["deep_needle"]["input_tokens"] or \
-                    needle["allocation_tokens"] != context or needle["cached_tokens"] != 0 or \
-                    f"{needle['needle_passes']}/5" != q["deep_needle"]["values"]:
-                fail("EXL3 near-capacity retrieval differs from qualification")
-            require_sha(needle["prompt_sha256"], "EXL3 near-capacity prompt")
+            if "deep_needle" in q:
+                needle = e.get("near_capacity_needle", {})
+                if needle.get("actual_input_tokens") != q["deep_needle"]["input_tokens"] or needle.get("allocation_tokens") != context or needle.get("cached_tokens") != 0 or f"{needle.get('needle_passes')}/5" != q["deep_needle"]["values"]:
+                    fail("EXL3 near-capacity retrieval differs from qualification")
+                require_sha(needle["prompt_sha256"], "EXL3 near-capacity prompt")
+            elif "near_capacity_needle" in e:
+                fail("EXL3 unmeasured near-capacity retrieval must be absent")
             c, qc = e["long_context"], q["long_context"]
-            pairs = {"prefill_tokens_per_second": "first_request_prefill_tokens_per_second",
-                     "decode_tokens_per_second": "first_request_decode_tokens_per_second"}
-            if c["cached_tokens"] != 0 or any(c[k] != qc[k] for k in
-                    ("input_tokens", "output_tokens", "allocation_tokens", "prompt_sha256")) or \
-                    any(c[k] != qc[v] for k, v in pairs.items()) or \
-                    c["reused_prompt"]["cached_tokens"] != qc["reused_prompt_cached_tokens"] or \
-                    c["reused_prompt"]["decode_tokens_per_second"] != qc["reused_prompt_decode_tokens_per_second"]:
-                fail("EXL3 long-context readings differ from qualification")
-            if any(e["quality"][k] != q["answer_quality"][k] for k in
-                   ("coding", "gsm8k", "math", "total", "thinking")) or \
-                    e["quality"]["perplexity"]["value"] != q["answer_quality"]["perplexity"]:
+            second = c.get("second_run", {})
+            pairs = {"prefill_tokens_per_second": "first_request_prefill_tokens_per_second", "decode_tokens_per_second": "first_request_decode_tokens_per_second"}
+            if "reused_prompt" in c or c["cached_tokens"] != 0 or any(c[k] != qc[k] for k in ("input_tokens", "output_tokens", "allocation_tokens", "prompt_sha256")) or any(c[k] != qc[v] for k, v in pairs.items()) or second.get("cached_tokens") != 0 or second.get("prefill_tokens_per_second") != qc["second_run_prefill_tokens_per_second"] or second.get("decode_tokens_per_second") != qc["second_run_decode_tokens_per_second"]:
+                fail("EXL3 long-context first/second run readings differ from qualification")
+            if "reference" in q["answer_quality"]:
+                if e["quality"] != q["answer_quality"]:
+                    fail("EXL3 quality reference differs from qualification")
+            elif any(e["quality"][k] != q["answer_quality"][k] for k in ("coding", "gsm8k", "math", "total", "thinking")) or e["quality"]["perplexity"]["value"] != q["answer_quality"]["perplexity"]:
                 fail("EXL3 quality readings differ from qualification")
-            if e["runtime"]["source_commit"] != manifest["strix_runtime"]["source_commit"] or \
-                    e["runtime"]["benchmark_binary_sha256"] != manifest["strix_runtime"]["server_sha256"]:
+            if e["runtime"]["source_commit"] != manifest["strix_runtime"]["source_commit"] or e["runtime"]["benchmark_binary_sha256"] != manifest["strix_runtime"]["server_sha256"]:
                 fail("EXL3 engine identity differs from qualification")
-            fixture = root / "benchmarks/maya-bench-inputs.json"
-            if e["maya_bench"]["inputs_sha256"] != hashlib.sha256(fixture.read_bytes()).hexdigest():
-                fail("EXL3 benchmark inputs differ from the published fixture")
-            native = e["upstream_benchmark"]
-            # (two cards: the release, GSQ and stock EXL3; one card: the release and stock v1.1.56 without the
-            #  helper's drafter experts, the only open PR a single card runs)
-            order = ["S+", "S0", "S+", "S0"] if exl3_id in SINGLE_SYSTEMS else ["E+", "G", "E0", "E+", "G", "E0"]
-            if native["allocation_tokens"] != context or native["order"] != order:
-                fail("EXL3 native comparison procedure drifted")
-            for arm in native["arms"].values():
-                loads = arm["loads"]
-                if len(loads) != native["loads_per_arm"] or len(loads) != 2 or \
-                        abs(arm["mean"]["decode"] - sum(x["decode_mean_tokens_per_second"] for x in loads) / 2) > 1e-9 or \
-                        any(abs(arm["mean"]["prefill"][k] - sum(x["prefill_tokens_per_second"][k] for x in loads) / 2) > 1e-9
-                            for k in ("2048", "8192")):
-                    fail("EXL3 native comparison means differ from its loads")
+            bench = e["maya_bench"]
+            if set(bench) != {"procedure", "this_release", "aggregation"} or "--bench" not in bench["procedure"] or "upstream_benchmark" in e:
+                fail("EXL3 source-native benchmark procedure drifted")
+            first = bench["this_release"]
+            if set(first) != {"decode_mean_tokens_per_second", "prefill_tokens_per_second", "second_run"} or set(first["second_run"]) != {"decode_mean_tokens_per_second", "prefill_tokens_per_second"}:
+                fail("EXL3 benchmark requires both source-native runs")
+            for reading in (first, first["second_run"]):
+                prefill = reading["prefill_tokens_per_second"]
+                if set(prefill) != {"2048", "8192"} or not all(type(x) in (int, float) and math.isfinite(x) and x > 0 for x in (reading["decode_mean_tokens_per_second"], *prefill.values())):
+                    fail("EXL3 source-native benchmark readings must be positive and finite")
     baseline = data["systems"]["qwen-vulkan-q4xl"]["context_scaling"]
     strata = data["systems"]["strata-qwen-q4xl"]
     curve = strata["context_scaling"]

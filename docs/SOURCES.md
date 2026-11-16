@@ -2,19 +2,19 @@
 
 ## DeepSeek-V4.1-Flash-1017
 
-### Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX
+### Maya DS4 HIP EXL3 2.25 bpw: two cards, one card, M5 alone
 
 | Component | Pinned source |
 |---|---|
-| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-exl3-1m-20261112), annotated tag `maya-ds4-exl3-1m-20261112` (object `977f53653c2b28b2da28d87b7e259bb4297d28ff`), commit `3c4e10465ce59860b2e87052e219b6eae50f55ce`, tree `46f4dee67ce32450bf4892a76fe7c00064731ffd`: upstream v1.1.56 (`22fc101f2c109b7e7174c975ff3c2d8e9ce0a867`) with the open PRs mw00/project-maya#867 (the EXL3 lend in place), #904 (DS4_HELPER_DRAFT), #945 (the full-rate HIP EXL3 decode kernels, the same output bits), #967 (DS4_PROMPT_LIGHT: a prompt chunk's few-row experts computed on the Radeon 8060S) and #968 (`v_sad_hi_u8` byte sums and window kernels sized for small windows, the same output bits) |
+| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-exl3-1m-20261116), annotated tag `maya-ds4-exl3-1m-20261116` (object `0678bf04fb85da10d78621f4c01a8ea5074c5e39`), commit `6eedc4cf84b0511d56f82f4f9857afa7057f7ac2`, tree `45b8c77f9580ac208ba1aad54d963a5b51d3acd6`: upstream v1.1.65 (`c81fab6c9d63cf69b928f92460e0a662b28aa9ec`) with the open PRs mw00/project-maya#867, #904, #967, #968, #1000, #1001, #1002, #1003 and #1008, a same-bits `block_gemv` load order and the `cold=1` request key; one engine for all three recipes |
 | Target | [turboderp/DeepSeek-V4.1-Flash-1017-exl3](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3/tree/9183eaaeb6f08dff6ee5b6e34b852911cf6733c9), revision `9183eaaeb6f08dff6ee5b6e34b852911cf6733c9`: 26 EXL3 shards, original FP8 Engram and pinned metadata; about 361 GB total |
 | Pack | The tagged engine’s `tools/ds4/pack.py`, `st.py`, `engram_hash.py` and chat template, all SHA-256 pinned. The pack indexes the downloaded safetensors in place and writes eight small metadata/tokenizer files |
 | Draft | DSpark and its Markov head are included in the target shards. The packer restores the Markov tensor names used by the engine |
 | Python | 3.14 and the existing hash-locked [requirements](../ansible/roles/maya_runtime/files/requirements.lock), matching the qualified environment |
 | ROCm / rocBLAS / GGML | The same pinned toolchain components described for GSQ below; the new release compiles its own engine |
-| State | `/var/lib/strix-halo-inference-exl3`; its profile, LT picks and saved conversations are separate from GSQ |
+| State | `/var/lib/strix-halo-inference-exl3` (two cards), `-exl3-single` (one card), `-exl3-apu` (M5 alone); each keeps its own profile, LT picks and saved conversations |
 
-The [manifest](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) pins every file. Packing runs without a GPU:
+The manifests ([two cards](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml), [one card](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml), [M5 alone](../ansible/releases/maya-ds4-exl3-apu-1m.yml)) pin every file. Packing runs without a GPU:
 
 ```sh
 python tools/ds4/pack.py --model "$MODELS/EXL3-2.25" --out "$MODELS/EXL3-2.25/maya-ds4"

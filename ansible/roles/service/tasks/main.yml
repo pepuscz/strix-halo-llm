@@ -70,6 +70,34 @@
     - strix_system.engine == 'maya'
     - strix_maya.gpu_from_topology | default(false)
 
+- name: Find the Radeon 8060S among the engine's GPUs
+  ansible.builtin.shell: |
+    set -o pipefail
+    i=0
+    for n in $(ls /sys/class/kfd/kfd/topology/nodes | sort -n); do
+      d=/sys/class/kfd/kfd/topology/nodes/$n
+      [ "$(cat "$d/gpu_id")" != 0 ] || continue
+      dev=$(printf '%04x' "$(awk '$1 == "device_id" {print $2}' "$d/properties")")
+      if [ "$dev" = {{ strix_platform.gpu_pci_id.split(':')[1] | quote }} ]; then echo "$i"; exit 0; fi
+      i=$((i + 1))
+    done
+    exit 1
+  args:
+    executable: /bin/bash
+  register: service_topology_apu
+  changed_when: false
+  check_mode: false
+  when:
+    - strix_system.engine == 'maya'
+    - strix_maya.apu_from_topology | default(false)
+
+- name: Select only the Radeon 8060S on this host
+  ansible.builtin.set_fact:
+    service_maya_server: "{{ strix_maya.server | combine({'gpu': [service_topology_apu.stdout | trim | int]}) }}"
+  when:
+    - strix_system.engine == 'maya'
+    - strix_maya.apu_from_topology | default(false)
+
 - name: Install the qualified Maya serving configuration
   ansible.builtin.template:
     src: maya-server.json.j2
@@ -200,6 +228,7 @@
     name: "{{ strix_service.name }}"
     enabled: "{{ strix_service.auto_start }}"
     state: started
+  when: strix_install_activate | default(true) | bool
 
 - name: Enable the nightly memory compaction while the GPUs are idle
   ansible.builtin.systemd_service:
@@ -218,5 +247,6 @@
              fan_governor_unit.changed | default(false))
          else 'started' }}
   when:
+    - strix_install_activate | default(true) | bool
     - strix_fan.manage | bool
     - strix_fan.governor.enabled | default(false) | bool

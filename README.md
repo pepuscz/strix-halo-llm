@@ -6,18 +6,21 @@ Installable recipes, measured results and pinned sources for four models on a **
 
 ## DeepSeek-V4.1-Flash-1017
 
-Needs the M5 with two [RX 7900 XTX cards](#hardware), or one, and serves one conversation at a time. **Maya DS4 HIP EXL3 2.25 bpw** runs [turboderp's EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3) with inputs up to **1M tokens**.
+Runs on the M5 alone, or with one or two [RX 7900 XTX cards](#hardware), and serves one conversation at a time. **Maya DS4 HIP EXL3 2.25 bpw** runs [turboderp's EXL3 quant](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3) with inputs up to **1M tokens**.
 
 <!-- exl3-hardware-table -->
-| EXL3 2.25 bpw | **2 × RX 7900 XTX** | 1 × RX 7900 XTX |
-|---|---:|---:|
-| Decode, short prompt | 70 | 46 |
-| Decode, 128K input | 83 | 55 |
-| Prefill, 8K input | 893 | 356 |
-| Prefill, 128K input | 1,801 | 942 |
-| Real code, 130K tokens: prefill / decode | 1,535 / 57 | 604 / 40 |
-| Ansible recipe | [recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml) |
+| EXL3 2.25 bpw, first / second run | M5 alone | 1 × RX 7900 XTX | **2 × RX 7900 XTX** |
+|---|---:|---:|---:|
+| Decode, short prompt | 22 / 27 | 55 / 71 | 76 / 99 |
+| Decode, 128K input | 23 / 41 | 64 / 93 | 89 / 139 |
+| Decode, real code (130K tokens) | 21 / 25 | 46 / 61 | 65 / 79 |
+| Prefill, 8K input | 297 / 317 | 518 / 610 | 982 / 1,212 |
+| Prefill, 128K input | 576 / 598 | 1,252 / 1,305 | 1,968 / 2,035 |
+| Prefill, real code (130K tokens) | 535 / 553 | 900 / 924 | 1,653 / 1,715 |
+| Ansible recipe | [recipe](ansible/releases/maya-ds4-exl3-apu-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) |
 <!-- /exl3-hardware-table -->
+
+The second run is the same request again after 60 s idle, with the experts it used moved into faster memory.
 
 ![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw reading and answer-writing speeds on each hardware option](docs/benchmark-deepseek-v41-hardware.svg)
 
@@ -32,10 +35,10 @@ EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also
 | Model size, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (lower is better) | 7.19 | 7.37 | 7.25 | 7.94 |
 | Quality checks passed | 29/30 | 30/30 | 30/30 | 30/30 |
-| Decode, short prompt | 70 | 61 | 42 | 81 |
-| Decode, 128K input | 83 | 56 | 26 | 96 |
-| Prefill, 8K input | 893 | 537 | 478 | 661 |
-| Prefill, 128K input | 1,801 | 1,673 | 1,669 | 1,762 |
+| Decode, short prompt | 76 | 61 | 42 | 81 |
+| Decode, 128K input | 89 | 56 | 26 | 96 |
+| Prefill, 8K input | 982 | 537 | 478 | 661 |
+| Prefill, 128K input | 1,968 | 1,673 | 1,669 | 1,762 |
 <!-- /quant-comparison-table -->
 
 GSQ-RCO keeps its own [recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml); Maya-S and Maya-XS v2 were measured for comparison only.
@@ -125,6 +128,7 @@ bin/strixctl verify
 |---|---|---|---:|
 | DeepSeek-V4.1-Flash-1017 | **EXL3 2.25 bpw, two cards** | `maya-ds4-exl3-dual-xtx` | ~423 GB |
 | | EXL3 2.25 bpw, one card | `maya-ds4-exl3-single-xtx` | ~423 GB |
+| | EXL3 2.25 bpw, M5 alone | `maya-ds4-exl3-apu` | ~423 GB |
 | | GSQ-RCO IQ2_XS, two cards | `maya-ds4-gsq-dual-xtx` | ~335 GB |
 | GLM-5.3-Flash | **Maya-M IQ2_S, two cards** | `maya-glm-dual-xtx` | ~240 GB |
 | Qwen3.8-Flash-Next | **Strata HIP UD-Q4_K_XL** (default when unset) | `strata-qwen-q4xl` | ~220 GB |

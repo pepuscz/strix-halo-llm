@@ -4,4 +4,4 @@
     name: "{{ strix_service.name }}"
     daemon_reload: true
     state: restarted
-  when: strix_service.auto_start | bool
+  when: strix_service.auto_start | bool and (strix_install_activate | default(true) | bool)

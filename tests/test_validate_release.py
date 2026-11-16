@@ -169,7 +169,6 @@ class ReleaseValidatorTest(unittest.TestCase):
         data = without_pending(yaml.safe_load(EXL3.read_text(encoding="utf-8")))
         qualification = data["strix_qualification"]
         qualification["deep_needle"]["values"] = "5/5"
-        qualification["long_context"]["reused_prompt_cached_tokens"] = 130047
         qualification["retrieval_ladder"]["largest_input_tokens"] = 983040
         data["strix_service"]["minimum_effective_non_cma_kib"] = 8 * 1024 * 1024
         return data
@@ -204,7 +203,6 @@ class ReleaseValidatorTest(unittest.TestCase):
     def test_exl3_single_validates_once_filled_and_rejects_drift(self) -> None:
         data = without_pending(yaml.safe_load(EXL3_SINGLE.read_text(encoding="utf-8")))
         qualification = data["strix_qualification"]
-        qualification["deep_needle"]["values"] = "5/5"
         qualification["retrieval_ladder"]["largest_input_tokens"] = 491520
         self.assertEqual(self.validate(data)["strix_system"]["id"], "maya-ds4-exl3-single-xtx")
         for change, message in (
@@ -215,6 +213,21 @@ class ReleaseValidatorTest(unittest.TestCase):
             (lambda d: d["strix_maya"]["server"].update(gpu=[0, 1, 2]), "service contract"),
             (lambda d: d["strix_maya"].pop("gpu_from_topology"), "gpu_from_topology"),
             (lambda d: d["strix_platform"]["discrete_gpus"][0].pop("at_least"), "at least one RX 7900 XTX"),
+        ):
+            broken = copy.deepcopy(data)
+            change(broken)
+            with self.subTest(message=message):
+                self.assert_fails(broken, message)
+
+    def test_exl3_apu_selects_only_apu_and_references_quality(self) -> None:
+        data = yaml.safe_load((ROOT / "ansible/releases/maya-ds4-exl3-apu-1m.yml").read_text())
+        self.assertEqual(self.validate(data)["strix_system"]["id"], "maya-ds4-exl3-apu")
+        for change, message in (
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_HELPER="1"), "environment drifted"),
+            (lambda d: d["strix_maya"].pop("apu_from_topology"), "topology-derived APU"),
+            (lambda d: d["strix_qualification"]["answer_quality"].update(reference="unmeasured"), "quality references"),
+            (lambda d: d["strix_policy"].update(cpu_boost=1), "APU policy"),
+            (lambda d: d["strix_policy"].update(vm_extfrag_threshold=500), "extfrag_threshold"),
         ):
             broken = copy.deepcopy(data)
             change(broken)
@@ -260,12 +273,13 @@ class ReleaseValidatorTest(unittest.TestCase):
             lambda d: d["context_scaling"][0].update(allocation_tokens=524288),
             lambda d: d["context_scaling"][0].update(cached_tokens=1),
             lambda d: d["near_capacity_needle"].update(actual_input_tokens=520000),
-            lambda d: d["long_context"]["reused_prompt"].update(cached_tokens=0),
+            lambda d: d["long_context"]["second_run"].update(cached_tokens=1),
             lambda d: d["quality"].update(total=d["quality"]["total"] - 1),
             lambda d: d["quality"]["perplexity"].update(value=7.8),
             lambda d: d["runtime"].update(source_commit="0" * 40),
             lambda d: d["maya_bench"].update(inputs_sha256="0" * 64),
-            lambda d: d["upstream_benchmark"]["arms"]["E+"]["mean"].update(decode=1),
+            lambda d: d["maya_bench"]["this_release"]["second_run"].update(decode_mean_tokens_per_second=-1),
+            lambda d: d["context_scaling"][0]["second_run"].update(cached_tokens=1),
         )
         for i, mutate in enumerate(mutations):
             with self.subTest(mutation=i), tempfile.TemporaryDirectory() as directory:
