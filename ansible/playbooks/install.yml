@@ -17,4 +17,5 @@
     - role: maya_runtime
       when: strix_system.engine == 'maya'
     - service
-    - verify
+    - role: verify
+      when: strix_install_activate | default(true) | bool

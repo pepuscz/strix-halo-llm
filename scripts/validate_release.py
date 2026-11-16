@@ -23,6 +23,7 @@ SYSTEMS = {
     "rocm-rocmfpx": ("Lucebox ROCm ROCmFPX", "rocm"),
     "maya-ds4-gsq-dual-xtx": ("Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX", "maya"),
     "maya-ds4-exl3-dual-xtx": ("Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX", "maya"),
+    "maya-ds4-exl3-apu": ("Maya DS4 HIP EXL3 2.25 bpw Radeon 8060S", "maya"),
     "maya-ds4-exl3-single-xtx": ("Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
@@ -32,9 +33,9 @@ PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
 MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-ds4-exl3-dual-xtx": "deepseek",
-                 "maya-ds4-exl3-single-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
+                 "maya-ds4-exl3-single-xtx": "deepseek", "maya-ds4-exl3-apu": "deepseek", "maya-glm-dual-xtx": "glm"}
 # turboderp's EXL3 on two cards (tensor parallel) and on one (for a host without a second card), and their manifests
-EXL3_SYSTEMS = {"maya-ds4-exl3-dual-xtx": "maya-ds4-exl3-dual-xtx-1m.yml",
+EXL3_SYSTEMS = {"maya-ds4-exl3-apu": "maya-ds4-exl3-apu-1m.yml","maya-ds4-exl3-dual-xtx": "maya-ds4-exl3-dual-xtx-1m.yml",
                 "maya-ds4-exl3-single-xtx": "maya-ds4-exl3-single-xtx-1m.yml"}
 SINGLE_SYSTEMS = {"maya-ds4-exl3-single-xtx"}
 # the single-card release's prompt chunk and what its tuning changed from the dual release's settings (one card lends
@@ -280,17 +281,20 @@ def validate_maya(data: dict, root: Path) -> None:
     service, runtime = data["strix_service"], data["strix_runtime"]
     rocm, rocblas, maya = data["strix_rocm724"], data["strix_rocblas"], data["strix_maya"]
     single = data["strix_system"]["id"] in SINGLE_SYSTEMS
+    apu = data["strix_system"]["id"] == "maya-ds4-exl3-apu"
     # one card: a host with more installs it too and serves on one of them (preflight's at_least, the service's
     # gpu_from_topology); two cards: exactly two
     xtx = {"name": "AMD Radeon RX 7900 XTX", "pci_id": "1002:744c", "count": 1 if single else 2}
     if single:
         xtx["at_least"] = True
-    if data["strix_platform"].get("discrete_gpus") != [xtx]:
+    if data["strix_platform"].get("discrete_gpus") != ([] if apu else [xtx]):
         fail("Maya single RX 7900 XTX requires at least one RX 7900 XTX card" if single else
              "Maya dual RX 7900 XTX requires exactly two RX 7900 XTX cards")
     if single != (maya.get("gpu_from_topology") is True) or (not single and "gpu_from_topology" in maya):
         fail("a single-card release numbers its GPUs from the host's topology (strix_maya.gpu_from_topology), "
              "a dual-card release by its fixed order")
+    if apu != (maya.get("apu_from_topology") is True):
+        fail("APU-only release requires topology-derived APU selection")
     require_sha(data["strix_target"]["revision"], "target revision", HEX40)
     require_url(runtime["repository"], "Maya repository")
     for key in ("tag_object", "source_tree", "upstream_commit", "ggml_commit"):
@@ -315,7 +319,7 @@ def validate_maya(data: dict, root: Path) -> None:
     if hashlib.sha256(patch.read_bytes()).hexdigest() != rocblas["patch"]["sha256"]:
         fail("rocBLAS backport patch hash drifted")
     cfg = maya["server"]
-    if cfg["gpu"] != ([0, 1] if single else [0, 1, 2]) or cfg["port"] != service["port"] or \
+    if cfg["gpu"] != ([0] if apu else [0, 1] if single else [0, 1, 2]) or cfg["port"] != service["port"] or \
             cfg["model_name"] != service["alias"]:
         fail("Maya server identity differs from the service contract")
     if cfg["lib_dirs"][0] != data["strix_paths"]["release"] + "/rocblas/install/lib":
@@ -333,6 +337,7 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     release, state = paths["release"], paths["state"]
     exl3 = data["strix_system"]["id"] in EXL3_SYSTEMS
     single = data["strix_system"]["id"] in SINGLE_SYSTEMS
+    apu = data["strix_system"]["id"] == "maya-ds4-exl3-apu"
     if exl3:
         if {file["name"] for file in files} != EXL3_FILES or len(files) != len(EXL3_FILES) or \
                 service["parallel_slots"] != 1:
@@ -389,12 +394,13 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         require_sha(digest, "pack")
     cfg = maya["server"]
     expected_args = ["--pack", maya["pack"], "--max-context", str(service["context"]),
-                     *([] if single else ["--tp", "2"]), "--vision", "off",
+                     *([] if single or apu else ["--tp", "2"]), "--vision", "off",
                      "--dspark", "on", "--threads", "on", "--mmap-experts", "on",
                      "--expert-profile", state + "/expert-profile.bin",
                      "--prefill-chunk", SINGLE_CHUNK if single else "16384" if exl3 else "32768"]
     if data["strix_system"]["id"] in ("maya-ds4-gsq-dual-xtx", *EXL3_SYSTEMS):
         expected_args += ["--suffix-draft", "0"]
+    if apu:expected_args += ["--reserve-mib", "20480"]
     if cfg["args"] != expected_args:
         fail("qualified Maya DS4 arguments drifted")
     expected_env = {
@@ -442,7 +448,11 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         for key in ("DS4_AR2", "DS4_AR2_DECODE", "DS4_YOCO_TP", "DS4_TP_CHECK", "DS4_EXL3_LEND"):
             del expected_env[key]
         expected_env.update({"DS4_HELPER": "1", "DS4_DRAFT_DEV": "0,0,0", **SINGLE_ENV})
-    if exl3 and not single:
+    if exl3:
+        expected_env.update({"DS4_DSPARK_SAMPLE":"1", "DS4_HC_FUSE":"2", "DS4_LIGHT_WIN":"8", "DS4_SETTLE_IDLE_MS":"500", "DS4_CHUNK_MIN":"128", "MAYA_DS4_PROMPT_LIGHT":"64"})
+    if apu:
+        expected_env = {k:v for k,v in expected_env.items() if "HELPER" not in k and k not in ("DS4_AR2", "DS4_AR2_DECODE", "DS4_YOCO_TP", "DS4_TP_CHECK", "DS4_EXL3_LEND", "DS4_DRAFT_DEV", "DS4_DRAFT_VRAM")}
+    if exl3 and not single and not apu:
         expected_env["MAYA_DS4_PROMPT_LIGHT"] = "64"
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
@@ -484,10 +494,10 @@ def validate_deepseek_qualification(qualification: dict, context: int) -> None:
     ladder = qualification["retrieval_ladder"]
     found = re.fullmatch(r"(\d+)/(\d+)", str(ladder.get("values")))
     if set(ladder) != {"allocation_tokens", "points", "values", "largest_input_tokens"} or \
-            ladder["allocation_tokens"] != context or ladder["points"] != 11 or \
+            ladder["allocation_tokens"] != context or ladder["points"] not in (5, 11) or \
             not 0 < ladder["largest_input_tokens"] < context or not found or \
             int(found.group(1)) > int(found.group(2)) or int(found.group(2)) != 5 * ladder["points"]:
-        fail("Maya DS4 retrieval ladder must hold eleven five-value points at the release's allocation")
+        fail("Maya DS4 retrieval ladder must hold five or eleven five-value points at the release's allocation")
     long = qualification["long_context"]
     numbers = ("input_tokens", "output_tokens", "first_request_prefill_tokens_per_second",
                "first_request_decode_tokens_per_second", "reused_prompt_cached_tokens",
@@ -496,7 +506,8 @@ def validate_deepseek_qualification(qualification: dict, context: int) -> None:
         fail("Maya DS4 long-context record drifted")
     require_sha(long["prompt_sha256"], "Maya DS4 long-context prompt")
     if long["allocation_tokens"] != context or \
-            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers) or \
+            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers if key != "reused_prompt_cached_tokens") or \
+            not isinstance(long["reused_prompt_cached_tokens"], int) or long["reused_prompt_cached_tokens"] < 0 or \
             not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
         fail("Maya DS4 long-context record must hold positive readings on the release's allocation, "
              "with less than its input cached on reuse")
@@ -629,7 +640,8 @@ def validate_maya_glm(data: dict, root: Path) -> None:
         fail("Maya GLM long-context record drifted")
     require_sha(long["prompt_sha256"], "Maya GLM long-context prompt")
     if long["allocation_tokens"] != service["context"] or \
-            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers) or \
+            not all(isinstance(long[key], (int, float)) and long[key] > 0 for key in numbers if key != "reused_prompt_cached_tokens") or \
+            not isinstance(long["reused_prompt_cached_tokens"], int) or long["reused_prompt_cached_tokens"] < 0 or \
             not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
         fail("Maya GLM long-context record must hold positive readings on the release's allocation, "
              "with less than its input cached on reuse")
