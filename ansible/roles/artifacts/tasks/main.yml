@@ -48,7 +48,7 @@
   register: artifacts_model_fetch
   changed_when: "'downloaded' in artifacts_model_fetch.stdout or 'adopted' in artifacts_model_fetch.stdout"
   async: 86400
-  poll: 30
+  poll: "{{ strix_artifact_poll_seconds | default(30) | int }}"
   vars:
     artifacts_relative_path: >-
       {{ (item.subdirectory + '/') if item.subdirectory | length > 0 else '' }}{{ item.name }}
