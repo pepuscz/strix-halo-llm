@@ -427,15 +427,7 @@ strix_maya:
   apu_from_topology: true
 strix_qualification:
   answer_quality:
-    coding: PENDING
-    gsm8k: PENDING
-    math: PENDING
-    total: PENDING
-    scoring: PENDING
-    thinking: false
-    math_10_output_cap: 4096
-    measured: PENDING
-    perplexity: PENDING
+    reference: maya-ds4-exl3-dual-xtx
   retrieval_ladder:
     allocation_tokens: 1048576
     points: PENDING
@@ -450,10 +442,5 @@ strix_qualification:
     first_request_decode_tokens_per_second: PENDING
     reused_prompt_cached_tokens: PENDING
     reused_prompt_decode_tokens_per_second: PENDING
-  deep_needle:
-    allocation_tokens: 1048576
-    input_tokens: 1040000
-    values: PENDING
-    measured: PENDING
   qualified_configuration: EXL3 2.25 bpw, Radeon 8060S only, 1M context, 16K prompt chunks, DSpark, 20 GiB host
     reserve.

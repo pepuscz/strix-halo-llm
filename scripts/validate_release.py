@@ -477,20 +477,24 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
             fail("the EXL3 release's non-CMA floor must lie between 2 and 14 GiB")
     elif service["minimum_effective_non_cma_kib"] != 14 * 1024 * 1024:
         fail("Maya requires the qualified 14 GiB non-CMA floor")
-    validate_deepseek_qualification(data["strix_qualification"], service["context"])
+    validate_deepseek_qualification(data["strix_qualification"], service["context"], reference=single or apu)
 
 
-def validate_deepseek_qualification(qualification: dict, context: int) -> None:
+def validate_deepseek_qualification(qualification: dict, context: int, reference: bool = False) -> None:
     """The DeepSeek dual RX 7900 XTX qualification: answer quality, the eleven-point retrieval ladder and the real-code
     prompt on the installed service at the release's allocation, and the deepest needle."""
-    if set(qualification) != {"answer_quality", "retrieval_ladder", "long_context", "deep_needle",
-                              "qualified_configuration"}:
+    sections = {"answer_quality", "retrieval_ladder", "long_context", "qualified_configuration"}
+    if not reference:sections.add("deep_needle")
+    if set(qualification) != sections:
         fail("Maya DS4 qualification sections drifted")
     quality = qualification["answer_quality"]
-    scores = [quality.get(key) for key in ("coding", "gsm8k", "math", "total")]
-    if not all(type(score) is int and 0 <= score <= 30 for score in scores) or sum(scores[:3]) != scores[3] or \
-            quality.get("thinking") is not False:
-        fail("Maya DS4 answer-quality scores must be integers that sum to the total, without thinking")
+    if reference:
+        if quality != {"reference": "maya-ds4-exl3-dual-xtx"}:
+            fail("APU/single quality references the measured dual-card EXL3 qualification only")
+    else:
+        scores = [quality.get(key) for key in ("coding", "gsm8k", "math", "total")]
+        if not all(type(score) is int and 0 <= score <= 30 for score in scores) or sum(scores[:3]) != scores[3] or quality.get("thinking") is not False:
+            fail("Maya DS4 answer-quality scores must be integers that sum to the total, without thinking")
     ladder = qualification["retrieval_ladder"]
     found = re.fullmatch(r"(\d+)/(\d+)", str(ladder.get("values")))
     if set(ladder) != {"allocation_tokens", "points", "values", "largest_input_tokens"} or \
@@ -511,11 +515,12 @@ def validate_deepseek_qualification(qualification: dict, context: int) -> None:
             not long["reused_prompt_cached_tokens"] < long["input_tokens"] < long["allocation_tokens"]:
         fail("Maya DS4 long-context record must hold positive readings on the release's allocation, "
              "with less than its input cached on reuse")
-    needle = qualification["deep_needle"]
-    if set(needle) != {"allocation_tokens", "input_tokens", "values", "measured"} or \
-            needle["allocation_tokens"] != context or not 0 < needle["input_tokens"] < context or \
-            not re.fullmatch(r"\d+/5", str(needle["values"])):
-        fail("Maya DS4 deep-needle record drifted")
+    if not reference:
+        needle = qualification["deep_needle"]
+        if set(needle) != {"allocation_tokens", "input_tokens", "values", "measured"} or \
+                needle["allocation_tokens"] != context or not 0 < needle["input_tokens"] < context or \
+                not re.fullmatch(r"\d+/5", str(needle["values"])):
+            fail("Maya DS4 deep-needle record drifted")
     if not isinstance(qualification["qualified_configuration"], str) or not qualification["qualified_configuration"]:
         fail("Maya DS4 qualification must state its qualified_configuration")
 
