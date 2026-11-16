@@ -440,7 +440,7 @@ strix_qualification:
     output_tokens: 768
     first_request_prefill_tokens_per_second: 534.5159586601753
     first_request_decode_tokens_per_second: 21.310128970676377
-    reused_prompt_cached_tokens: 0
-    reused_prompt_decode_tokens_per_second: 24.982271695216287
+    second_run_prefill_tokens_per_second: 553.0340368873634
+    second_run_decode_tokens_per_second: 24.982271695216287
   qualified_configuration: EXL3 2.25 bpw, Radeon 8060S only, 1M context, 16K prompt chunks, DSpark, 20 GiB host
     reserve.
