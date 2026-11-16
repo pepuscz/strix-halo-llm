@@ -305,6 +305,7 @@ strix_policy:
   expected_watts: '120.000'
   vm_compaction_proactiveness: 0
   vm_watermark_boost_factor: 0
+  vm_extfrag_threshold: 1000
 strix_gpu_od:
   pci_id: 1002:744c
   voltage_offset_mv: -100

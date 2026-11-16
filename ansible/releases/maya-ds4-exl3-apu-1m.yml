@@ -293,14 +293,15 @@ strix_service:
 strix_policy:
   cpu_governor: performance
   cpu_min_khz: 2000000
-  cpu_boost: 1
-  gpu_dpm: high
+  cpu_boost: 0
+  gpu_dpm: auto
   stapm_mw: 120000
   fast_mw: 120000
   slow_mw: 120000
   expected_watts: '120.000'
   vm_compaction_proactiveness: 0
   vm_watermark_boost_factor: 0
+  vm_extfrag_threshold: 1000
 strix_allow_reboot: false
 strix_verify_full_model_hashes: false
 strix_verify_api_smoke: true
