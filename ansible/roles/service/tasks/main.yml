@@ -247,5 +247,6 @@
              fan_governor_unit.changed | default(false))
          else 'started' }}
   when:
+    - strix_install_activate | default(true) | bool
     - strix_fan.manage | bool
     - strix_fan.governor.enabled | default(false) | bool
