@@ -12,10 +12,13 @@ DATA = ROOT / 'benchmarks/results.json'
 M5 = 'BOSGAME M5 (Ryzen AI Max+ 395, Radeon 8060S, 128 GiB RAM)'
 # One chart per model: its file, the hardware in plain words, its curves (system, colour, dashed) and an optional note.
 CHARTS = [
-    ('docs/benchmark-deepseek-v41.svg', f'{M5} with two RX 7900 XTX cards, or one',
-     [('maya-ds4-exl3-dual-xtx', '#cf222e', False), ('maya-ds4-exl3-single-xtx', '#cf222e', True),
-      ('maya-ds4-gsq-dual-xtx', '#8250df', False), ('maya-ds4-maya-s-dual-xtx', '#0969da', False),
-      ('maya-ds4-maya-xs-dual-xtx', '#bc4c00', False)],
+    ('docs/benchmark-deepseek-v41-hardware.svg', f'EXL3 2.25 bpw · {M5} with one or two RX 7900 XTX cards',
+     [('maya-ds4-exl3-dual-xtx', '#cf222e', False), ('maya-ds4-exl3-single-xtx', '#bc4c00', False),
+      ('maya-ds4-exl3-apu', '#0969da', False)],
+     '1M allocation · runtime versions and full protocol in BENCHMARKS.md'),
+    ('docs/benchmark-deepseek-v41-quants.svg', f'{M5} with two RX 7900 XTX cards',
+     [('maya-ds4-exl3-dual-xtx', '#cf222e', False), ('maya-ds4-gsq-dual-xtx', '#8250df', False),
+      ('maya-ds4-maya-s-dual-xtx', '#0969da', False), ('maya-ds4-maya-xs-dual-xtx', '#bc4c00', False)],
      'EXL3: 1M allocation · other quants: 512K · runtime versions and full protocol in BENCHMARKS.md'),
     ('docs/benchmark-glm.svg', f'{M5} with two RX 7900 XTX cards', [('maya-glm-dual-xtx', '#1a7f37', False)],
      'Allocation: the smallest of 128K, 256K and 512K that holds the input · full protocol in BENCHMARKS.md'),
@@ -57,6 +60,7 @@ def spread(labels, top, bottom):
 def chart(data, hardware, series, note):
     """Prefill and decode against input length for one model's setups, the winning setup bold in the legend."""
     systems = data['systems']
+    series = [x for x in series if x[0] in systems]   # (a hardware option without a release yet: no curve)
     model = systems[series[0][0]]['model']
     left, right, height, xmin, xmax = 80, 1020, 165, 1800, 524288
     first = 139 + 24 * len(series)   # the first panel's top, below the legend
@@ -259,7 +263,7 @@ def render_deepseek_details(data, text):
     e = systems[QUANTS[0][0]]
     winners = set(data['winning_setups'].values())
     lines = ['## DeepSeek-V4.1-Flash-1017', '',
-             '![DeepSeek-V4.1-Flash-1017 context scaling on two RX 7900 XTX cards and on one](benchmark-deepseek-v41.svg)', '',
+             '![DeepSeek-V4.1-Flash-1017 context scaling, four quants on two RX 7900 XTX cards](benchmark-deepseek-v41-quants.svg)', '',
              f"**{e['name']}** uses the qualified {fork_version(e)}-based fork{' with the full-rate HIP EXL3 decode kernels' if 'full-rate' in e['runtime']['upstream'] else ''}, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../{e['manifest']}).", '',
              'GSQ, Maya-S and Maya-XS measurements use the v1.1.48 indexer engine at 512K. EXL3 uses 1M. The eleven curve points share identical input bytes, zero cached input, thinking off and a 256-token cap; each load is fresh, from the frozen profile. All five values were found at every point.', '',
              *detailed_table(data), '', detailed_summary(data), '',
@@ -303,6 +307,7 @@ def single_details(data):
     b = bench(v)
     dual = data['systems'][SINGLE.replace('single', 'dual')]
     lines = ['### One RX 7900 XTX', '',
+             '![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw context scaling on each hardware option](benchmark-deepseek-v41-hardware.svg)', '',
              (f"**{v['name']}** runs the same EXL3 2.25 bpw model and {fork_version(v)}-based engine as the dual recipe on one card, for a host without a second one." if same_exl3_engine(data) else
               f"**{v['name']}** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the {fork_version(v)}-based engine tag `{v['runtime']['release_tag']}`. The two-card line in the chart is the dual release (engine tag `{dual['runtime']['release_tag']}`).") +
              f" The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../{v['manifest']}).", '',

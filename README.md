@@ -19,6 +19,8 @@ Needs the M5 with two [RX 7900 XTX cards](#hardware), or one, and serves one con
 | Ansible recipe | [recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml) |
 <!-- /exl3-hardware-table -->
 
+![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw reading and answer-writing speeds on each hardware option](docs/benchmark-deepseek-v41-hardware.svg)
+
 <!-- quant-comparison-note -->
 EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity.
 <!-- /quant-comparison-note -->
@@ -38,7 +40,7 @@ EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also
 
 GSQ-RCO keeps its own [recipe](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml); Maya-S and Maya-XS v2 were measured for comparison only.
 
-![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds on two RX 7900 XTX cards and on one](docs/benchmark-deepseek-v41.svg)
+![DeepSeek-V4.1-Flash-1017 reading and answer-writing speeds, four quants on two RX 7900 XTX cards](docs/benchmark-deepseek-v41-quants.svg)
 
 [Measurements and method](docs/BENCHMARKS.md#deepseek-v41-flash-1017)
 

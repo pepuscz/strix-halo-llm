@@ -6,7 +6,7 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 ## DeepSeek-V4.1-Flash-1017
 
-![DeepSeek-V4.1-Flash-1017 context scaling on two RX 7900 XTX cards and on one](benchmark-deepseek-v41.svg)
+![DeepSeek-V4.1-Flash-1017 context scaling, four quants on two RX 7900 XTX cards](benchmark-deepseek-v41-quants.svg)
 
 **Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX** uses the qualified v1.1.56-based fork, original FP8 Engram, 16K prompt chunks and 1M context. [Ansible recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml).
 
@@ -129,6 +129,8 @@ The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 pred
 Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).
 
 ### One RX 7900 XTX
+
+![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw context scaling on each hardware option](benchmark-deepseek-v41-hardware.svg)
 
 **Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX** runs the same EXL3 2.25 bpw model on one card, for a host without a second one, on the v1.1.56-based engine tag `maya-ds4-exl3-1m-20261107`. The two-card line in the chart is the dual release (engine tag `maya-ds4-exl3-1m-20261112`). The Radeon 8060S holds a 113 GB expert pool, prompts run in 8K chunks (one card lends the prompt path no VRAM, so its buffers stay), and the DSpark blocks' experts all sit in the pool. [Ansible recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml).
 
