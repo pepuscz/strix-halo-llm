@@ -455,6 +455,11 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         expected_env = {k:v for k,v in expected_env.items() if "HELPER" not in k and k not in ("DS4_AR2", "DS4_AR2_DECODE", "DS4_YOCO_TP", "DS4_TP_CHECK", "DS4_EXL3_LEND", "DS4_DRAFT_DEV", "DS4_DRAFT_VRAM")}
     if exl3 and not single and not apu:
         expected_env["MAYA_DS4_PROMPT_LIGHT"] = "64"
+        # v6, short prompt reads: the run's devices polled every 1 ms, a chunk's mHC mixes in one kernel, each token's
+        # light row sent to the helper once, the light cut 32 for chunks of up to 1,024 tokens, each Engram layer
+        # waiting for its own table's rows, and reads of 64 tokens or more through the chunk path
+        expected_env.update({"DS4_RUN_POLL_MS": "1", "DS4_HC_MIX_ROWS": "1", "DS4_LIGHT_X_ONCE": "1",
+                             "DS4_PROMPT_LIGHT_SMALL": "32", "DS4_EG_LATE": "1", "DS4_CHUNK_MIN": "64"})
     if cfg["env"] != expected_env:
         drifted = sorted(key for key in set(cfg["env"]) | set(expected_env) if cfg["env"].get(key) != expected_env.get(key))
         fail("qualified Maya DS4 environment drifted: " + ", ".join(drifted))
