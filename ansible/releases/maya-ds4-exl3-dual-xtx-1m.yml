@@ -1,5 +1,5 @@
 ---
-strix_release_id: maya-ds4-exl3-dual-xtx-1m-v5
+strix_release_id: maya-ds4-exl3-dual-xtx-1m-v6
 strix_release_schema: 1
 strix_system:
   id: maya-ds4-exl3-dual-xtx
@@ -32,21 +32,21 @@ strix_paths:
   root: /opt/strix-halo
   source: /opt/strix-halo/src
   bin: /opt/strix-halo/bin
-  downloads: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v5/downloads
-  release: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v5
+  downloads: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v6/downloads
+  release: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v6
   models: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3
   state: /var/lib/strix-halo-inference-exl3
 strix_runtime:
   repository: https://github.com/pepuscz/project-maya
-  release_tag: maya-ds4-exl3-1m-20261116
-  tag_object: 0678bf04fb85da10d78621f4c01a8ea5074c5e39
+  release_tag: maya-ds4-exl3-1m-20261117
+  tag_object: a086a41e44fe1f05b762d519ed1f130039df9bd8
   tag_object_type: tag
-  source_commit: 6eedc4cf84b0511d56f82f4f9857afa7057f7ac2
-  source_tree: 45b8c77f9580ac208ba1aad54d963a5b51d3acd6
+  source_commit: 2fb9bfdb815cddba7afa23b0b7beb193a40ccc96
+  source_tree: 8c73c108aa850f198dbaf5765f5fd22600d43889
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.65
   upstream_commit: c81fab6c9d63cf69b928f92460e0a662b28aa9ec
-  server_sha256: 5708dc4ac6b1945506ab46d770e1c91a01d9a4334a0951bb4d36487bf234e133
+  server_sha256: ad6bf6679402a30d19bb62f206f410c5ce9c0c5f2e66cfd20c83e042e8d87fcf
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -359,7 +359,7 @@ strix_maya:
     sha256: f384b25188569368d420fa12c072f2cef8152b3bbd66f90154e896a66bb70d7a
   server:
     model_management: false
-    exe: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v5/source/build-hip/maya-ds4
+    exe: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v6/source/build-hip/maya-ds4
     args:
       - --pack
       - /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4
@@ -381,7 +381,7 @@ strix_maya:
       - '16384'
       - --suffix-draft
       - '0'
-    cwd: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v5/source
+    cwd: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v6/source
     tokenizer: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4/tokenizer
     backend: hip
     model_name: deepseek-v4.1-flash
@@ -394,8 +394,8 @@ strix_maya:
       top_p: 1.0
     reasoning_effort: high
     lib_dirs:
-      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v5/rocblas/install/lib
-      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v5/rocm/lib
+      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v6/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v6/rocm/lib
     port: 18109
     log: /var/lib/strix-halo-inference-exl3/native.log
     installer:
@@ -414,7 +414,7 @@ strix_maya:
       DS4_AR2_DECODE: '1'
       DS4_ATTN_SLAB_MB: '64'
       DS4_ATTN_WMMA: '1'
-      DS4_CHUNK_MIN: '128'
+      DS4_CHUNK_MIN: '64'
       DS4_DECODE_TRIM: '12'
       DS4_DRAFT_DEV: 1,0,0
       DS4_DRAFT_VRAM: 96,48,32
@@ -443,7 +443,7 @@ strix_maya:
       MAYA_DS4_SLOT_GB: '16'
       MAYA_DS4_SLOT_KEEP: '1'
       MAYA_DS4_SLOT_RAM_GB: '1'
-      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v5/rocm/lib/rocblas/library
+      ROCBLAS_TENSILE_LIBPATH: /opt/strix-halo/releases/maya-ds4-exl3-dual-xtx-1m-v6/rocm/lib/rocblas/library
       ROCBLAS_USE_HIPBLASLT: '0'
       MAYA_DS4_HELPER_EXL3: '1'
       DS4_FLOW_STATS: '1'
@@ -451,6 +451,11 @@ strix_maya:
       MAYA_DS4_PROMPT_LIGHT: '64'
       DS4_AHEAD_EXL3: '1'
       DS4_EXL3_LEND: '1'
+      DS4_RUN_POLL_MS: '1'
+      DS4_HC_MIX_ROWS: '1'
+      DS4_LIGHT_X_ONCE: '1'
+      DS4_PROMPT_LIGHT_SMALL: '32'
+      DS4_EG_LATE: '1'
   model_subdirectory: EXL3-2.25
 strix_qualification:
   answer_quality:
@@ -463,7 +468,7 @@ strix_qualification:
     thinking: false
     math_10_output_cap: 4096
     measured: '2026-11-12'
-    perplexity: 7.1934
+    perplexity: 7.1937
   retrieval_ladder:
     allocation_tokens: 1048576
     points: 5
@@ -474,14 +479,15 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1653.1623492681738
-    first_request_decode_tokens_per_second: 64.78716404312395
-    second_run_prefill_tokens_per_second: 1715.4895057388326
-    second_run_decode_tokens_per_second: 78.83391500718538
+    first_request_prefill_tokens_per_second: 1629.455699549058
+    first_request_decode_tokens_per_second: 57.56862509932087
+    second_run_prefill_tokens_per_second: 1697.962935399383
+    second_run_decode_tokens_per_second: 75.9118315706237
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
     values: 5/5
-    measured: '2026-11-16'
+    measured: '2026-11-17'
   qualified_configuration: "EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark and the\
-    \ helper\u2019s 109 GB pool, PROMPT_LIGHT=64, idle expert re-placement and optimized HIP EXL3 kernels."
+    \ helper\u2019s 109 GB pool, PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 kernels and short prompt\
+    \ reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)."

@@ -286,7 +286,10 @@ def exl3_details(data):
     ]
     lines = ['### EXL3 2.25 bpw on each hardware option', '',
              '![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw context scaling on each hardware option](benchmark-deepseek-v41-hardware.svg)', '',
-             f"**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files and {fork_version(e)}-based engine (`{e['runtime']['release_tag']}`) on the M5 alone, with one RX 7900 XTX, or with two. Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.", '',
+             (f"**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files and {fork_version(e)}-based engine (`{e['runtime']['release_tag']}`) on the M5 alone, with one RX 7900 XTX, or with two."
+              if same_exl3_engine(data) else
+              f"**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files on the M5 alone, with one RX 7900 XTX, or with two: two cards on the newer engine (`{e['runtime']['release_tag']}`, shorter prompt reads), one card and the M5 alone on `{systems[SINGLE]['runtime']['release_tag']}`.")
+             + " Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.", '',
              *table(data, 'First / second run', cols, rows), '']
     for sid, name in cols:
         v = systems[sid]
@@ -294,7 +297,7 @@ def exl3_details(data):
     n = e['near_capacity_needle']
     q = e['quality']
     lines += ['', f"On two cards the **{n['actual_input_tokens']:,}-token** check found **{n['needle_passes']}/5** values: **{reading(n['prefill_tokens_per_second'],0)} prefill / {reading(n['decode_tokens_per_second'])} decode tok/s**. "
-              f"Perplexity with this engine: **{reading(q['perplexity']['value'],4)}** (23 × 2,048 tokens). The answer-quality score (**{q['total']}/30**) and the Lucebox KL below were measured with the 12 Nov engine; the one-card and M5-alone recipes run the same model files and engine.", '',
+              f"Perplexity with this engine: **{reading(q['perplexity']['value'],4)}** (23 × 2,048 tokens). The answer-quality score (**{q['total']}/30**) and the Lucebox KL below were measured with the 12 Nov engine; the one-card and M5-alone recipes run the same model files" + (" and engine." if same_exl3_engine(data) else f" on `{systems[SINGLE]['runtime']['release_tag']}`."), '',
               '#### Recorded context scaling', '']
     for sid, name in cols:
         v = systems[sid]
