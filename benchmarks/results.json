@@ -1969,11 +1969,11 @@
       },
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-exl3-1m-20261116",
-        "source_commit": "6eedc4cf84b0511d56f82f4f9857afa7057f7ac2",
-        "source_tree": "45b8c77f9580ac208ba1aad54d963a5b51d3acd6",
-        "upstream": "Project Maya v1.1.65-based fork with DS4_HELPER_DRAFT, DS4_PROMPT_LIGHT=64, idle expert re-placement and optimized HIP EXL3 decode kernels",
-        "benchmark_binary_sha256": "5708dc4ac6b1945506ab46d770e1c91a01d9a4334a0951bb4d36487bf234e133"
+        "release_tag": "maya-ds4-exl3-1m-20261117",
+        "source_commit": "2fb9bfdb815cddba7afa23b0b7beb193a40ccc96",
+        "source_tree": "8c73c108aa850f198dbaf5765f5fd22600d43889",
+        "upstream": "Project Maya v1.1.65-based fork with DS4_HELPER_DRAFT, DS4_PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 decode kernels and shorter prompt reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)",
+        "benchmark_binary_sha256": "ad6bf6679402a30d19bb62f206f410c5ce9c0c5f2e66cfd20c83e042e8d87fcf"
       },
       "power_watts": {
         "stapm": 120,
@@ -2010,7 +2010,7 @@
         "thinking": false,
         "math_10_output_cap": 4096,
         "perplexity": {
-          "value": 7.1934,
+          "value": 7.1937,
           "sequences": 23,
           "tokens_per_sequence": 2048,
           "scored_tokens": 47081,
@@ -2058,18 +2058,18 @@
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 1653.1623492681738,
-        "decode_tokens_per_second": 64.78716404312395,
+        "prefill_tokens_per_second": 1629.455699549058,
+        "decode_tokens_per_second": 57.56862509932087,
         "allocation_tokens": 1048576,
         "second_run": {
-          "prefill_tokens_per_second": 1715.4895057388326,
-          "decode_tokens_per_second": 78.83391500718538,
+          "prefill_tokens_per_second": 1697.962935399383,
+          "decode_tokens_per_second": 75.9118315706237,
           "cached_tokens": 0
         },
         "prompt_sha256": "5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a"
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "release_id": "maya-ds4-exl3-dual-xtx-1m-v5",
+      "release_id": "maya-ds4-exl3-dual-xtx-1m-v6",
       "selection": "added_hardware",
       "context_scaling": [
         {
@@ -2077,14 +2077,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 2040,
           "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 503.4053893988747,
+          "prefill_tokens_per_second": 502.265117195194,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 92.28550829127613,
+          "decode_tokens_per_second": 92.0863309352518,
           "second_run": {
-            "prefill_tokens_per_second": 755.2199022656598,
-            "decode_tokens_per_second": 144.30665163472378,
+            "prefill_tokens_per_second": 759.041524036315,
+            "decode_tokens_per_second": 142.602495543672,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2095,14 +2095,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 7680,
           "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 960.1440216032405,
+          "prefill_tokens_per_second": 997.9728676126617,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 92.80742459396751,
+          "decode_tokens_per_second": 91.14212475078325,
           "second_run": {
-            "prefill_tokens_per_second": 1329.087636716046,
-            "decode_tokens_per_second": 142.88903773163653,
+            "prefill_tokens_per_second": 1312.887840402072,
+            "decode_tokens_per_second": 140.19715224534502,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2113,14 +2113,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 30720,
           "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 1643.237691764555,
+          "prefill_tokens_per_second": 1611.6001636781416,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 92.64620729588883,
+          "decode_tokens_per_second": 91.99367543481385,
           "second_run": {
-            "prefill_tokens_per_second": 1845.4440599769318,
-            "decode_tokens_per_second": 125.83562721195437,
+            "prefill_tokens_per_second": 1786.5762522608447,
+            "decode_tokens_per_second": 136.51877133105802,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2131,14 +2131,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 122879,
           "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 1968.4860252054127,
+          "prefill_tokens_per_second": 1929.7749676876276,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 88.55680088556801,
+          "decode_tokens_per_second": 88.22718500137856,
           "second_run": {
-            "prefill_tokens_per_second": 2034.8079518451361,
-            "decode_tokens_per_second": 138.70827915041178,
+            "prefill_tokens_per_second": 1979.8692321821597,
+            "decode_tokens_per_second": 129.11034900141215,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2149,14 +2149,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 491520,
           "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-          "prefill_tokens_per_second": 1579.3227985168144,
+          "prefill_tokens_per_second": 1532.0339471193945,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 85.33333333333333,
+          "decode_tokens_per_second": 84.58895056833201,
           "second_run": {
-            "prefill_tokens_per_second": 1584.1752648591366,
-            "decode_tokens_per_second": 125.66267425878657,
+            "prefill_tokens_per_second": 1537.9325083174826,
+            "decode_tokens_per_second": 124.41679626749612,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2167,23 +2167,23 @@
       "maya_bench": {
         "procedure": "Project Maya v1.1.65 maya.py --bench requests in one fresh load: three 256-token greedy answers, thinking off (decode is their mean), then 2,048- and 8,192-token prompts; the second run is the same seven requests after 60 s idle, every prompt read (cold=1).",
         "this_release": {
-          "decode_mean_tokens_per_second": 76.30248585509464,
+          "decode_mean_tokens_per_second": 70.40073727785513,
           "prefill_tokens_per_second": {
-            "2048": 579.7922033802338,
-            "8192": 982.442674853689
+            "2048": 535.1170568561873,
+            "8192": 1045.6848904149806
           },
           "second_run": {
-            "decode_mean_tokens_per_second": 98.99925044338194,
+            "decode_mean_tokens_per_second": 95.78684233761193,
             "prefill_tokens_per_second": {
-              "2048": 602.6720028250251,
-              "8192": 1211.6371596337874
+              "2048": 548.3413210527725,
+              "8192": 1229.3655081337415
             }
           }
         },
         "aggregation": "one load"
       },
-      "qualification_note": "EXL3 v5 at 1M: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.1934 on this engine; answer quality and Lucebox KL from the v4 engine.",
-      "manifest_sha256": "86a5a07dd145291f0e6063b9529ed45cdc73286754bac4e5ae9fab45a4280769",
+      "qualification_note": "EXL3 v6 at 1M: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.1937 on 23 x 2,048 tokens; answer quality and Lucebox KL from 12 Nov.",
+      "manifest_sha256": "1571f32906c2d630d755c9f31410135f7d8942a1d2c19284f48f36df86ca63c2",
       "measurement_profile": {
         "strix_gpu_od_enabled": true,
         "public_default_enabled": false,
@@ -2204,14 +2204,14 @@
       },
       "placement": {
         "vram_share_of_picks": {
-          "run1": 0.47658,
-          "run2": 0.8702799999999999
+          "run1": 0.4767,
+          "run2": 0.87148
         },
         "cpu_lane_picks_per_token": {
-          "run1": 0.2086,
-          "run2": 0.1912
+          "run1": 0.2096,
+          "run2": 0.19619999999999999
         },
-        "idle_moves": 7714,
+        "idle_moves": 4178,
         "note": "ladder means; the second run is the same request again in the same load after 60 s idle"
       },
       "near_capacity_needle": {
@@ -2219,11 +2219,11 @@
         "allocation_tokens": 1048576,
         "actual_input_tokens": 1040000,
         "prompt_sha256": "1420bcb32be6877eae9e491927e03654d25bafab3a4c0ea0241cf8953ca59881",
-        "prefill_tokens_per_second": 1118.2676657528054,
+        "prefill_tokens_per_second": 1069.7205817839956,
         "completion_tokens": 64,
         "cached_tokens": 0,
         "needle_passes": 5,
-        "decode_tokens_per_second": 80.02000500125031
+        "decode_tokens_per_second": 80.03001125422033
       }
     },
     "maya-ds4-exl3-single-xtx": {

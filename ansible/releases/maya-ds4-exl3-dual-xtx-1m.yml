@@ -468,26 +468,26 @@ strix_qualification:
     thinking: false
     math_10_output_cap: 4096
     measured: '2026-11-12'
-    perplexity: PENDING v6 measurement
+    perplexity: 7.1937
   retrieval_ladder:
     allocation_tokens: 1048576
     points: 5
-    values: PENDING v6 measurement
+    values: 25/25
     largest_input_tokens: 491520
   long_context:
     prompt_sha256: 5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: PENDING v6 measurement
-    first_request_decode_tokens_per_second: PENDING v6 measurement
-    second_run_prefill_tokens_per_second: PENDING v6 measurement
-    second_run_decode_tokens_per_second: PENDING v6 measurement
+    first_request_prefill_tokens_per_second: 1629.455699549058
+    first_request_decode_tokens_per_second: 57.56862509932087
+    second_run_prefill_tokens_per_second: 1697.962935399383
+    second_run_decode_tokens_per_second: 75.9118315706237
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
-    values: PENDING v6 measurement
-    measured: PENDING v6 measurement
+    values: 5/5
+    measured: '2026-11-17'
   qualified_configuration: "EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark and the\
     \ helper\u2019s 109 GB pool, PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 kernels and short prompt\
     \ reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)."
