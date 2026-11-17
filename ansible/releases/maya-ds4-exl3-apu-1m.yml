@@ -17,11 +17,11 @@ strix_platform:
   strict_kernel: false
   secure_boot: disabled
   kernel_arguments:
-  - amd_pstate=active
-  - amd_iommu=off
-  - amdgpu.gttsize=126976
-  - ttm.pages_limit=32505856
-  - ttm.page_pool_size=32505856
+    - amd_pstate=active
+    - amd_iommu=off
+    - amdgpu.gttsize=126976
+    - ttm.pages_limit=32505856
+    - ttm.page_pool_size=32505856
   discrete_gpus: []
   minimum_free_bytes: 423366012365
 strix_paths:
@@ -63,14 +63,14 @@ strix_rocm724:
     bin/hipcc: 7e6614203ff9838f64581a4c9522dd4794834d7e91bad8074bb8c88d85618d09
     lib/libamdhip64.so.7.2.70204: f1043337461c8e54ee135e95fa979a7d0e4344676ad5b0554652f844f8f098ac
   compat_debs:
-  - file: libicu74_74.2-1ubuntu3.1_amd64.deb
-    url: https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu74_74.2-1ubuntu3.1_amd64.deb
-    size: 10860078
-    sha256: c9a70989678660eed9a1e904c74fa043da8bec8e2036856fc16e31ced79b04f8
-  - file: libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
-    url: https://launchpadlibrarian.net/865991952/libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
-    size: 763972
-    sha256: bfd07c01d6e5ab3e327f3ca5819409b1914bbfb3f1a016d53e4dabd5f96143bb
+    - file: libicu74_74.2-1ubuntu3.1_amd64.deb
+      url: https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu74_74.2-1ubuntu3.1_amd64.deb
+      size: 10860078
+      sha256: c9a70989678660eed9a1e904c74fa043da8bec8e2036856fc16e31ced79b04f8
+    - file: libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      url: https://launchpadlibrarian.net/865991952/libxml2_2.9.14+dfsg-1.3ubuntu3.8_amd64.deb
+      size: 763972
+      sha256: bfd07c01d6e5ab3e327f3ca5819409b1914bbfb3f1a016d53e4dabd5f96143bb
 strix_rocblas:
   repository: https://github.com/ROCm/rocm-libraries.git
   tag: rocm-7.2.4
@@ -87,12 +87,12 @@ strix_rocblas:
   gpu_targets: gfx1100;gfx1151
   build_jobs: 2
   deps:
-  - name: libmsgpack-cxx-dev
-    version: 7.0.0-2
-    sha256: 033efcbd18ea9eec440e2a4277366623834ec0553a136bfa7ece2a94dbfbcdb2
-  - name: libboost1.90-dev
-    version: 1.90.0-6ubuntu1
-    sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
+    - name: libmsgpack-cxx-dev
+      version: 7.0.0-2
+      sha256: 033efcbd18ea9eec440e2a4277366623834ec0553a136bfa7ece2a94dbfbcdb2
+    - name: libboost1.90-dev
+      version: 1.90.0-6ubuntu1
+      sha256: 7b89698c907fd5d33ccd439674fa53803139923822181c87b910579827aca379
   reference_library_sha256: 187a52fd7a34ea502a20e42a1489775881456c8751436e1b3e5d7af7c6006e56
 strix_target:
   repository: turboderp/DeepSeek-V4.1-Flash-1017-exl3
@@ -101,146 +101,146 @@ strix_target:
   subdirectory: ''
   total_size: 361366012365
   files:
-  - name: model-00001-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 6032458343
-    sha256: f580ffacc90c2d0d70fd38326ec970935128c83a6a1df80ca6d126a67f222687
-  - name: model-00002-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4393973603
-    sha256: 805579875d7666d712935876ebf28125564b4d6c34ad52a90d2757348cd93f31
-  - name: model-00003-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4402337162
-    sha256: 3f1c8d653772d34d3b38a09321d56027e4309319222c4ecd4c4cd29df33f0012
-  - name: model-00004-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4393973603
-    sha256: c3aaff91dfa52913ca27759aadf6cbaa8df7f99edb405a949bcd89979c61dfe9
-  - name: model-00005-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4393973603
-    sha256: 068b3f87ce85c08718977c59e646d57e3982ec0d11af73cceb2c00b0236c1699
-  - name: model-00006-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7938603068
-    sha256: b2bce85976a4cadeb13b6c6443fcad28eefea8e469a554c7b4a383d1d364dcfe
-  - name: model-00007-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7097619475
-    sha256: 015174aabb8e7a44554de1005d3c0268795497fcfe68d167b47a02955547e4a9
-  - name: model-00008-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089260598
-    sha256: e5b3cf57999a4a6d742009abb38f67350934a5edbcd363f3ce5700265a0ed001
-  - name: model-00009-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089265280
-    sha256: 766a1165a894c1c5c7fd2fb4d7f63af6c1ace898388768a4cf66a69663abced5
-  - name: model-00010-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7412283884
-    sha256: d8065d83fd61079a156bf0e0eb9a656a2c1712b5b02f305c93e669f554baacdf
-  - name: model-00011-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089265280
-    sha256: a985a01e128fc3ad16ae898afbbbf4cbb46d73650eb2c884bad98292f87a3114
-  - name: model-00012-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089265280
-    sha256: c479da73c4b1610d0dd75cd5a0798e90237cec24e86d557e44bd0f6306b45e1b
-  - name: model-00013-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7095649023
-    sha256: 6301f61626af10d39f3f38f43f3a043de4cf084cf82ce66e4cc80f5dfcb9a2b1
-  - name: model-00014-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089265280
-    sha256: 40f70bc38023c0c0ec1ddca8e94c4719c6065b279497ac5ffa61439d6efda7d6
-  - name: model-00015-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7093536416
-    sha256: 0d4574af183130b6e9459089c2495dadd1cd1ba77932b976e62250da0a8278ed
-  - name: model-00016-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089265280
-    sha256: 29cbe6c8e49654ff13bcc23670202cf54274434e8e65e95cf8eb5e17f79f5bd7
-  - name: model-00017-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7093536416
-    sha256: f9c6183842b681401824c4044eb12b694582bdcc8d3a83c60cf86636e517ce6e
-  - name: model-00018-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089265280
-    sha256: d497e4ce3805418fc4ef1e343449dc1514b41f298da36f8aee18dbe4998d95c5
-  - name: model-00019-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7093536416
-    sha256: 86ce119965f9433b84cc8e08fa293f4162fb2ee3304e3d9552059521fb50e960
-  - name: model-00020-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7089265280
-    sha256: 7f9d610162d716b93515e7334b0cc9dd8f0f4444a3372d426f674799ab9d26f5
-  - name: model-00021-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4393978285
-    sha256: 11f405b59cd5e8396585ccd0503622d15ed04a7dce17bfc01e750c92fd2342bb
-  - name: model-00022-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4398249421
-    sha256: 245e664e9ee529d663d3a2a106a7ebf89eb0b3459c172b847fc74204d56acb0e
-  - name: model-00023-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4393978285
-    sha256: 2028095c52133c9bdab75972d65b493d700144ce92a7afc1476178fd96bb4be4
-  - name: model-00024-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 4393978285
-    sha256: 457b18745d97fdc7c21576279ad30aa6cb577becc12525f62800ed86fa9b0598
-  - name: model-00025-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 7460757610
-    sha256: 2e0fa08ea7301dfc6e83f6711bbdc23c18961a08d06731ec0fe3e776fad52eaa
-  - name: model-00026-of-00026.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 2334790648
-    sha256: 750589ec80a03fef30fe80baf3e4855c3bb84a82d819f9910b8319c6478479ba
-  - name: ngram_embedding.safetensors
-    local_subdirectory: EXL3-2.25
-    size: 202758032904
-    sha256: 9e53a8ee850a57a77cd2b41a0afd09c655809ef158c1b6916498695d8e0031e9
-  - name: model.safetensors.index.json
-    local_subdirectory: EXL3-2.25
-    size: 15577698
-    sha256: 92b8d7702c81da49d264b3db048a123b3cbcdf66448c2f81a20fa853a9412d1b
-  - name: config.json
-    local_subdirectory: EXL3-2.25
-    size: 4473
-    sha256: 044637f76322263ca892a909e5d392874ce0b15dd9fb30ff741a1dfb20c06bc1
-  - name: quantization_config.json
-    local_subdirectory: EXL3-2.25
-    size: 54676465
-    sha256: 8e7f8b1c6c9e3e65e50e151c35903d2f5939452af64ea951a1cd278986582d73
-  - name: tokenizer.json
-    local_subdirectory: EXL3-2.25
-    size: 6367257
-    sha256: c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b
-  - name: tokenizer_config.json
-    local_subdirectory: EXL3-2.25
-    size: 801
-    sha256: 6ac8c8dc065ed118161d02dd532749ae3f52c243deac27872134fae2f50d8547
-  - name: chat_template.jinja
-    local_subdirectory: EXL3-2.25
-    size: 15348
-    sha256: d959d804d5101b79a49b6ff1bf3c54cd5affa9a5a78c503d925f3090040b31c3
-  - name: LICENSE
-    local_subdirectory: EXL3-2.25
-    size: 1084
-    sha256: f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040
-  - name: README.md
-    local_subdirectory: EXL3-2.25
-    size: 5231
-    sha256: b72b796e4f4c739eca5d0ad360a7679b39118ca7eb64891f7151a527b292c42a
+    - name: model-00001-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 6032458343
+      sha256: f580ffacc90c2d0d70fd38326ec970935128c83a6a1df80ca6d126a67f222687
+    - name: model-00002-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4393973603
+      sha256: 805579875d7666d712935876ebf28125564b4d6c34ad52a90d2757348cd93f31
+    - name: model-00003-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4402337162
+      sha256: 3f1c8d653772d34d3b38a09321d56027e4309319222c4ecd4c4cd29df33f0012
+    - name: model-00004-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4393973603
+      sha256: c3aaff91dfa52913ca27759aadf6cbaa8df7f99edb405a949bcd89979c61dfe9
+    - name: model-00005-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4393973603
+      sha256: 068b3f87ce85c08718977c59e646d57e3982ec0d11af73cceb2c00b0236c1699
+    - name: model-00006-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7938603068
+      sha256: b2bce85976a4cadeb13b6c6443fcad28eefea8e469a554c7b4a383d1d364dcfe
+    - name: model-00007-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7097619475
+      sha256: 015174aabb8e7a44554de1005d3c0268795497fcfe68d167b47a02955547e4a9
+    - name: model-00008-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089260598
+      sha256: e5b3cf57999a4a6d742009abb38f67350934a5edbcd363f3ce5700265a0ed001
+    - name: model-00009-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089265280
+      sha256: 766a1165a894c1c5c7fd2fb4d7f63af6c1ace898388768a4cf66a69663abced5
+    - name: model-00010-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7412283884
+      sha256: d8065d83fd61079a156bf0e0eb9a656a2c1712b5b02f305c93e669f554baacdf
+    - name: model-00011-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089265280
+      sha256: a985a01e128fc3ad16ae898afbbbf4cbb46d73650eb2c884bad98292f87a3114
+    - name: model-00012-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089265280
+      sha256: c479da73c4b1610d0dd75cd5a0798e90237cec24e86d557e44bd0f6306b45e1b
+    - name: model-00013-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7095649023
+      sha256: 6301f61626af10d39f3f38f43f3a043de4cf084cf82ce66e4cc80f5dfcb9a2b1
+    - name: model-00014-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089265280
+      sha256: 40f70bc38023c0c0ec1ddca8e94c4719c6065b279497ac5ffa61439d6efda7d6
+    - name: model-00015-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7093536416
+      sha256: 0d4574af183130b6e9459089c2495dadd1cd1ba77932b976e62250da0a8278ed
+    - name: model-00016-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089265280
+      sha256: 29cbe6c8e49654ff13bcc23670202cf54274434e8e65e95cf8eb5e17f79f5bd7
+    - name: model-00017-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7093536416
+      sha256: f9c6183842b681401824c4044eb12b694582bdcc8d3a83c60cf86636e517ce6e
+    - name: model-00018-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089265280
+      sha256: d497e4ce3805418fc4ef1e343449dc1514b41f298da36f8aee18dbe4998d95c5
+    - name: model-00019-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7093536416
+      sha256: 86ce119965f9433b84cc8e08fa293f4162fb2ee3304e3d9552059521fb50e960
+    - name: model-00020-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7089265280
+      sha256: 7f9d610162d716b93515e7334b0cc9dd8f0f4444a3372d426f674799ab9d26f5
+    - name: model-00021-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4393978285
+      sha256: 11f405b59cd5e8396585ccd0503622d15ed04a7dce17bfc01e750c92fd2342bb
+    - name: model-00022-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4398249421
+      sha256: 245e664e9ee529d663d3a2a106a7ebf89eb0b3459c172b847fc74204d56acb0e
+    - name: model-00023-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4393978285
+      sha256: 2028095c52133c9bdab75972d65b493d700144ce92a7afc1476178fd96bb4be4
+    - name: model-00024-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 4393978285
+      sha256: 457b18745d97fdc7c21576279ad30aa6cb577becc12525f62800ed86fa9b0598
+    - name: model-00025-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 7460757610
+      sha256: 2e0fa08ea7301dfc6e83f6711bbdc23c18961a08d06731ec0fe3e776fad52eaa
+    - name: model-00026-of-00026.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 2334790648
+      sha256: 750589ec80a03fef30fe80baf3e4855c3bb84a82d819f9910b8319c6478479ba
+    - name: ngram_embedding.safetensors
+      local_subdirectory: EXL3-2.25
+      size: 202758032904
+      sha256: 9e53a8ee850a57a77cd2b41a0afd09c655809ef158c1b6916498695d8e0031e9
+    - name: model.safetensors.index.json
+      local_subdirectory: EXL3-2.25
+      size: 15577698
+      sha256: 92b8d7702c81da49d264b3db048a123b3cbcdf66448c2f81a20fa853a9412d1b
+    - name: config.json
+      local_subdirectory: EXL3-2.25
+      size: 4473
+      sha256: 044637f76322263ca892a909e5d392874ce0b15dd9fb30ff741a1dfb20c06bc1
+    - name: quantization_config.json
+      local_subdirectory: EXL3-2.25
+      size: 54676465
+      sha256: 8e7f8b1c6c9e3e65e50e151c35903d2f5939452af64ea951a1cd278986582d73
+    - name: tokenizer.json
+      local_subdirectory: EXL3-2.25
+      size: 6367257
+      sha256: c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b
+    - name: tokenizer_config.json
+      local_subdirectory: EXL3-2.25
+      size: 801
+      sha256: 6ac8c8dc065ed118161d02dd532749ae3f52c243deac27872134fae2f50d8547
+    - name: chat_template.jinja
+      local_subdirectory: EXL3-2.25
+      size: 15348
+      sha256: d959d804d5101b79a49b6ff1bf3c54cd5affa9a5a78c503d925f3090040b31c3
+    - name: LICENSE
+      local_subdirectory: EXL3-2.25
+      size: 1084
+      sha256: f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040
+    - name: README.md
+      local_subdirectory: EXL3-2.25
+      size: 5231
+      sha256: b72b796e4f4c739eca5d0ad360a7679b39118ca7eb64891f7151a527b292c42a
 strix_extra_artifacts: []
 strix_draft:
   repository: turboderp/DeepSeek-V4.1-Flash-1017-exl3
@@ -285,11 +285,11 @@ strix_service:
   health_delay_seconds: 5
   auto_start: true
   conflicts:
-  - deepseek-v4-flash.service
-  - m5-deepseek.service
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
   retire_units:
-  - deepseek-v4-flash.service
-  - m5-deepseek.service
+    - deepseek-v4-flash.service
+    - m5-deepseek.service
 strix_policy:
   cpu_governor: performance
   cpu_min_khz: 2000000
@@ -310,18 +310,18 @@ strix_maya:
   build_jobs: 4
   hip_architectures: gfx1100;gfx1151
   packages:
-  - build-essential
-  - cmake
-  - curl
-  - git
-  - ninja-build
-  - python3
-  - python3-venv
-  - python3-yaml
-  - python3-rich
-  - libdrm-amdgpu1
-  - libelf1t64
-  - libnuma1
+    - build-essential
+    - cmake
+    - curl
+    - git
+    - ninja-build
+    - python3
+    - python3-venv
+    - python3-yaml
+    - python3-rich
+    - libdrm-amdgpu1
+    - libelf1t64
+    - libnuma1
   requirements_sha256: abac03058b7d45744e8e197323dbf897ae8b035487056131f0809c9782c8e0a2
   pack: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4
   pack_kind: exl3
@@ -349,39 +349,39 @@ strix_maya:
     model_management: false
     exe: /opt/strix-halo/releases/maya-ds4-exl3-apu-1m-v1/source/build-hip/maya-ds4
     args:
-    - --pack
-    - /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4
-    - --max-context
-    - '1048576'
-    - --vision
-    - 'off'
-    - --dspark
-    - 'on'
-    - --threads
-    - 'on'
-    - --mmap-experts
-    - 'on'
-    - --expert-profile
-    - /var/lib/strix-halo-inference-exl3-apu/expert-profile.bin
-    - --prefill-chunk
-    - '16384'
-    - --suffix-draft
-    - '0'
-    - --reserve-mib
-    - '20480'
+      - --pack
+      - /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4
+      - --max-context
+      - '1048576'
+      - --vision
+      - 'off'
+      - --dspark
+      - 'on'
+      - --threads
+      - 'on'
+      - --mmap-experts
+      - 'on'
+      - --expert-profile
+      - /var/lib/strix-halo-inference-exl3-apu/expert-profile.bin
+      - --prefill-chunk
+      - '16384'
+      - --suffix-draft
+      - '0'
+      - --reserve-mib
+      - '20480'
     cwd: /opt/strix-halo/releases/maya-ds4-exl3-apu-1m-v1/source
     tokenizer: /opt/strix-halo/models/deepseek-v41-flash-1017-exl3/EXL3-2.25/maya-ds4/tokenizer
     backend: hip
     model_name: deepseek-v4.1-flash
     gpu:
-    - 0
+      - 0
     sampling:
       temperature: 1.0
       top_p: 1.0
     reasoning_effort: high
     lib_dirs:
-    - /opt/strix-halo/releases/maya-ds4-exl3-apu-1m-v1/rocblas/install/lib
-    - /opt/strix-halo/releases/maya-ds4-exl3-apu-1m-v1/rocm/lib
+      - /opt/strix-halo/releases/maya-ds4-exl3-apu-1m-v1/rocblas/install/lib
+      - /opt/strix-halo/releases/maya-ds4-exl3-apu-1m-v1/rocm/lib
     port: 18109
     log: /var/lib/strix-halo-inference-exl3-apu/native.log
     installer:

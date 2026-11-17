@@ -2265,7 +2265,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
       "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
-      "manifest_sha256": "819b0b507e3e421484928abb3aa4760b800966083eed13ee23056242b8e59471",
+      "manifest_sha256": "87b4392889a66f31e6543ca0f2606169030766e326eeedb2debcc877d1f64184",
       "release_id": "maya-ds4-exl3-single-xtx-1m-v2",
       "hardware": {
         "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",
@@ -2470,7 +2470,7 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw Radeon 8060S",
       "manifest": "ansible/releases/maya-ds4-exl3-apu-1m.yml",
-      "manifest_sha256": "38d7e3ed934303af8ad5c470b2f1d0b4eb2c78ab4f66e5ec9006b630aaeebfeb",
+      "manifest_sha256": "6c9ec9b7e8da93dfb46cbd015f1f304968b52cd49082cd2bc3a1775ce7a45ba9",
       "release_id": "maya-ds4-exl3-apu-1m-v1",
       "hardware": {
         "added_gpus": "none",
