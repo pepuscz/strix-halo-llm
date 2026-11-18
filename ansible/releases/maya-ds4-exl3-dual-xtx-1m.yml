@@ -479,15 +479,15 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1629.455699549058
-    first_request_decode_tokens_per_second: 57.56862509932087
-    second_run_prefill_tokens_per_second: 1697.962935399383
-    second_run_decode_tokens_per_second: 75.9118315706237
+    first_request_prefill_tokens_per_second: 1684.96773182105
+    first_request_decode_tokens_per_second: 60.33466886636813
+    second_run_prefill_tokens_per_second: 1751.408016333259
+    second_run_decode_tokens_per_second: 76.79385649148068
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
     values: 5/5
-    measured: '2026-11-17'
+    measured: '2026-11-18'
   qualified_configuration: "EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark and the\
     \ helper\u2019s 109 GB pool, PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 kernels and short prompt\
     \ reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)."

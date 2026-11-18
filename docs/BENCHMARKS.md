@@ -14,22 +14,22 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 | First / second run | M5 alone | 1 × RX 7900 XTX | **2 × RX 7900 XTX** |
 |---|---:|---:|---:|
-| Maya `--bench` decode | 22.1 / 26.7 | 48.3 / 66.7 | 70.4 / 95.8 |
-| Maya `--bench` prefill, 2K | 122 / 111 | 203 / 230 | 535 / 548 |
-| Maya `--bench` prefill, 8K | 297 / 317 | 540 / 615 | 1,046 / 1,229 |
-| 128K five-phrase: decode | 23.3 / 40.8 | 62.8 / 92.8 | 88.2 / 129.1 |
-| 128K five-phrase: prefill | 576 / 598 | 1,231 / 1,282 | 1,930 / 1,980 |
-| 480K five-phrase: decode | 23.2 / 38.6 | 62.3 / 91.6 | 84.6 / 124.4 |
-| 480K five-phrase: prefill | 473 / 477 | 1,074 / 1,088 | 1,532 / 1,538 |
-| Real code, 130,048 tokens: decode | 21.3 / 25.0 | 43.3 / 58.1 | 57.6 / 75.9 |
-| Real code, 130,048 tokens: prefill | 535 / 553 | 891 / 901 | 1,629 / 1,698 |
+| Maya `--bench` decode | 22.1 / 26.7 | 54.2 / 70.3 | 76.1 / 97.5 |
+| Maya `--bench` prefill, 2K | 122 / 111 | 202 / 230 | 658 / 664 |
+| Maya `--bench` prefill, 8K | 297 / 317 | 536 / 629 | 1,060 / 1,271 |
+| 128K five-phrase: decode | 23.3 / 40.8 | 64.6 / 91.7 | 90.8 / 130.6 |
+| 128K five-phrase: prefill | 576 / 598 | 1,251 / 1,303 | 1,992 / 2,057 |
+| 480K five-phrase: decode | 23.2 / 38.6 | 63.7 / 93.9 | 84.2 / 125.1 |
+| 480K five-phrase: prefill | 473 / 477 | 1,096 / 1,109 | 1,599 / 1,604 |
+| Real code, 130,048 tokens: decode | 21.3 / 25.0 | 46.1 / 61.7 | 60.3 / 76.8 |
+| Real code, 130,048 tokens: prefill | 535 / 553 | 900 / 916 | 1,685 / 1,751 |
 | Expert picks served from GPU memory | 85 % / 88 % | 24 % / 65 % | 48 % / 87 % |
 
 - **M5 alone** ([recipe](../ansible/releases/maya-ds4-exl3-apu-1m.yml)): the Radeon 8060S runs the whole model, with 20 GiB of RAM kept out of its expert budget; 16K prompt chunks.
 - **1 × RX 7900 XTX** ([recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml)): the card runs the model and the Radeon 8060S holds a 113 GB expert pool; 8K prompt chunks.
 - **2 × RX 7900 XTX** ([recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml)): the two cards run the model tensor parallel and the Radeon 8060S holds a 109 GB expert pool; 16K prompt chunks.
 
-On two cards the **1,040,000-token** check found **5/5** values: **1,070 prefill / 80.0 decode tok/s**. Perplexity with this engine: **7.1937** (23 × 2,048 tokens). The answer-quality score (**30/30**) and the Lucebox KL below were measured with this engine; the one-card recipe runs the same model files and engine, the M5-alone recipe the same model files on `maya-ds4-exl3-1m-20261116`.
+On two cards the **1,040,000-token** check found **5/5** values: **1,128 prefill / 79.4 decode tok/s**. Perplexity with this engine: **7.1937** (23 × 2,048 tokens). The answer-quality score (**30/30**) and the Lucebox KL below were measured with this engine; the one-card recipe runs the same model files and engine, the M5-alone recipe the same model files on `maya-ds4-exl3-1m-20261116`.
 
 #### Recorded context scaling
 
@@ -47,21 +47,21 @@ On two cards the **1,040,000-token** check found **5/5** values: **1,070 prefill
 
 | Input tokens | Prefill, first / second run | Decode, first / second run | Values |
 |---:|---:|---:|---:|
-| 2,040 | 225.1 / 277.2 | 63.1 / 102.3 | 5/5 |
-| 7,680 | 589.1 / 742.0 | 61.7 / 103.5 | 5/5 |
-| 30,720 | 1,016.6 / 1,121.6 | 60.7 / 97.4 | 5/5 |
-| 122,879 | 1,231.5 / 1,281.6 | 62.8 / 92.8 | 5/5 |
-| 491,520 | 1,074.4 / 1,088.3 | 62.3 / 91.6 | 5/5 |
+| 2,040 | 223.5 / 276.6 | 65.2 / 104.4 | 5/5 |
+| 7,680 | 595.4 / 748.5 | 63.8 / 106.0 | 5/5 |
+| 30,720 | 1,035.7 / 1,147.5 | 64.3 / 100.2 | 5/5 |
+| 122,879 | 1,250.7 / 1,302.8 | 64.6 / 91.7 | 5/5 |
+| 491,520 | 1,095.8 / 1,108.8 | 63.7 / 93.9 | 5/5 |
 
 **2 × RX 7900 XTX**
 
 | Input tokens | Prefill, first / second run | Decode, first / second run | Values |
 |---:|---:|---:|---:|
-| 2,040 | 502.3 / 759.0 | 92.1 / 142.6 | 5/5 |
-| 7,680 | 998.0 / 1,312.9 | 91.1 / 140.2 | 5/5 |
-| 30,720 | 1,611.6 / 1,786.6 | 92.0 / 136.5 | 5/5 |
-| 122,879 | 1,929.8 / 1,979.9 | 88.2 / 129.1 | 5/5 |
-| 491,520 | 1,532.0 / 1,537.9 | 84.6 / 124.4 | 5/5 |
+| 2,040 | 526.0 / 773.1 | 94.2 / 143.7 | 5/5 |
+| 7,680 | 1,011.4 / 1,346.5 | 92.7 / 141.6 | 5/5 |
+| 30,720 | 1,645.9 / 1,866.3 | 92.6 / 138.9 | 5/5 |
+| 122,879 | 1,992.2 / 2,057.0 | 90.8 / 130.6 | 5/5 |
+| 491,520 | 1,598.5 / 1,604.5 | 84.2 / 125.1 | 5/5 |
 
 ### Quants on two RX 7900 XTX
 
@@ -76,13 +76,13 @@ GSQ, Maya-S and Maya-XS were measured with the v1.1.48 indexer engine at 512K: e
 | Perplexity (23 × 2,048 tokens; lower is better) | 7.1937 | 7.3695 | 7.2498 | 7.9435 |
 | Quality | 30/30 | 30/30 | 30/30 | 30/30 |
 | Deepest retrieval | 5/5 at 1.04M | 5/5 at 520K | 5/5 at 520K | 5/5 at 520K |
-| Maya benchmark: decode | 70.4 | 60.9 | 41.7 | 80.7 |
-| Maya benchmark: prefill 2K / 8K | 535 / 1,046 | 210 / 537 | 169 / 478 | 286 / 661 |
-| 128K five-phrase: decode / prefill | 88.2 / 1,930 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
-| 480K five-phrase: decode / prefill | 84.6 / 1,532 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
-| Real code, 130,048 tokens: decode / prefill | 57.6 / 1,629 | 52.5 / 1,464 | 37.3 / 1,378 | 66.2 / 1,587 |
+| Maya benchmark: decode | 76.1 | 60.9 | 41.7 | 80.7 |
+| Maya benchmark: prefill 2K / 8K | 658 / 1,060 | 210 / 537 | 169 / 478 | 286 / 661 |
+| 128K five-phrase: decode / prefill | 90.8 / 1,992 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
+| 480K five-phrase: decode / prefill | 84.2 / 1,599 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
+| Real code, 130,048 tokens: decode / prefill | 60.3 / 1,685 | 52.5 / 1,464 | 37.3 / 1,378 | 66.2 / 1,587 |
 
-EXL3 supports 1M context and has the lowest measured perplexity (7.1937). It also decodes faster at long context (88.2 against GSQ-RCO's 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
+EXL3 supports 1M context and has the lowest measured perplexity (7.1937). It also decodes faster at long context (90.8 against GSQ-RCO's 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
 
 Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.
 

@@ -42,12 +42,12 @@
 <text class="tick" x="905.17" y="422" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="235" x2="1020.00" y2="400"/>
 <text class="tick" x="1020.00" y="422" text-anchor="middle">512K</text>
-<path d="M100.73 358.56 L320.35 317.67 L550.00 267.04 L779.65 240.79 L1009.31 273.61" fill="none" stroke="#cf222e" stroke-width="2.7"/>
-<circle cx="100.73" cy="358.56" r="4" fill="#cf222e"><title>2,040 tokens: 502.27</title></circle>
-<circle cx="320.35" cy="317.67" r="4" fill="#cf222e"><title>7,680 tokens: 997.97</title></circle>
-<circle cx="550.00" cy="267.04" r="4" fill="#cf222e"><title>30,720 tokens: 1611.60</title></circle>
-<circle cx="779.65" cy="240.79" r="4" fill="#cf222e"><title>122,879 tokens: 1929.77</title></circle>
-<circle cx="1009.31" cy="273.61" r="4" fill="#cf222e"><title>491,520 tokens: 1532.03</title></circle>
+<path d="M100.73 356.61 L320.35 316.56 L550.00 264.21 L779.65 235.64 L1009.31 268.12" fill="none" stroke="#cf222e" stroke-width="2.7"/>
+<circle cx="100.73" cy="356.61" r="4" fill="#cf222e"><title>2,040 tokens: 525.99</title></circle>
+<circle cx="320.35" cy="316.56" r="4" fill="#cf222e"><title>7,680 tokens: 1011.39</title></circle>
+<circle cx="550.00" cy="264.21" r="4" fill="#cf222e"><title>30,720 tokens: 1645.89</title></circle>
+<circle cx="779.65" cy="235.64" r="4" fill="#cf222e"><title>122,879 tokens: 1992.21</title></circle>
+<circle cx="1009.31" cy="268.12" r="4" fill="#cf222e"><title>491,520 tokens: 1598.55</title></circle>
 <path d="M100.73 378.69 L205.52 365.50 L320.35 351.57 L435.16 325.61 L550.00 308.24 L660.71 281.33 L779.65 261.99 L827.31 258.86 L870.78 262.21 L894.48 262.47 L1009.31 281.56" fill="none" stroke="#8250df" stroke-width="2.7"/>
 <circle cx="100.73" cy="378.69" r="4" fill="#8250df"><title>2,040 tokens: 258.30</title></circle>
 <circle cx="205.52" cy="365.50" r="4" fill="#8250df"><title>3,840 tokens: 418.20</title></circle>
@@ -84,14 +84,14 @@
 <circle cx="870.78" cy="257.50" r="4" fill="#bc4c00"><title>212,992 tokens: 1727.30</title></circle>
 <circle cx="894.48" cy="259.50" r="4" fill="#bc4c00"><title>245,760 tokens: 1703.00</title></circle>
 <circle cx="1009.31" cy="280.60" r="4" fill="#bc4c00"><title>491,520 tokens: 1447.30</title></circle>
-<line x1="1009.31" y1="273.61" x2="1032.31" y2="255.59" stroke="#cf222e" stroke-width="1"/>
-<text class="value" x="1040.31" y="259.59" text-anchor="start" style="fill:#cf222e">1532.0</text>
-<line x1="1009.31" y1="280.60" x2="1032.31" y2="271.59" stroke="#bc4c00" stroke-width="1"/>
-<text class="value" x="1040.31" y="275.59" text-anchor="start" style="fill:#bc4c00">1447.3</text>
-<line x1="1009.31" y1="281.56" x2="1032.31" y2="287.59" stroke="#8250df" stroke-width="1"/>
-<text class="value" x="1040.31" y="291.59" text-anchor="start" style="fill:#8250df">1435.6</text>
-<line x1="1009.31" y1="282.60" x2="1032.31" y2="303.59" stroke="#0969da" stroke-width="1"/>
-<text class="value" x="1040.31" y="307.59" text-anchor="start" style="fill:#0969da">1423.0</text>
+<line x1="1009.31" y1="268.12" x2="1032.31" y2="254.22" stroke="#cf222e" stroke-width="1"/>
+<text class="value" x="1040.31" y="258.22" text-anchor="start" style="fill:#cf222e">1598.5</text>
+<line x1="1009.31" y1="280.60" x2="1032.31" y2="270.22" stroke="#bc4c00" stroke-width="1"/>
+<text class="value" x="1040.31" y="274.22" text-anchor="start" style="fill:#bc4c00">1447.3</text>
+<line x1="1009.31" y1="281.56" x2="1032.31" y2="286.22" stroke="#8250df" stroke-width="1"/>
+<text class="value" x="1040.31" y="290.22" text-anchor="start" style="fill:#8250df">1435.6</text>
+<line x1="1009.31" y1="282.60" x2="1032.31" y2="302.22" stroke="#0969da" stroke-width="1"/>
+<text class="value" x="1040.31" y="306.22" text-anchor="start" style="fill:#0969da">1423.0</text>
 <text x="80" y="460" class="panel">Writing the answer (tokens/second) · higher is better</text>
 <line class="grid" x1="80" y1="645.00" x2="1020" y2="645.00"/>
 <text class="tick" x="68" y="649.00" text-anchor="end">0</text>
@@ -121,12 +121,12 @@
 <text class="tick" x="905.17" y="667" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="480" x2="1020.00" y2="645"/>
 <text class="tick" x="1020.00" y="667" text-anchor="middle">512K</text>
-<path d="M100.73 493.06 L320.35 494.62 L550.00 493.21 L779.65 499.43 L1009.31 505.43" fill="none" stroke="#cf222e" stroke-width="2.7"/>
-<circle cx="100.73" cy="493.06" r="4" fill="#cf222e"><title>2,040 tokens: 92.09</title></circle>
-<circle cx="320.35" cy="494.62" r="4" fill="#cf222e"><title>7,680 tokens: 91.14</title></circle>
-<circle cx="550.00" cy="493.21" r="4" fill="#cf222e"><title>30,720 tokens: 91.99</title></circle>
-<circle cx="779.65" cy="499.43" r="4" fill="#cf222e"><title>122,879 tokens: 88.23</title></circle>
-<circle cx="1009.31" cy="505.43" r="4" fill="#cf222e"><title>491,520 tokens: 84.59</title></circle>
+<path d="M100.73 489.52 L320.35 492.11 L550.00 492.22 L779.65 495.23 L1009.31 506.00" fill="none" stroke="#cf222e" stroke-width="2.7"/>
+<circle cx="100.73" cy="489.52" r="4" fill="#cf222e"><title>2,040 tokens: 94.23</title></circle>
+<circle cx="320.35" cy="492.11" r="4" fill="#cf222e"><title>7,680 tokens: 92.66</title></circle>
+<circle cx="550.00" cy="492.22" r="4" fill="#cf222e"><title>30,720 tokens: 92.59</title></circle>
+<circle cx="779.65" cy="495.23" r="4" fill="#cf222e"><title>122,879 tokens: 90.77</title></circle>
+<circle cx="1009.31" cy="506.00" r="4" fill="#cf222e"><title>491,520 tokens: 84.24</title></circle>
 <path d="M100.73 547.49 L205.52 551.44 L320.35 553.10 L435.16 553.92 L550.00 555.08 L660.71 547.49 L779.65 552.93 L827.31 561.51 L870.78 553.59 L894.48 557.38 L1009.31 554.58" fill="none" stroke="#8250df" stroke-width="2.7"/>
 <circle cx="100.73" cy="547.49" r="4" fill="#8250df"><title>2,040 tokens: 59.10</title></circle>
 <circle cx="205.52" cy="551.44" r="4" fill="#8250df"><title>3,840 tokens: 56.70</title></circle>
@@ -163,14 +163,14 @@
 <circle cx="870.78" cy="489.74" r="4" fill="#bc4c00"><title>212,992 tokens: 94.10</title></circle>
 <circle cx="894.48" cy="489.57" r="4" fill="#bc4c00"><title>245,760 tokens: 94.20</title></circle>
 <circle cx="1009.31" cy="496.34" r="4" fill="#bc4c00"><title>491,520 tokens: 90.10</title></circle>
-<line x1="1009.31" y1="496.34" x2="1032.31" y2="494.61" stroke="#bc4c00" stroke-width="1"/>
-<text class="value" x="1040.31" y="498.61" text-anchor="start" style="fill:#bc4c00">90.1</text>
-<line x1="1009.31" y1="505.43" x2="1032.31" y2="510.61" stroke="#cf222e" stroke-width="1"/>
-<text class="value" x="1040.31" y="514.61" text-anchor="start" style="fill:#cf222e">84.6</text>
-<line x1="1009.31" y1="554.58" x2="1032.31" y2="552.85" stroke="#8250df" stroke-width="1"/>
-<text class="value" x="1040.31" y="556.85" text-anchor="start" style="fill:#8250df">54.8</text>
-<line x1="1009.31" y1="590.22" x2="1032.31" y2="588.49" stroke="#0969da" stroke-width="1"/>
-<text class="value" x="1040.31" y="592.49" text-anchor="start" style="fill:#0969da">33.2</text>
+<line x1="1009.31" y1="496.34" x2="1032.31" y2="494.75" stroke="#bc4c00" stroke-width="1"/>
+<text class="value" x="1040.31" y="498.75" text-anchor="start" style="fill:#bc4c00">90.1</text>
+<line x1="1009.31" y1="506.00" x2="1032.31" y2="510.75" stroke="#cf222e" stroke-width="1"/>
+<text class="value" x="1040.31" y="514.75" text-anchor="start" style="fill:#cf222e">84.2</text>
+<line x1="1009.31" y1="554.58" x2="1032.31" y2="553.00" stroke="#8250df" stroke-width="1"/>
+<text class="value" x="1040.31" y="557.00" text-anchor="start" style="fill:#8250df">54.8</text>
+<line x1="1009.31" y1="590.22" x2="1032.31" y2="588.64" stroke="#0969da" stroke-width="1"/>
+<text class="value" x="1040.31" y="592.64" text-anchor="start" style="fill:#0969da">33.2</text>
 <text x="550" y="700" text-anchor="middle" class="label">Input length (tokens; each tick doubles)</text>
 <text x="550" y="735" text-anchor="middle" class="label">Test: find five phrases hidden in a long text. Every run found all five correctly.</text>
 <text x="550" y="765" text-anchor="middle" class="tick">EXL3: 1M allocation · other quants: 512K · runtime versions and full protocol in BENCHMARKS.md</text>
