@@ -10,26 +10,26 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 ![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw context scaling on each hardware option](benchmark-deepseek-v41-hardware.svg)
 
-**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files on the M5 alone, with one RX 7900 XTX, or with two: two cards on the newer engine (`maya-ds4-exl3-1m-20261117`, shorter prompt reads), one card and the M5 alone on `maya-ds4-exl3-1m-20261116`. Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.
+**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files on the M5 alone, with one RX 7900 XTX, or with two: two cards and one card on the newer engine (`maya-ds4-exl3-1m-20261117`, shorter prompt reads), the M5 alone on `maya-ds4-exl3-1m-20261116`. Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.
 
 | First / second run | M5 alone | 1 × RX 7900 XTX | **2 × RX 7900 XTX** |
 |---|---:|---:|---:|
-| Maya `--bench` decode | 22.1 / 26.7 | 54.8 / 70.5 | 70.4 / 95.8 |
-| Maya `--bench` prefill, 2K | 122 / 111 | 193 / 222 | 535 / 548 |
-| Maya `--bench` prefill, 8K | 297 / 317 | 518 / 610 | 1,046 / 1,229 |
-| 128K five-phrase: decode | 23.3 / 40.8 | 64.3 / 93.1 | 88.2 / 129.1 |
-| 128K five-phrase: prefill | 576 / 598 | 1,252 / 1,305 | 1,930 / 1,980 |
-| 480K five-phrase: decode | 23.2 / 38.6 | 63.2 / 94.6 | 84.6 / 124.4 |
-| 480K five-phrase: prefill | 473 / 477 | 1,096 / 1,109 | 1,532 / 1,538 |
-| Real code, 130,048 tokens: decode | 21.3 / 25.0 | 46.2 / 60.7 | 57.6 / 75.9 |
-| Real code, 130,048 tokens: prefill | 535 / 553 | 900 / 924 | 1,629 / 1,698 |
+| Maya `--bench` decode | 22.1 / 26.7 | 48.3 / 66.7 | 70.4 / 95.8 |
+| Maya `--bench` prefill, 2K | 122 / 111 | 203 / 230 | 535 / 548 |
+| Maya `--bench` prefill, 8K | 297 / 317 | 540 / 615 | 1,046 / 1,229 |
+| 128K five-phrase: decode | 23.3 / 40.8 | 62.8 / 92.8 | 88.2 / 129.1 |
+| 128K five-phrase: prefill | 576 / 598 | 1,231 / 1,282 | 1,930 / 1,980 |
+| 480K five-phrase: decode | 23.2 / 38.6 | 62.3 / 91.6 | 84.6 / 124.4 |
+| 480K five-phrase: prefill | 473 / 477 | 1,074 / 1,088 | 1,532 / 1,538 |
+| Real code, 130,048 tokens: decode | 21.3 / 25.0 | 43.3 / 58.1 | 57.6 / 75.9 |
+| Real code, 130,048 tokens: prefill | 535 / 553 | 891 / 901 | 1,629 / 1,698 |
 | Expert picks served from GPU memory | 85 % / 88 % | 24 % / 65 % | 48 % / 87 % |
 
 - **M5 alone** ([recipe](../ansible/releases/maya-ds4-exl3-apu-1m.yml)): the Radeon 8060S runs the whole model, with 20 GiB of RAM kept out of its expert budget; 16K prompt chunks.
 - **1 × RX 7900 XTX** ([recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml)): the card runs the model and the Radeon 8060S holds a 113 GB expert pool; 8K prompt chunks.
 - **2 × RX 7900 XTX** ([recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml)): the two cards run the model tensor parallel and the Radeon 8060S holds a 109 GB expert pool; 16K prompt chunks.
 
-On two cards the **1,040,000-token** check found **5/5** values: **1,070 prefill / 80.0 decode tok/s**. Perplexity with this engine: **7.1937** (23 × 2,048 tokens). The answer-quality score (**29/30**) and the Lucebox KL below were measured with the 12 Nov engine; the one-card and M5-alone recipes run the same model files on `maya-ds4-exl3-1m-20261116`.
+On two cards the **1,040,000-token** check found **5/5** values: **1,070 prefill / 80.0 decode tok/s**. Perplexity with this engine: **7.1937** (23 × 2,048 tokens). The answer-quality score (**30/30**) and the Lucebox KL below were measured with this engine; the one-card recipe runs the same model files and engine, the M5-alone recipe the same model files on `maya-ds4-exl3-1m-20261116`.
 
 #### Recorded context scaling
 
@@ -47,11 +47,11 @@ On two cards the **1,040,000-token** check found **5/5** values: **1,070 prefill
 
 | Input tokens | Prefill, first / second run | Decode, first / second run | Values |
 |---:|---:|---:|---:|
-| 2,040 | 223.2 / 274.8 | 65.0 / 104.7 | 5/5 |
-| 7,680 | 593.5 / 750.9 | 65.0 / 105.7 | 5/5 |
-| 30,720 | 1,034.1 / 1,154.7 | 63.4 / 101.0 | 5/5 |
-| 122,879 | 1,252.4 / 1,304.5 | 64.3 / 93.1 | 5/5 |
-| 491,520 | 1,096.0 / 1,109.1 | 63.2 / 94.6 | 5/5 |
+| 2,040 | 225.1 / 277.2 | 63.1 / 102.3 | 5/5 |
+| 7,680 | 589.1 / 742.0 | 61.7 / 103.5 | 5/5 |
+| 30,720 | 1,016.6 / 1,121.6 | 60.7 / 97.4 | 5/5 |
+| 122,879 | 1,231.5 / 1,281.6 | 62.8 / 92.8 | 5/5 |
+| 491,520 | 1,074.4 / 1,088.3 | 62.3 / 91.6 | 5/5 |
 
 **2 × RX 7900 XTX**
 
@@ -74,7 +74,7 @@ GSQ, Maya-S and Maya-XS were measured with the v1.1.48 indexer engine at 512K: e
 | Context allocation | 1M | 512K | 512K | 512K |
 | Model shards, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (23 × 2,048 tokens; lower is better) | 7.1937 | 7.3695 | 7.2498 | 7.9435 |
-| Quality | 29/30 | 30/30 | 30/30 | 30/30 |
+| Quality | 30/30 | 30/30 | 30/30 | 30/30 |
 | Deepest retrieval | 5/5 at 1.04M | 5/5 at 520K | 5/5 at 520K | 5/5 at 520K |
 | Maya benchmark: decode | 70.4 | 60.9 | 41.7 | 80.7 |
 | Maya benchmark: prefill 2K / 8K | 535 / 1,046 | 210 / 537 | 169 / 478 | 286 / 661 |
@@ -136,13 +136,13 @@ Different answer text and draft acceptance mean these decode rates do not isolat
 
 ### Quality and teacher comparison
 
-Cold coding/maths suite: EXL3 29/30 (12 Nov engine); GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.
+Cold coding/maths suite: EXL3 30/30 (this release); GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.
 
 The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.
 
 | Quant | KL | Top-1 agreement | Held-out PPL |
 |---|---:|---:|---:|
-| **EXL3 2.25** (12 Nov engine) | 0.1631 | 83.27% | 9.0912 |
+| **EXL3 2.25** (this release) | 0.1654 | 83.26% | 9.1463 |
 | GSQ-RCO IQ2_XS (v1.1.50 indexer) | 0.2272 | 80.51% | 9.6736 |
 
 Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).

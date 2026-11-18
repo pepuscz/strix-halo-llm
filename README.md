@@ -11,12 +11,12 @@ Runs on the M5 alone, or with one or two [RX 7900 XTX cards](#hardware), and ser
 <!-- exl3-hardware-table -->
 | EXL3 2.25 bpw, first / second run | M5 alone | 1 × RX 7900 XTX | **2 × RX 7900 XTX** |
 |---|---:|---:|---:|
-| Decode, short prompt | 22 / 27 | 55 / 71 | 70 / 96 |
-| Decode, 128K input | 23 / 41 | 64 / 93 | 88 / 129 |
-| Decode, real code (130K tokens) | 21 / 25 | 46 / 61 | 58 / 76 |
-| Prefill, 8K input | 297 / 317 | 518 / 610 | 1,046 / 1,229 |
-| Prefill, 128K input | 576 / 598 | 1,252 / 1,305 | 1,930 / 1,980 |
-| Prefill, real code (130K tokens) | 535 / 553 | 900 / 924 | 1,629 / 1,698 |
+| Decode, short prompt | 22 / 27 | 48 / 67 | 70 / 96 |
+| Decode, 128K input | 23 / 41 | 63 / 93 | 88 / 129 |
+| Decode, real code (130K tokens) | 21 / 25 | 43 / 58 | 58 / 76 |
+| Prefill, 8K input | 297 / 317 | 540 / 615 | 1,046 / 1,229 |
+| Prefill, 128K input | 576 / 598 | 1,231 / 1,282 | 1,930 / 1,980 |
+| Prefill, real code (130K tokens) | 535 / 553 | 891 / 901 | 1,629 / 1,698 |
 | Ansible recipe | [recipe](ansible/releases/maya-ds4-exl3-apu-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) |
 <!-- /exl3-hardware-table -->
 
@@ -34,7 +34,7 @@ EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also
 | Longest input | 1M | 512K | 512K | 512K |
 | Model size, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (lower is better) | 7.19 | 7.37 | 7.25 | 7.94 |
-| Quality checks passed | 29/30 | 30/30 | 30/30 | 30/30 |
+| Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 |
 | Decode, short prompt | 70 | 61 | 42 | 81 |
 | Decode, 128K input | 88 | 56 | 26 | 96 |
 | Prefill, 8K input | 1,046 | 537 | 478 | 661 |
