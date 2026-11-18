@@ -461,13 +461,13 @@ strix_qualification:
   answer_quality:
     coding: 10
     gsm8k: 10
-    math: 9
-    total: 29
-    scoring: 29/30 reviewed on 2026-11-12 with the v4 engine; math_08 gold corrected; perplexity measured with
-      this release.
+    math: 10
+    total: 30
+    scoring: 30/30 reviewed on 2026-11-18 with this release (raw 28/30, math_01 whitespace-normalized,
+      math_08 gold corrected); perplexity measured with this release.
     thinking: false
     math_10_output_cap: 4096
-    measured: '2026-11-12'
+    measured: '2026-11-18'
     perplexity: 7.1937
   retrieval_ladder:
     allocation_tokens: 1048576

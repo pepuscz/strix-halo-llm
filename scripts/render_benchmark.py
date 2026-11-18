@@ -235,10 +235,44 @@ def xs_summary(data):
     return lead + "Maya-XS v2 is the fastest, with higher perplexity."
 
 
+EXL3_SETUPS = [(SINGLE.replace('single', 'dual'), 'two cards'), (SINGLE, 'one card'), ('maya-ds4-exl3-apu', 'the M5 alone')]
+
+
 def same_exl3_engine(data):
-    """Whether the one-card and two-card EXL3 releases run the same engine tag."""
+    """Whether every EXL3 recipe (two cards, one card, the M5 alone) runs the same engine tag."""
+    return len({data['systems'][sid]['runtime']['release_tag'] for sid, _ in EXL3_SETUPS}) == 1
+
+
+def exl3_others(data):
+    """The EXL3 recipes on another engine tag than the two-card one's: (names, that tag)."""
     systems = data['systems']
-    return systems[SINGLE]['runtime']['release_tag'] == systems[SINGLE.replace('single', 'dual')]['runtime']['release_tag']
+    tag = systems[EXL3_SETUPS[0][0]]['runtime']['release_tag']
+    others = [(name, systems[sid]['runtime']['release_tag']) for sid, name in EXL3_SETUPS[1:]
+              if systems[sid]['runtime']['release_tag'] != tag]
+    return [n for n, _ in others], (others[0][1] if others else None)
+
+
+def join_names(names):
+    return names[0] if len(names) == 1 else ', '.join(names[:-1]) + ' and ' + names[-1]
+
+
+def exl3_recipes_sentence(data):
+    """Which engine the one-card and M5-alone recipes run, against the two-card one."""
+    if same_exl3_engine(data):
+        return "the one-card and M5-alone recipes run the same model files and engine."
+    names, old = exl3_others(data)
+    adj = {'one card': 'one-card', 'the M5 alone': 'M5-alone'}
+    same = [adj[n] for _, n in EXL3_SETUPS[1:] if n not in names]
+    diff = [adj[n] for n in names]
+    plural = lambda xs: 'recipes' if len(xs) > 1 else 'recipe'   # noqa: E731
+    head = (f"the {join_names(same)} {plural(same)} {'run' if len(same) > 1 else 'runs'} the same model files and engine, "
+            if same else '')
+    return head + f"the {join_names(diff)} {plural(diff)} the same model files on `{old}`."
+
+
+def exl3_quality_engine(e):
+    """Which engine the two-card answer-quality score and Lucebox KL were measured with."""
+    return 'this engine' if e['quality'].get('measured_with') == e['runtime']['release_tag'] else '12 Nov engine'
 
 
 def fork_version(system):
@@ -288,7 +322,9 @@ def exl3_details(data):
              '![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw context scaling on each hardware option](benchmark-deepseek-v41-hardware.svg)', '',
              (f"**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files and {fork_version(e)}-based engine (`{e['runtime']['release_tag']}`) on the M5 alone, with one RX 7900 XTX, or with two."
               if same_exl3_engine(data) else
-              f"**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files on the M5 alone, with one RX 7900 XTX, or with two: two cards on the newer engine (`{e['runtime']['release_tag']}`, shorter prompt reads), one card and the M5 alone on `{systems[SINGLE]['runtime']['release_tag']}`.")
+              (lambda names, old: f"**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files on the M5 alone, with one RX 7900 XTX, or with two: "
+               f"{join_names([n for _, n in EXL3_SETUPS if n not in names])} on the newer engine (`{e['runtime']['release_tag']}`, shorter prompt reads), "
+               f"{join_names(names)} on `{old}`.")(*exl3_others(data)))
              + " Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.", '',
              *table(data, 'First / second run', cols, rows), '']
     for sid, name in cols:
@@ -297,7 +333,7 @@ def exl3_details(data):
     n = e['near_capacity_needle']
     q = e['quality']
     lines += ['', f"On two cards the **{n['actual_input_tokens']:,}-token** check found **{n['needle_passes']}/5** values: **{reading(n['prefill_tokens_per_second'],0)} prefill / {reading(n['decode_tokens_per_second'])} decode tok/s**. "
-              f"Perplexity with this engine: **{reading(q['perplexity']['value'],4)}** (23 × 2,048 tokens). The answer-quality score (**{q['total']}/30**) and the Lucebox KL below were measured with the 12 Nov engine; the one-card and M5-alone recipes run the same model files" + (" and engine." if same_exl3_engine(data) else f" on `{systems[SINGLE]['runtime']['release_tag']}`."), '',
+              f"Perplexity with this engine: **{reading(q['perplexity']['value'],4)}** (23 × 2,048 tokens). The answer-quality score (**{q['total']}/30**) and the Lucebox KL below were measured with {'the ' if exl3_quality_engine(e) != 'this engine' else ''}{exl3_quality_engine(e)}; " + exl3_recipes_sentence(data), '',
               '#### Recorded context scaling', '']
     for sid, name in cols:
         v = systems[sid]
@@ -367,10 +403,10 @@ def render_deepseek_details(data, text):
         v = systems[sid]
         lines += ['#### ' + (f"**{v['name']}**" if sid in winners else v['name']), '', *scaling_rows(v), '']
     lines += ['### Quality and teacher comparison', '',
-              f"Cold coding/maths suite: EXL3 {e['quality']['total']}/30 (12 Nov engine); GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.", '',
+              f"Cold coding/maths suite: EXL3 {e['quality']['total']}/30 ({exl3_quality_engine(e).replace('this engine', 'this release')}); GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.", '',
               'The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.', '',
               '| Quant | KL | Top-1 agreement | Held-out PPL |', '|---|---:|---:|---:|']
-    for sid, label in [(QUANTS[0][0], '**EXL3 2.25** (12 Nov engine)'), (QUANTS[1][0], 'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
+    for sid, label in [(QUANTS[0][0], f"**EXL3 2.25** ({exl3_quality_engine(e).replace('this engine', 'this release')})"), (QUANTS[1][0], 'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
         z = systems[sid]['quality']['lucebox_kl']['all']
         lines.append(f"| {label} | {z['kl_top256']:.4f} | {z['top1_agree']*100:.2f}% | {z['ppl']:.4f} |")
     lines += ['', "Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).", '']
