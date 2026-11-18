@@ -459,10 +459,10 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 891.3618477553854
-    first_request_decode_tokens_per_second: 43.3288763265237
-    second_run_prefill_tokens_per_second: 901.3484740951029
-    second_run_decode_tokens_per_second: 58.09203957520196
+    first_request_prefill_tokens_per_second: 899.5628354822644
+    first_request_decode_tokens_per_second: 46.05973371716445
+    second_run_prefill_tokens_per_second: 915.9864455868919
+    second_run_decode_tokens_per_second: 61.723434008969186
   qualified_configuration: EXL3 2.25 bpw with original FP8 Engram, 1M context, 8K chunks, one RX 7900 XTX (the first
     of a host's cards, or strix_xtx_pci), DSpark with every one of its blocks' experts in the Radeon 8060S helper's
     113 GB pool, background memory compaction off while serving, PROMPT_LIGHT=64, idle expert re-placement, and the v6
