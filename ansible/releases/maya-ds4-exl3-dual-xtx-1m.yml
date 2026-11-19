@@ -463,11 +463,10 @@ strix_qualification:
     gsm8k: 10
     math: 10
     total: 30
-    scoring: 30/30 reviewed on 2026-11-18 with this release (raw 28/30, math_01 whitespace-normalized,
-      math_08 gold corrected); perplexity measured with this release.
+    scoring: 30/30 reviewed on 2026-11-19 with this release (raw 29/30, math_08 gold corrected); perplexity measured with this release.
     thinking: false
     math_10_output_cap: 4096
-    measured: '2026-11-18'
+    measured: '2026-11-19'
     perplexity: 7.1937
   retrieval_ladder:
     allocation_tokens: 1048576
@@ -479,15 +478,15 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1684.96773182105
-    first_request_decode_tokens_per_second: 60.33466886636813
-    second_run_prefill_tokens_per_second: 1751.408016333259
-    second_run_decode_tokens_per_second: 76.79385649148068
+    first_request_prefill_tokens_per_second: 1686.1255855503102
+    first_request_decode_tokens_per_second: 60.18054162487462
+    second_run_prefill_tokens_per_second: 1749.5937059399655
+    second_run_decode_tokens_per_second: 77.08598901926146
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
     values: 5/5
-    measured: '2026-11-18'
+    measured: '2026-11-19'
   qualified_configuration: "EXL3 2.25 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark and the\
     \ helper\u2019s 109 GB pool, PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 kernels and short prompt\
     \ reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)."
