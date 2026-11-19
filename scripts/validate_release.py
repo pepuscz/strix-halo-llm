@@ -26,6 +26,7 @@ SYSTEMS = {
     "maya-ds4-exl3-dual-xtx": ("Maya DS4 HIP EXL3 2.25 bpw dual RX 7900 XTX", "maya"),
     "maya-ds4-exl3-apu": ("Maya DS4 HIP EXL3 2.25 bpw Radeon 8060S", "maya"),
     "maya-ds4-exl3-single-xtx": ("Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX", "maya"),
+    "maya-ds4-exl3-268-dual-xtx": ("Maya DS4 HIP EXL3 2.68 bpw dual RX 7900 XTX", "maya"),
     "maya-glm-dual-xtx": ("Maya HIP Maya-M IQ2_S dual RX 7900 XTX", "maya"),
 }
 # A pin or result the qualified host has yet to supply. A manifest holding one, alone or in a sentence, is a draft:
@@ -34,10 +35,17 @@ PENDING = "PENDING"
 PENDING_WORD = re.compile(r"\bPENDING\b")
 # The model family each Maya system builds; the DeepSeek release predates strix_maya.family, so absent means deepseek.
 MAYA_FAMILIES = {"maya-ds4-gsq-dual-xtx": "deepseek", "maya-ds4-exl3-dual-xtx": "deepseek",
-                 "maya-ds4-exl3-single-xtx": "deepseek", "maya-ds4-exl3-apu": "deepseek", "maya-glm-dual-xtx": "glm"}
+                 "maya-ds4-exl3-single-xtx": "deepseek", "maya-ds4-exl3-apu": "deepseek",
+                 "maya-ds4-exl3-268-dual-xtx": "deepseek", "maya-glm-dual-xtx": "glm"}
 # turboderp's EXL3 on two cards (tensor parallel) and on one (for a host without a second card), and their manifests
 EXL3_SYSTEMS = {"maya-ds4-exl3-apu": "maya-ds4-exl3-apu-1m.yml","maya-ds4-exl3-dual-xtx": "maya-ds4-exl3-dual-xtx-1m.yml",
-                "maya-ds4-exl3-single-xtx": "maya-ds4-exl3-single-xtx-1m.yml"}
+                "maya-ds4-exl3-single-xtx": "maya-ds4-exl3-single-xtx-1m.yml",
+                "maya-ds4-exl3-268-dual-xtx": "maya-ds4-exl3-268-dual-xtx-1m.yml"}
+# turboderp's EXL3 2.68 bpw on two cards: 41 shards (the same Engram file), production's pool fill
+# (DS4_SETTLE_POOL, DS4_SETTLE_POOL_PROMPT) and reads under 384 tokens through the window path (on the chunk path its
+# experts that only the drive holds are copied whole); its own state folder
+EXL3_268 = "maya-ds4-exl3-268-dual-xtx"
+EXL3_268_ENV = {"DS4_SETTLE_POOL": "1", "DS4_SETTLE_POOL_PROMPT": "1024", "DS4_CHUNK_MIN": "384"}
 SINGLE_SYSTEMS = {"maya-ds4-exl3-single-xtx"}
 # the single-card release's prompt chunk and what its tuning changed from the dual release's settings (one card lends
 # no VRAM to the prompt path, so its chunk buffers stay: 8K chunks leave ~200 more experts in VRAM; the 8060S's pool
@@ -48,9 +56,11 @@ SINGLE_ENV = {"DS4_HELPER_GB": "113", "DS4_DRAFT_VRAM": "0,0,0"}
 # turboderp's EXL3 repo: 26 shards, its Engram tables (FP8) and the files the engine source's pack.py reads; the
 # DSpark drafter and its markov head are inside the shards.
 EXL3_SHARDS = tuple(f"model-{i:05d}-of-00026.safetensors" for i in range(1, 27))
-EXL3_FILES = {*EXL3_SHARDS, "ngram_embedding.safetensors", "model.safetensors.index.json", "config.json",
-              "quantization_config.json", "tokenizer.json", "tokenizer_config.json", "chat_template.jinja", "LICENSE",
-              "README.md"}
+EXL3_OTHER_FILES = {"ngram_embedding.safetensors", "model.safetensors.index.json", "config.json",
+                    "quantization_config.json", "tokenizer.json", "tokenizer_config.json", "chat_template.jinja",
+                    "LICENSE", "README.md"}
+EXL3_FILES = {*EXL3_SHARDS, *EXL3_OTHER_FILES}
+EXL3_268_FILES = {*(f"model-{i:05d}-of-00041.safetensors" for i in range(1, 42)), *EXL3_OTHER_FILES}
 EXL3_PACK_TOOLS = ("tools/ds4/pack.py", "tools/ds4/st.py", "tools/ds4/engram_hash.py", "tools/ds4/chat_template.jinja")
 MAYA_FILES = Path("ansible/roles/maya_runtime/files")
 # compat-bf16.json is not here: it names the model shard it was packed from, so it is pinned normalized.
@@ -340,7 +350,8 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
     single = data["strix_system"]["id"] in SINGLE_SYSTEMS
     apu = data["strix_system"]["id"] == "maya-ds4-exl3-apu"
     if exl3:
-        if {file["name"] for file in files} != EXL3_FILES or len(files) != len(EXL3_FILES) or \
+        wanted = EXL3_268_FILES if data["strix_system"]["id"] == EXL3_268 else EXL3_FILES
+        if {file["name"] for file in files} != wanted or len(files) != len(wanted) or \
                 service["parallel_slots"] != 1:
             fail("Maya DS4 EXL3 requires turboderp's pinned files and one session")
     elif len(files) != 4 or service["parallel_slots"] != 1:
@@ -460,6 +471,8 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         # waiting for its own table's rows, and reads of 64 tokens or more through the chunk path
         expected_env.update({"DS4_RUN_POLL_MS": "1", "DS4_HC_MIX_ROWS": "1", "DS4_LIGHT_X_ONCE": "1",
                              "DS4_PROMPT_LIGHT_SMALL": "32", "DS4_EG_LATE": "1", "DS4_CHUNK_MIN": "64"})
+    if data["strix_system"]["id"] == EXL3_268:
+        expected_env.update(EXL3_268_ENV)
     if exl3 and single:
         # v6 on one card: the run's devices polled every 1 ms, each token's light row sent to the helper once, each
         # Engram layer waiting for its own table's rows; no HC_MIX_ROWS and no light cut (slower reads on one card),

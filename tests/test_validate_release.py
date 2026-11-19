@@ -22,6 +22,7 @@ GLM = ROOT / "ansible/releases/maya-glm-dual-xtx-512k.yml"
 GSQ = ROOT / "ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml"
 EXL3 = ROOT / "ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml"
 EXL3_SINGLE = ROOT / "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml"
+EXL3_268 = ROOT / "ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml"
 DUMMY_HEX64 = "0123456789abcdef" * 4
 # Typed dummies where the validator requires a type other than a 64-hex digest.
 DUMMIES = {"tag_object": "0123456789abcdef0123456789abcdef01234567",
@@ -194,6 +195,33 @@ class ReleaseValidatorTest(unittest.TestCase):
             (lambda d: d["strix_maya"]["pack_tool"]["files"].pop("tools/ds4/st.py"), "pack.py and its helpers"),
             (lambda d: d["strix_maya"].update(pack=d["strix_maya"]["pack"] + "-x"),
              "must live in strix_maya.model_subdirectory"),
+        ):
+            broken = copy.deepcopy(data)
+            change(broken)
+            with self.subTest(message=message):
+                self.assert_fails(broken, message)
+
+    def test_exl3_268_validates_once_filled_and_rejects_drift(self) -> None:
+        data = without_pending(yaml.safe_load(EXL3_268.read_text(encoding="utf-8")))
+        qualification = data["strix_qualification"]
+        qualification["deep_needle"]["values"] = "5/5"
+        qualification["retrieval_ladder"].update(values="25/25", largest_input_tokens=491520)
+        qualification["long_context"].update(second_run_prefill_tokens_per_second=1000.0,
+                                             second_run_decode_tokens_per_second=40.0)
+        self.assertEqual(self.validate(data)["strix_system"]["id"], "maya-ds4-exl3-268-dual-xtx")
+        model = data["strix_paths"]["models"] + "/" + data["strix_maya"]["model_subdirectory"]
+        normalized = (ROOT / "tests/fixtures/exl3-ds4-normalized.txt").read_text(encoding="utf-8")
+        import hashlib
+        self.assertEqual(hashlib.sha256(normalized.replace("model_dir MODEL_DIR", "model_dir " + model).encode()).hexdigest(),
+                         data["strix_maya"]["pack_files"]["ds4.txt"])
+        two_25 = yaml.safe_load(EXL3.read_text(encoding="utf-8"))["strix_target"]["files"]
+        for change, message in (
+            (lambda d: d["strix_maya"]["server"]["env"].update(DS4_CHUNK_MIN="64"), "environment drifted: DS4_CHUNK_MIN"),
+            (lambda d: d["strix_maya"]["server"]["env"].pop("DS4_SETTLE_POOL"), "environment drifted: DS4_SETTLE_POOL"),
+            (lambda d: d["strix_maya"]["server"]["env"].pop("DS4_SETTLE_POOL_PROMPT"),
+             "environment drifted: DS4_SETTLE_POOL_PROMPT"),
+            (lambda d: d["strix_target"].update(files=two_25, total_size=sum(f["size"] for f in two_25)),
+             "turboderp's pinned files"),
         ):
             broken = copy.deepcopy(data)
             change(broken)

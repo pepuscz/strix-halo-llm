@@ -10,12 +10,29 @@ export STRIX_SYSTEM=strata-qwen-q4xl     # Winning single-box Qwen setup; defaul
 # export STRIX_SYSTEM=maya-ds4-gsq-dual-xtx # DeepSeek-V4.1-Flash-1017 (GSQ-RCO IQ2_XS) on two RX 7900 XTX cards
 # export STRIX_SYSTEM=maya-ds4-exl3-dual-xtx # DeepSeek-V4.1-Flash-1017 (EXL3 2.25 bpw, 1M context) on two RX 7900 XTX cards
 # export STRIX_SYSTEM=maya-ds4-exl3-single-xtx # the same on one RX 7900 XTX (strix_xtx_pci picks the card on a host with more)
+# export STRIX_SYSTEM=maya-ds4-exl3-268-dual-xtx # DeepSeek-V4.1-Flash-1017 (EXL3 2.68 bpw, 1M context) on two RX 7900 XTX cards
 bin/strixctl validate
 bin/strixctl install --allow-reboot
 bin/strixctl verify
 ```
 
 Keep the same `STRIX_SYSTEM` selection for later commands. Installing a different setup replaces the shared `strix-halo-inference.service` and retains the other release's immutable artifacts. The installer retires the previous model service names. The initial Qwen build and tensor conversion run on the target host; the controller observes their progress.
+
+### Reuse the Engram file
+
+The EXL3 2.25 and 2.68 bpw recipes download the same 203 GB Engram file (`ngram_embedding.safetensors`, one SHA-256 on
+both branches) into their own model folders. With 2.25 bpw installed, hard-link it and its verified marker into the 2.68
+bpw folder before installing 2.68 bpw; the installer then neither downloads nor hashes it again:
+
+```bash
+M=/opt/strix-halo/models/deepseek-v41-flash-1017-exl3
+sudo install -d -m 0755 "$M/EXL3-2.68"
+sudo ln "$M/EXL3-2.25/ngram_embedding.safetensors" "$M/EXL3-2.68/"
+sudo cp "$M/EXL3-2.25/ngram_embedding.safetensors.verified" "$M/EXL3-2.68/"
+```
+
+The two recipes keep separate state folders (`/var/lib/strix-halo-inference-exl3` and `-exl3-268`), so saved
+conversations of one quant are never restored into the other.
 
 ## Service controls
 

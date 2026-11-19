@@ -6,7 +6,7 @@
 
 | Component | Pinned source |
 |---|---|
-| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-exl3-1m-20261119), annotated tag `maya-ds4-exl3-1m-20261119` (object `77a7b6cb9e77d16b90b50d5d6064d9a12eec62d3`), commit `90fcbd1720994c39de3ba08ffd0e9abe68ba60b6`, tree `2db470ee1067ec6411ef17156b17b5e16d9afd43`, one engine for all three setups: upstream v1.1.67 (`56b5216ab4464ac41c26b1be32eb63b98de53d0a`) with the changes of the open PRs mw00/project-maya#867, #904, #967, #968, #1000, #1001, #1002, #1003, #1008, #1012, #1013, #1029, #1030, #1031, #1032, #1033 and #1034 - among them shorter prompt reads (a chunk's mHC mixes in one kernel, each token's row sent to the helper once, a smaller light cut for chunks of up to 1,024 tokens, the Engram rows waited for per table), the `cold=1` request key, a same-bits `block_gemv` load order and the idle pool fill for larger quants (off in these recipes) |
+| Runtime | [pepuscz/project-maya](https://github.com/pepuscz/project-maya/tree/maya-ds4-exl3-1m-20261119), annotated tag `maya-ds4-exl3-1m-20261119` (object `77a7b6cb9e77d16b90b50d5d6064d9a12eec62d3`), commit `90fcbd1720994c39de3ba08ffd0e9abe68ba60b6`, tree `2db470ee1067ec6411ef17156b17b5e16d9afd43`, one engine for all three setups: upstream v1.1.67 (`56b5216ab4464ac41c26b1be32eb63b98de53d0a`) with the changes of the open PRs mw00/project-maya#867, #904, #967, #968, #1000, #1001, #1002, #1003, #1008, #1012, #1013, #1029, #1030, #1031, #1032, #1033 and #1034 - among them shorter prompt reads (a chunk's mHC mixes in one kernel, each token's row sent to the helper once, a smaller light cut for chunks of up to 1,024 tokens, the Engram rows waited for per table), the `cold=1` request key, a same-bits `block_gemv` load order and the idle pool fill for larger quants (on in the 2.68 bpw recipe below) |
 | Target | [turboderp/DeepSeek-V4.1-Flash-1017-exl3](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3/tree/9183eaaeb6f08dff6ee5b6e34b852911cf6733c9), revision `9183eaaeb6f08dff6ee5b6e34b852911cf6733c9`: 26 EXL3 shards, original FP8 Engram and pinned metadata; about 361 GB total |
 | Pack | The tagged engine’s `tools/ds4/pack.py`, `st.py`, `engram_hash.py` and chat template, all SHA-256 pinned. The pack indexes the downloaded safetensors in place and writes eight small metadata/tokenizer files |
 | Draft | DSpark and its Markov head are included in the target shards. The packer restores the Markov tensor names used by the engine |
@@ -21,6 +21,17 @@ python tools/ds4/pack.py --model "$MODELS/EXL3-2.25" --out "$MODELS/EXL3-2.25/ma
 ```
 
 The engine source maps `markov_w1` to `embed` and `markov_w2` to `head`. Model tensors remain in their source files. The rebuilt pack matched the qualification pack byte for byte; `ds4.txt` is checked with its model directory normalized and at the published directory. GSQ’s GGUF/hybrid packing path is unchanged.
+
+### Maya DS4 HIP EXL3 2.68 bpw: two cards
+
+| Component | Pinned source |
+|---|---|
+| Runtime | The same tag as the 2.25 bpw recipes above, `maya-ds4-exl3-1m-20261119` (commit `90fcbd1720994c39de3ba08ffd0e9abe68ba60b6`), with the idle pool fill on (`DS4_SETTLE_POOL=1`, `DS4_SETTLE_POOL_PROMPT=1024`; mw00/project-maya#1032 and #1033) and `DS4_CHUNK_MIN=384` |
+| Target | [turboderp/DeepSeek-V4.1-Flash-1017-exl3](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3/tree/608c237e95188739612e435a935ffa614b9c40e9), branch `2.68bpw`, revision `608c237e95188739612e435a935ffa614b9c40e9`: 41 EXL3 shards (about 193 GB), the same original FP8 Engram file as 2.25 bpw and pinned metadata; about 395 GB total |
+| Pack | The same tools as 2.25 bpw, into `EXL3-2.68/maya-ds4`; only `tensors.txt` differs from 2.25 bpw's pack (`ds4.txt` matches it with the model directory normalized) |
+| State | `/var/lib/strix-halo-inference-exl3-268`: its own profile, LT picks and saved conversations |
+
+The [manifest](../ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml) pins every file.
 
 ### Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX
 

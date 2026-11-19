@@ -209,7 +209,8 @@
           - (single or apu) == ('--tp' not in strix_maya.server.args)
           - >-
             strix_maya.server.env.DS4_DECODE_TRIM ==
-            ('12' if strix_system.id in ['maya-ds4-exl3-dual-xtx', 'maya-ds4-exl3-single-xtx', 'maya-ds4-exl3-apu'] else '15')
+            ('12' if strix_system.id in ['maya-ds4-exl3-dual-xtx', 'maya-ds4-exl3-single-xtx', 'maya-ds4-exl3-apu',
+                                         'maya-ds4-exl3-268-dual-xtx'] else '15')
           - strix_maya.server.args[:4] == ['--pack', strix_maya.pack, '--max-context', strix_service.context | string]
           - strix_maya.server.env.MAYA_DS4_SLOT_DIR == strix_paths.state + '/ds4-slots'
           - strix_maya.server.env.MAYA_DS4_SLOT_KEEP == '1'
