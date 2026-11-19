@@ -408,10 +408,14 @@ def detailed_summary(data):
 
 
 NUMBERS = {4: 'four', 5: 'five'}
-EXL3_268_NOTE = ('The 2.25 bpw two-card recipe on turboderp\'s larger 2.68 bpw files (193 GB of shards against 159 GB): fewer '
-                 'experts fit in VRAM and the 8060S\'s pool, so idle re-placement also fills the pool and a request\'s '
-                 'picks warm it (`DS4_SETTLE_POOL`, `DS4_SETTLE_POOL_PROMPT=1024`), and reads under 384 tokens take the '
-                 'window path (`DS4_CHUNK_MIN=384`), where experts only the drive holds are not copied whole.')
+def exl3_268_note(data):
+    """What the 2.68 bpw recipe changes from the two-card 2.25 bpw one, and why."""
+    y, x = data['systems'][EXL3_268], data['systems']['maya-ds4-exl3-dual-xtx']
+    return (f"The 2.25 bpw two-card recipe on turboderp's larger 2.68 bpw files ({y['target']['model_bytes']/1e9:.0f} GB of shards "
+            f"against {x['target']['model_bytes']/1e9:.0f} GB): fewer experts fit in VRAM and the 8060S's pool, so idle "
+            "re-placement also fills the pool, steered by what prompts read (`DS4_SETTLE_POOL`, `DS4_SETTLE_POOL_PROMPT=1024`), "
+            "and reads under 384 tokens take the window path (`DS4_CHUNK_MIN=384`), where experts only the drive holds are "
+            "not copied whole.")
 
 
 def scaling_rows(system):
@@ -441,7 +445,7 @@ def render_deepseek_details(data, text):
         lines += ['#### ' + (f"**{v['name']}**" if sid in winners else v['name']), '']
         if sid == EXL3_268:
             n = v['near_capacity_needle']
-            lines += [f"([recipe](../{v['manifest']})) {EXL3_268_NOTE} Same procedure as the two-card 2.25 bpw release above: first run / second run after 60 s idle. "
+            lines += [f"([recipe](../{v['manifest']})) {exl3_268_note(data)} Same procedure as the two-card 2.25 bpw release above: first run / second run after 60 s idle. "
                       f"The **{n['actual_input_tokens']:,}-token** check found **{n['needle_passes']}/5** values: **{reading(n['prefill_tokens_per_second'],0)} prefill / {reading(n['decode_tokens_per_second'])} decode tok/s**.", '',
                       '| Input tokens | Prefill, first / second run | Decode, first / second run | Values |', '|---:|---:|---:|---:|']
             for x in v['context_scaling']:
@@ -455,8 +459,8 @@ def render_deepseek_details(data, text):
         else:
             lines += [*scaling_rows(v), '']
     lines += ['### Quality and teacher comparison', '',
-              f"Cold coding/maths suite: EXL3 {e['quality']['total']}/30 ({exl3_quality_engine(e).replace('this engine', 'this release')})"
-              + (f", EXL3 2.68 bpw {systems[EXL3_268]['quality']['total']}/30 (its release)" if EXL3_268 in systems else '')
+              f"Cold coding/maths suite: EXL3{' 2.25 bpw' if EXL3_268 in systems else ''} {e['quality']['total']}/30 ({exl3_quality_engine(e).replace('this engine', 'this release')})"
+              + (f", 2.68 bpw {systems[EXL3_268]['quality']['total']}/30 (its release)" if EXL3_268 in systems else '')
               + f"; GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.", '',
               'The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.', '',
               '| Quant | KL | Top-1 agreement | Held-out PPL |', '|---|---:|---:|---:|']
