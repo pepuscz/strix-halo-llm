@@ -25,20 +25,20 @@ The second run is the same request again after 60 s idle, with the experts it us
 ![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw reading and answer-writing speeds on each hardware option](docs/benchmark-deepseek-v41-hardware.svg)
 
 <!-- quant-comparison-note -->
-EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity.
+EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity. EXL3 2.68 bpw stays closer to the original model (KL 0.098 against 0.165) and decodes a short prompt at 55 % of 2.25 bpw's speed.
 <!-- /quant-comparison-note -->
 
 <!-- quant-comparison-table -->
-| 2 × RX 7900 XTX | **EXL3 2.25 bpw** | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
-|---|---:|---:|---:|---:|
-| Longest input | 1M | 512K | 512K | 512K |
-| Model size, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
-| Perplexity (lower is better) | 7.19 | 7.37 | 7.25 | 7.94 |
-| Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 |
-| Decode, short prompt | 77 | 61 | 42 | 81 |
-| Decode, 128K input | 89 | 56 | 26 | 96 |
-| Prefill, 8K input | 1,062 | 537 | 478 | 661 |
-| Prefill, 128K input | 1,985 | 1,673 | 1,669 | 1,762 |
+| 2 × RX 7900 XTX | **EXL3 2.25 bpw** | EXL3 2.68 bpw | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
+|---|---:|---:|---:|---:|---:|
+| Longest input | 1M | 1M | 512K | 512K | 512K |
+| Model size, excluding Engram | 159 GB | 193 GB | 155 GB | 178 GB | 117 GB |
+| Perplexity (lower is better) | 7.19 | 7.08 | 7.37 | 7.25 | 7.94 |
+| Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 | 30/30 |
+| Decode, short prompt | 77 | 42 | 61 | 42 | 81 |
+| Decode, 128K input | 89 | 42 | 56 | 26 | 96 |
+| Prefill, 8K input | 1,062 | 472 | 537 | 478 | 661 |
+| Prefill, 128K input | 1,985 | 1,746 | 1,673 | 1,669 | 1,762 |
 <!-- /quant-comparison-table -->
 
 EXL3 2.68 bpw and GSQ-RCO have their own recipes ([EXL3 2.68 bpw](ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml), [GSQ-RCO](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml)); Maya-S and Maya-XS v2 were measured for comparison only.

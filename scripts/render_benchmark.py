@@ -392,7 +392,8 @@ def detailed_summary(data):
     x = data['systems']['maya-ds4-exl3-dual-xtx']
     xs = data['systems']['maya-ds4-maya-xs-dual-xtx']
     g = data['systems']['maya-ds4-gsq-dual-xtx']
-    faster = (f"It also decodes faster at long context ({at_128k(x):.1f} against GSQ-RCO's {at_128k(g):.1f} tokens/s at 128K). "
+    it = '2.25 bpw' if EXL3_268 in data['systems'] else 'It'
+    faster = (f"{it} also decodes faster at long context than GSQ-RCO ({at_128k(x):.1f} against {at_128k(g):.1f} tokens/s at 128K). "
               if at_128k(x) > at_128k(g) else
               f"GSQ-RCO decodes faster at long context ({at_128k(g):.1f} against {at_128k(x):.1f} tokens/s at 128K). ")
     if EXL3_268 in data['systems']:

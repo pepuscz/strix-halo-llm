@@ -65,26 +65,40 @@ On two cards the **1,040,000-token** check found **5/5** values: **1,129 prefill
 
 ### Quants on two RX 7900 XTX
 
-![DeepSeek-V4.1-Flash-1017 context scaling, four quants on two RX 7900 XTX cards](benchmark-deepseek-v41-quants.svg)
+![DeepSeek-V4.1-Flash-1017 context scaling, five quants on two RX 7900 XTX cards](benchmark-deepseek-v41-quants.svg)
 
-GSQ, Maya-S and Maya-XS were measured with the v1.1.48 indexer engine at 512K: eleven curve points, medians of three loads for GSQ and one load for Maya-S and Maya-XS, and the [fixed-input Maya benchmark](../benchmarks/maya_bench.py) ([token fixture](../benchmarks/maya-bench-inputs.json)). EXL3's column is the two-card release above (first runs, Maya's own `--bench` requests). Thinking off, zero cached input, a 256-token cap.
+GSQ, Maya-S and Maya-XS were measured with the v1.1.48 indexer engine at 512K: eleven curve points, medians of three loads for GSQ and one load for Maya-S and Maya-XS, and the [fixed-input Maya benchmark](../benchmarks/maya_bench.py) ([token fixture](../benchmarks/maya-bench-inputs.json)). EXL3's columns are the two-card releases on the same engine: 2.25 bpw above and 2.68 bpw below (first runs, Maya's own `--bench` requests). Thinking off, zero cached input, a 256-token cap.
 
-| 2 × RX 7900 XTX | **EXL3 2.25 bpw** | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
-|---|---:|---:|---:|---:|
-| Context allocation | 1M | 512K | 512K | 512K |
-| Model shards, excluding Engram | 159 GB | 155 GB | 178 GB | 117 GB |
-| Perplexity (23 × 2,048 tokens; lower is better) | 7.1937 | 7.3695 | 7.2498 | 7.9435 |
-| Quality | 30/30 | 30/30 | 30/30 | 30/30 |
-| Deepest retrieval | 5/5 at 1.04M | 5/5 at 520K | 5/5 at 520K | 5/5 at 520K |
-| Maya benchmark: decode | 76.5 | 60.9 | 41.7 | 80.7 |
-| Maya benchmark: prefill 2K / 8K | 667 / 1,062 | 210 / 537 | 169 / 478 | 286 / 661 |
-| 128K five-phrase: decode / prefill | 88.7 / 1,985 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
-| 480K five-phrase: decode / prefill | 84.6 / 1,600 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
-| Real code, 130,048 tokens: decode / prefill | 60.2 / 1,686 | 52.5 / 1,464 | 37.3 / 1,378 | 66.2 / 1,587 |
+| 2 × RX 7900 XTX | **EXL3 2.25 bpw** | EXL3 2.68 bpw | GSQ-RCO IQ2_XS | Maya-S IQ2_XXS | Maya-XS v2 IQ1_S |
+|---|---:|---:|---:|---:|---:|
+| Context allocation | 1M | 1M | 512K | 512K | 512K |
+| Model shards, excluding Engram | 159 GB | 193 GB | 155 GB | 178 GB | 117 GB |
+| Perplexity (23 × 2,048 tokens; lower is better) | 7.1937 | 7.0833 | 7.3695 | 7.2498 | 7.9435 |
+| Quality | 30/30 | 30/30 | 30/30 | 30/30 | 30/30 |
+| Deepest retrieval | 5/5 at 1.04M | 5/5 at 1.04M | 5/5 at 520K | 5/5 at 520K | 5/5 at 520K |
+| Maya benchmark: decode | 76.5 | 42.3 | 60.9 | 41.7 | 80.7 |
+| Maya benchmark: prefill 2K / 8K | 667 / 1,062 | 169 / 472 | 210 / 537 | 169 / 478 | 286 / 661 |
+| 128K five-phrase: decode / prefill | 88.7 / 1,985 | 41.9 / 1,746 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
+| 480K five-phrase: decode / prefill | 84.6 / 1,600 | 40.7 / 1,513 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
+| Real code, 130,048 tokens: decode / prefill | 60.2 / 1,686 | 43.9 / 1,259 | 52.5 / 1,464 | 37.3 / 1,378 | 66.2 / 1,587 |
 
-EXL3 supports 1M context and has the lowest measured perplexity (7.1937). It also decodes faster at long context (88.7 against GSQ-RCO's 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
+EXL3 supports 1M context. 2.68 bpw has the lowest measured perplexity (7.0833; 2.25 bpw 7.1937), 2.25 bpw the faster decode (76.5 against 42.3 tokens/s on the Maya benchmark). 2.25 bpw also decodes faster at long context than GSQ-RCO (88.7 against 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
 
 Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.
+
+#### Maya DS4 HIP EXL3 2.68 bpw dual RX 7900 XTX
+
+([recipe](../ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml)) The 2.25 bpw two-card recipe on turboderp's larger 2.68 bpw files (193 GB of shards against 159 GB): fewer experts fit in VRAM and the 8060S's pool, so idle re-placement also fills the pool, steered by what prompts read (`DS4_SETTLE_POOL`, `DS4_SETTLE_POOL_PROMPT=1024`), and reads under 384 tokens take the window path (`DS4_CHUNK_MIN=384`), where experts only the drive holds are not copied whole. Same procedure as the two-card 2.25 bpw release above: first run / second run after 60 s idle. The **1,040,000-token** check found **5/5** values: **1,093 prefill / 38.5 decode tok/s**.
+
+| Input tokens | Prefill, first / second run | Decode, first / second run | Values |
+|---:|---:|---:|---:|
+| 2,040 | 206.0 / 271.6 | 41.5 / 92.3 | 5/5 |
+| 7,680 | 609.1 / 769.2 | 42.1 / 92.1 | 5/5 |
+| 30,720 | 1,227.9 / 1,403.0 | 36.5 / 85.9 | 5/5 |
+| 122,879 | 1,745.9 / 1,792.2 | 41.9 / 82.8 | 5/5 |
+| 491,520 | 1,513.4 / 1,510.8 | 40.7 / 101.6 | 5/5 |
+
+Real code, 130,048 tokens: **1,259 / 1,256** prefill and **43.9 / 58.6** decode tok/s (first / second run); Maya `--bench`: decode **42.3 / 67.1**, prefill 2K / 8K **169 / 472**; expert picks served from GPU memory 44 % / 84 %.
 
 #### Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX
 
@@ -136,13 +150,14 @@ Different answer text and draft acceptance mean these decode rates do not isolat
 
 ### Quality and teacher comparison
 
-Cold coding/maths suite: EXL3 30/30 (this release); GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.
+Cold coding/maths suite: EXL3 2.25 bpw 30/30 (this release), 2.68 bpw 30/30 (its release); GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.
 
 The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.
 
 | Quant | KL | Top-1 agreement | Held-out PPL |
 |---|---:|---:|---:|
 | **EXL3 2.25** (this release) | 0.1654 | 83.26% | 9.1463 |
+| EXL3 2.68 (its release) | 0.0980 | 86.50% | 8.8357 |
 | GSQ-RCO IQ2_XS (v1.1.50 indexer) | 0.2272 | 80.51% | 9.6736 |
 
 Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).
