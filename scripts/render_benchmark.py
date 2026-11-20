@@ -17,8 +17,9 @@ CHARTS = [
       ('maya-ds4-exl3-apu', '#0969da', False)],
      '1M allocation · runtime versions and full protocol in BENCHMARKS.md', True),
     ('docs/benchmark-deepseek-v41-quants.svg', f'{M5} with two RX 7900 XTX cards',
-     [('maya-ds4-exl3-dual-xtx', '#cf222e', False), ('maya-ds4-gsq-dual-xtx', '#8250df', False),
-      ('maya-ds4-maya-s-dual-xtx', '#0969da', False), ('maya-ds4-maya-xs-dual-xtx', '#bc4c00', False)],
+     [('maya-ds4-exl3-dual-xtx', '#cf222e', False), ('maya-ds4-exl3-268-dual-xtx', '#9a6700', False),
+      ('maya-ds4-gsq-dual-xtx', '#8250df', False), ('maya-ds4-maya-s-dual-xtx', '#0969da', False),
+      ('maya-ds4-maya-xs-dual-xtx', '#bc4c00', False)],
      'EXL3: 1M allocation · other quants: 512K · runtime versions and full protocol in BENCHMARKS.md', False),
     ('docs/benchmark-glm.svg', f'{M5} with two RX 7900 XTX cards', [('maya-glm-dual-xtx', '#1a7f37', False)],
      'Allocation: the smallest of 128K, 256K and 512K that holds the input · full protocol in BENCHMARKS.md', False),
@@ -30,7 +31,8 @@ CHARTS = [
 # DeepSeek-V4.1-Flash-1017: the EXL3 2.25 bpw setup on each hardware option, and the quants compared on two cards
 EXL3_HARDWARE = [('maya-ds4-exl3-apu', 'M5 alone'), ('maya-ds4-exl3-single-xtx', '1 × RX 7900 XTX'),
                  ('maya-ds4-exl3-dual-xtx', '2 × RX 7900 XTX')]
-QUANTS = [('maya-ds4-exl3-dual-xtx', 'EXL3 2.25 bpw'), ('maya-ds4-gsq-dual-xtx', 'GSQ-RCO IQ2_XS'),
+EXL3_268 = 'maya-ds4-exl3-268-dual-xtx'
+QUANTS = [('maya-ds4-exl3-dual-xtx', 'EXL3 2.25 bpw'), (EXL3_268, 'EXL3 2.68 bpw'), ('maya-ds4-gsq-dual-xtx', 'GSQ-RCO IQ2_XS'),
           ('maya-ds4-maya-s-dual-xtx', 'Maya-S IQ2_XXS'), ('maya-ds4-maya-xs-dual-xtx', 'Maya-XS v2 IQ1_S')]
 SINGLE = 'maya-ds4-exl3-single-xtx'
 STYLE = ('<style>text{font-family:Arial,sans-serif;fill:#24292f}.title{font-size:26px;font-weight:700}'
@@ -231,8 +233,24 @@ def xs_summary(data):
     def pre(v):
         return bench(v)['prefill_tokens_per_second']['8192'], at(v)['prefill_tokens_per_second']
     if all(a > b for a, b in zip(pre(x), pre(xs))):   # (EXL3 reads prompts faster at 8K and 128K: XS keeps decode only)
-        return lead + "it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity."
-    return lead + "Maya-XS v2 is the fastest, with higher perplexity."
+        text = lead + "it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity."
+    else:
+        text = lead + "Maya-XS v2 is the fastest, with higher perplexity."
+    return text + (' ' + exl3_268_sentence(data) if EXL3_268 in data['systems'] else '')
+
+
+def kl(system):
+    return system['quality']['lucebox_kl']['all']['kl_top256']
+
+
+def exl3_268_sentence(data):
+    """EXL3 2.68 bpw against 2.25 bpw on two cards: fidelity (KL, perplexity) against short-prompt decode."""
+    x, y = data['systems']['maya-ds4-exl3-dual-xtx'], data['systems'][EXL3_268]
+    share = bench(y)['decode_mean_tokens_per_second'] / bench(x)['decode_mean_tokens_per_second'] * 100
+    closer = kl(y) < kl(x) and y['quality']['perplexity']['value'] < x['quality']['perplexity']['value']
+    return ((f"EXL3 2.68 bpw stays closer to the original model (KL {kl(y):.3f} against {kl(x):.3f}) "
+             if closer else f"EXL3 2.68 bpw (KL {kl(y):.3f} against {kl(x):.3f}) ") +
+            f"and decodes a short prompt at {share:.0f} % of 2.25 bpw's speed.")
 
 
 EXL3_SETUPS = [(SINGLE.replace('single', 'dual'), 'two cards'), (SINGLE, 'one card'), ('maya-ds4-exl3-apu', 'the M5 alone')]
@@ -374,12 +392,31 @@ def detailed_summary(data):
     x = data['systems']['maya-ds4-exl3-dual-xtx']
     xs = data['systems']['maya-ds4-maya-xs-dual-xtx']
     g = data['systems']['maya-ds4-gsq-dual-xtx']
-    faster = (f"It also decodes faster at long context ({at_128k(x):.1f} against GSQ-RCO's {at_128k(g):.1f} tokens/s at 128K). "
+    it = '2.25 bpw' if EXL3_268 in data['systems'] else 'It'
+    faster = (f"{it} also decodes faster at long context than GSQ-RCO ({at_128k(x):.1f} against {at_128k(g):.1f} tokens/s at 128K). "
               if at_128k(x) > at_128k(g) else
               f"GSQ-RCO decodes faster at long context ({at_128k(g):.1f} against {at_128k(x):.1f} tokens/s at 128K). ")
-    return (f"EXL3 supports 1M context and has the lowest measured perplexity ({x['quality']['perplexity']['value']:.4f}). "
+    if EXL3_268 in data['systems']:
+        y = data['systems'][EXL3_268]
+        lead = (f"EXL3 supports 1M context. 2.68 bpw has the lowest measured perplexity ({y['quality']['perplexity']['value']:.4f}; "
+                f"2.25 bpw {x['quality']['perplexity']['value']:.4f}), 2.25 bpw the faster decode ({bench(x)['decode_mean_tokens_per_second']:.1f} "
+                f"against {bench(y)['decode_mean_tokens_per_second']:.1f} tokens/s on the Maya benchmark). ")
+    else:
+        lead = f"EXL3 supports 1M context and has the lowest measured perplexity ({x['quality']['perplexity']['value']:.4f}). "
+    return (lead +
             f"{faster}"
             f"Maya-XS v2 has the fastest recorded decode, with higher perplexity ({xs['quality']['perplexity']['value']:.4f}).")
+
+
+NUMBERS = {4: 'four', 5: 'five'}
+def exl3_268_note(data):
+    """What the 2.68 bpw recipe changes from the two-card 2.25 bpw one, and why."""
+    y, x = data['systems'][EXL3_268], data['systems']['maya-ds4-exl3-dual-xtx']
+    return (f"The 2.25 bpw two-card recipe on turboderp's larger 2.68 bpw files ({y['target']['model_bytes']/1e9:.0f} GB of shards "
+            f"against {x['target']['model_bytes']/1e9:.0f} GB): fewer experts fit in VRAM and the 8060S's pool, so idle "
+            "re-placement also fills the pool, steered by what prompts read (`DS4_SETTLE_POOL`, `DS4_SETTLE_POOL_PROMPT=1024`), "
+            "and reads under 384 tokens take the window path (`DS4_CHUNK_MIN=384`), where experts only the drive holds are "
+            "not copied whole.")
 
 
 def scaling_rows(system):
@@ -395,18 +432,42 @@ def render_deepseek_details(data, text):
     winners = set(data['winning_setups'].values())
     lines = ['## DeepSeek-V4.1-Flash-1017', '', *exl3_details(data),
              '### Quants on two RX 7900 XTX', '',
-             '![DeepSeek-V4.1-Flash-1017 context scaling, four quants on two RX 7900 XTX cards](benchmark-deepseek-v41-quants.svg)', '',
-             "GSQ, Maya-S and Maya-XS were measured with the v1.1.48 indexer engine at 512K: eleven curve points, medians of three loads for GSQ and one load for Maya-S and Maya-XS, and the [fixed-input Maya benchmark](../benchmarks/maya_bench.py) ([token fixture](../benchmarks/maya-bench-inputs.json)). EXL3's column is the two-card release above (first runs, Maya's own `--bench` requests). Thinking off, zero cached input, a 256-token cap.", '',
+             f'![DeepSeek-V4.1-Flash-1017 context scaling, {NUMBERS[len([q for q in QUANTS if q[0] in systems])]} quants on two RX 7900 XTX cards](benchmark-deepseek-v41-quants.svg)', '',
+             "GSQ, Maya-S and Maya-XS were measured with the v1.1.48 indexer engine at 512K: eleven curve points, medians of three loads for GSQ and one load for Maya-S and Maya-XS, and the [fixed-input Maya benchmark](../benchmarks/maya_bench.py) ([token fixture](../benchmarks/maya-bench-inputs.json)). "
+             + ("EXL3's columns are the two-card releases on the same engine: 2.25 bpw above and 2.68 bpw below (first runs, Maya's own `--bench` requests)."
+                if EXL3_268 in systems else "EXL3's column is the two-card release above (first runs, Maya's own `--bench` requests).")
+             + " Thinking off, zero cached input, a 256-token cap.", '',
              *detailed_table(data), '', detailed_summary(data), '',
              'Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.', '']
     for sid, _ in QUANTS[1:]:
+        if sid not in systems:
+            continue
         v = systems[sid]
-        lines += ['#### ' + (f"**{v['name']}**" if sid in winners else v['name']), '', *scaling_rows(v), '']
+        lines += ['#### ' + (f"**{v['name']}**" if sid in winners else v['name']), '']
+        if sid == EXL3_268:
+            n = v['near_capacity_needle']
+            lines += [f"([recipe](../{v['manifest']})) {exl3_268_note(data)} Same procedure as the two-card 2.25 bpw release above: first run / second run after 60 s idle. "
+                      f"The **{n['actual_input_tokens']:,}-token** check found **{n['needle_passes']}/5** values: **{reading(n['prefill_tokens_per_second'],0)} prefill / {reading(n['decode_tokens_per_second'])} decode tok/s**.", '',
+                      '| Input tokens | Prefill, first / second run | Decode, first / second run | Values |', '|---:|---:|---:|---:|']
+            for x in v['context_scaling']:
+                r2 = x.get('second_run') or {}
+                lines.append(f"| {x['actual_input_tokens']:,} | {both(x['prefill_tokens_per_second'], r2.get('prefill_tokens_per_second'))} | "
+                             f"{both(x['decode_tokens_per_second'], r2.get('decode_tokens_per_second'))} | {x['needle_passes']}/5 |")
+            c, c2 = v['long_context'], v['long_context'].get('second_run') or {}
+            lines += ['', f"Real code, 130,048 tokens: **{both(c['prefill_tokens_per_second'], c2.get('prefill_tokens_per_second'), 0)}** prefill and **{both(c['decode_tokens_per_second'], c2.get('decode_tokens_per_second'))}** decode tok/s (first / second run); "
+                      f"Maya `--bench`: decode **{both(bench(v)['decode_mean_tokens_per_second'], (bench(v).get('second_run') or {}).get('decode_mean_tokens_per_second'))}**, prefill 2K / 8K **{reading(bench(v)['prefill_tokens_per_second']['2048'], 0)} / {reading(bench(v)['prefill_tokens_per_second']['8192'], 0)}**; "
+                      f"expert picks served from GPU memory {v['placement']['vram_share_of_picks']['run1'] * 100:.0f} % / {v['placement']['vram_share_of_picks']['run2'] * 100:.0f} %.", '']
+        else:
+            lines += [*scaling_rows(v), '']
     lines += ['### Quality and teacher comparison', '',
-              f"Cold coding/maths suite: EXL3 {e['quality']['total']}/30 ({exl3_quality_engine(e).replace('this engine', 'this release')}); GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.", '',
+              f"Cold coding/maths suite: EXL3{' 2.25 bpw' if EXL3_268 in systems else ''} {e['quality']['total']}/30 ({exl3_quality_engine(e).replace('this engine', 'this release')})"
+              + (f", 2.68 bpw {systems[EXL3_268]['quality']['total']}/30 (its release)" if EXL3_268 in systems else '')
+              + f"; GSQ, Maya-S and Maya-XS 30/30 (math_08 scored against its corrected gold answer). Perplexity in the tables: 23 × 2,048 tokens.", '',
               'The separate Lucebox held-out set has eight 1,024-token sequences and 8,184 predictions. KL uses the teacher’s top 256 probabilities; lower is better. Top-1 is agreement with the teacher.', '',
               '| Quant | KL | Top-1 agreement | Held-out PPL |', '|---|---:|---:|---:|']
-    for sid, label in [(QUANTS[0][0], f"**EXL3 2.25** ({exl3_quality_engine(e).replace('this engine', 'this release')})"), (QUANTS[1][0], 'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
+    for sid, label in [(QUANTS[0][0], f"**EXL3 2.25** ({exl3_quality_engine(e).replace('this engine', 'this release')})"),
+                       *([(EXL3_268, 'EXL3 2.68 (its release)')] if EXL3_268 in systems else []),
+                       ('maya-ds4-gsq-dual-xtx', 'GSQ-RCO IQ2_XS (v1.1.50 indexer)')]:
         z = systems[sid]['quality']['lucebox_kl']['all']
         lines.append(f"| {label} | {z['kl_top256']:.4f} | {z['top1_agree']*100:.2f}% | {z['ppl']:.4f} |")
     lines += ['', "Maya-S and Maya-XS have no KL measurement. [Exact data and input hashes](../benchmarks/results.json).", '']

@@ -2229,6 +2229,275 @@
         "decode_tokens_per_second": 78.72078720787208
       }
     },
+    "maya-ds4-exl3-268-dual-xtx": {
+      "name": "Maya DS4 HIP EXL3 2.68 bpw dual RX 7900 XTX",
+      "manifest": "ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml",
+      "hardware": {
+        "added_gpus": "2 x AMD Radeon RX 7900 XTX (1002:744c), each on its own PCIe 4.0 x4 link",
+        "helper_gpu": "AMD Radeon 8060S (1002:1586) serves routed experts beside the two cards"
+      },
+      "runtime": {
+        "repository": "https://github.com/pepuscz/project-maya",
+        "release_tag": "maya-ds4-exl3-1m-20261119",
+        "source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
+        "source_tree": "2db470ee1067ec6411ef17156b17b5e16d9afd43",
+        "upstream": "Project Maya v1.1.67-based fork with DS4_HELPER_DRAFT, DS4_PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 decode kernels and shorter prompt reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)",
+        "benchmark_binary_sha256": "1ac735f41cf4edd71185e2b927d07f6cc66673c97c598c30c55d29979884c091"
+      },
+      "power_watts": {
+        "stapm": 120,
+        "fast": 120,
+        "slow": 120
+      },
+      "cpu": {
+        "governor": "performance",
+        "minimum_khz": 2000000,
+        "boost": false
+      },
+      "gpu_dpm": "auto",
+      "context_allocation": 1048576,
+      "target": {
+        "repository": "turboderp/DeepSeek-V4.1-Flash-1017-exl3",
+        "revision": "608c237e95188739612e435a935ffa614b9c40e9",
+        "quantization": "EXL3 2.68 bpw with original FP8 Engram",
+        "bytes": 395339892195,
+        "model_bytes": 192505169462,
+        "engram_bytes": 202758032904
+      },
+      "draft": {
+        "type": "DSpark",
+        "bytes": 0,
+        "storage": "included in the target safetensors shards",
+        "placement": "blocks split across the two cards: block 0 on the second card, blocks 1 and 2 on the lead (DS4_DRAFT_DEV=1,0,0)"
+      },
+      "quality": {
+        "coding": 10,
+        "gsm8k": 10,
+        "math": 10,
+        "total": 30,
+        "raw_total": 29,
+        "thinking": false,
+        "math_10_output_cap": 4096,
+        "perplexity": {
+          "value": 7.0833,
+          "sequences": 23,
+          "tokens_per_sequence": 2048,
+          "scored_tokens": 47081,
+          "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
+        },
+        "scoring": "Answer quality and Lucebox KL measured 2026-11-20 with this release (30/30 reviewed); perplexity measured with this release.",
+        "lucebox_kl": {
+          "all": {
+            "tokens": 8184,
+            "nll": 2.1787954284283617,
+            "ppl": 8.835656665074206,
+            "kl_top256": 0.09803262083380206,
+            "top1_agree": 0.864980449657869
+          },
+          "from_512": {
+            "tokens": 4096,
+            "nll": 2.002618911421453,
+            "ppl": 7.408432744125725,
+            "kl_top256": 0.08803773964928917,
+            "top1_agree": 0.870849609375,
+            "from": 512
+          },
+          "teacher": {
+            "nll": 2.147273237987231,
+            "ppl": 8.561481417629807,
+            "tokens": 8184
+          },
+          "eval": {
+            "heldout.i32": "9c816710d619da56761967609174231ace2f900dbe7486d376997b2abaffa716",
+            "teacher_idx.i32": "ed0fade255c0b6c4a8606e3b21a9c52b024a0d5f37e5c69ff548486c16a8ffb1",
+            "teacher_lp.f32": "e689eabd99c20cdf2edc1d24fc6516121b34fd8e05b3fedcefbe12a36004350d"
+          },
+          "runtime_source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
+          "allocation_tokens": 1048576,
+          "ppl_check": {
+            "engine_exit": 0,
+            "seconds": 124.9,
+            "ppl": 8.8301,
+            "tokens": 8184,
+            "sequences": 8,
+            "relative_difference": 0.0006288910134060188,
+            "within_tolerance": true
+          }
+        },
+        "measured_with": "maya-ds4-exl3-1m-20261119"
+      },
+      "long_context": {
+        "input_tokens": 130048,
+        "output_tokens": 768,
+        "cached_tokens": 0,
+        "prefill_tokens_per_second": 1258.9156411904557,
+        "decode_tokens_per_second": 43.910053000806165,
+        "allocation_tokens": 1048576,
+        "second_run": {
+          "prefill_tokens_per_second": 1256.1929186528923,
+          "decode_tokens_per_second": 58.62505915940214,
+          "cached_tokens": 0
+        },
+        "prompt_sha256": "5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a"
+      },
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "release_id": "maya-ds4-exl3-268-dual-xtx-1m-v1",
+      "selection": "added_hardware",
+      "context_scaling": [
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 2040,
+          "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
+          "prefill_tokens_per_second": 206.01274451390083,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "decode_tokens_per_second": 41.50992346607861,
+          "second_run": {
+            "prefill_tokens_per_second": 271.5691103449194,
+            "decode_tokens_per_second": 92.2589015424535,
+            "cached_tokens": 0,
+            "needle_passes": 5
+          },
+          "aggregation": "one fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 7680,
+          "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
+          "prefill_tokens_per_second": 609.0790851124575,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "decode_tokens_per_second": 42.069282850193915,
+          "second_run": {
+            "prefill_tokens_per_second": 769.199951925003,
+            "decode_tokens_per_second": 92.05983889528193,
+            "cached_tokens": 0,
+            "needle_passes": 5
+          },
+          "aggregation": "one fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 30720,
+          "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
+          "prefill_tokens_per_second": 1227.9355333844974,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "decode_tokens_per_second": 36.53802237953871,
+          "second_run": {
+            "prefill_tokens_per_second": 1402.9639440093165,
+            "decode_tokens_per_second": 85.85994097129058,
+            "cached_tokens": 0,
+            "needle_passes": 5
+          },
+          "aggregation": "one fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 122879,
+          "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
+          "prefill_tokens_per_second": 1745.8668879328472,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "decode_tokens_per_second": 41.88755808626219,
+          "second_run": {
+            "prefill_tokens_per_second": 1792.1874111227953,
+            "decode_tokens_per_second": 82.81573498964804,
+            "cached_tokens": 0,
+            "needle_passes": 5
+          },
+          "aggregation": "one fresh cold load"
+        },
+        {
+          "workload": "deep_retrieval",
+          "allocation_tokens": 1048576,
+          "actual_input_tokens": 491520,
+          "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
+          "prefill_tokens_per_second": 1513.3536090860332,
+          "completion_tokens": 64,
+          "cached_tokens": 0,
+          "needle_passes": 5,
+          "decode_tokens_per_second": 40.6865861411316,
+          "second_run": {
+            "prefill_tokens_per_second": 1510.759922814528,
+            "decode_tokens_per_second": 101.55506188511583,
+            "cached_tokens": 0,
+            "needle_passes": 5
+          },
+          "aggregation": "one fresh cold load"
+        }
+      ],
+      "context_scaling_note": "Five matched five-phrase prompts, one fresh cold load per point; the second run is the same request again in the same load after 60 s idle. Greedy, thinking off, 1,048,576-token allocation.",
+      "maya_bench": {
+        "procedure": "Project Maya v1.1.67 maya.py --bench requests in one fresh load: three 256-token greedy answers, thinking off (decode is their mean), then 2,048- and 8,192-token prompts; the second run is the same seven requests after 60 s idle, every prompt read (cold=1).",
+        "this_release": {
+          "decode_mean_tokens_per_second": 42.28825053972266,
+          "prefill_tokens_per_second": {
+            "2048": 168.7096349018057,
+            "8192": 472.30566109532015
+          },
+          "second_run": {
+            "decode_mean_tokens_per_second": 67.12796434153512,
+            "prefill_tokens_per_second": {
+              "2048": 188.417130502783,
+              "8192": 548.418410041841
+            }
+          }
+        },
+        "aggregation": "one load"
+      },
+      "qualification_note": "EXL3 2.68 bpw at 1M on the v7 engine: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.0833 on 23 x 2,048 tokens; answer quality and Lucebox KL measured 2026-11-20 with this release.",
+      "manifest_sha256": "3d1d16bfe0034c1de596206a960eb244c3c96110b214f070306804d05b356d5d",
+      "measurement_profile": {
+        "strix_gpu_od_enabled": true,
+        "public_default_enabled": false,
+        "voltage_offset_mv": -100,
+        "power_cap_w_per_xtx": 350,
+        "sclk_ceilings_mhz": [
+          2920,
+          2890
+        ],
+        "mclk_ceilings_mhz": [
+          1250,
+          1250
+        ],
+        "gpu_dpm": "auto",
+        "cpu_boost": 0,
+        "public_policy_source_commit": "39a98df5d295751a34e84269277e7359989fb45f",
+        "MAYA_DS4_PROMPT_LIGHT": "64"
+      },
+      "placement": {
+        "vram_share_of_picks": {
+          "run1": 0.43566,
+          "run2": 0.83974
+        },
+        "cpu_lane_picks_per_token": {
+          "run1": 9.9086,
+          "run2": 1.8344
+        },
+        "idle_moves": 5465,
+        "note": "ladder means; the second run is the same request again in the same load after 60 s idle"
+      },
+      "near_capacity_needle": {
+        "workload": "deep_retrieval",
+        "allocation_tokens": 1048576,
+        "actual_input_tokens": 1040000,
+        "prompt_sha256": "1420bcb32be6877eae9e491927e03654d25bafab3a4c0ea0241cf8953ca59881",
+        "prefill_tokens_per_second": 1092.7597521452765,
+        "completion_tokens": 64,
+        "cached_tokens": 0,
+        "needle_passes": 5,
+        "decode_tokens_per_second": 38.524047432733404
+      }
+    },
     "maya-ds4-exl3-single-xtx": {
       "power_watts": {
         "stapm": 120,
