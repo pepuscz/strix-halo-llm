@@ -40,12 +40,12 @@
 <text class="tick" x="905.17" y="398" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="211" x2="1020.00" y2="376"/>
 <text class="tick" x="1020.00" y="398" text-anchor="middle">512K</text>
-<path d="M100.73 339.92 L320.35 308.34 L550.00 263.78 L779.65 239.56 L1009.31 266.01" fill="none" stroke="#cf222e" stroke-width="2.7"/>
-<circle cx="100.73" cy="339.92" r="4" fill="#cf222e"><title>2,040 tokens: 524.75</title></circle>
-<circle cx="320.35" cy="308.34" r="4" fill="#cf222e"><title>7,680 tokens: 984.21</title></circle>
-<circle cx="550.00" cy="263.78" r="4" fill="#cf222e"><title>30,720 tokens: 1632.32</title></circle>
-<circle cx="779.65" cy="239.56" r="4" fill="#cf222e"><title>122,879 tokens: 1984.55</title></circle>
-<circle cx="1009.31" cy="266.01" r="4" fill="#cf222e"><title>491,520 tokens: 1599.81</title></circle>
+<path d="M100.73 340.03 L320.35 306.81 L550.00 262.53 L779.65 238.90 L1009.31 265.98" fill="none" stroke="#cf222e" stroke-width="2.7"/>
+<circle cx="100.73" cy="340.03" r="4" fill="#cf222e"><title>2,040 tokens: 523.17</title></circle>
+<circle cx="320.35" cy="306.81" r="4" fill="#cf222e"><title>7,680 tokens: 1006.34</title></circle>
+<circle cx="550.00" cy="262.53" r="4" fill="#cf222e"><title>30,720 tokens: 1650.42</title></circle>
+<circle cx="779.65" cy="238.90" r="4" fill="#cf222e"><title>122,879 tokens: 1994.19</title></circle>
+<circle cx="1009.31" cy="265.98" r="4" fill="#cf222e"><title>491,520 tokens: 1600.26</title></circle>
 <path d="M100.73 360.54 L320.35 335.28 L550.00 304.92 L779.65 289.96 L1009.31 300.64" fill="none" stroke="#bc4c00" stroke-width="2.7"/>
 <circle cx="100.73" cy="360.54" r="4" fill="#bc4c00"><title>2,040 tokens: 224.92</title></circle>
 <circle cx="320.35" cy="335.28" r="4" fill="#bc4c00"><title>7,680 tokens: 592.35</title></circle>
@@ -58,12 +58,12 @@
 <circle cx="550.00" cy="341.59" r="4" fill="#0969da"><title>30,720 tokens: 500.57</title></circle>
 <circle cx="779.65" cy="336.54" r="4" fill="#0969da"><title>122,879 tokens: 574.03</title></circle>
 <circle cx="1009.31" cy="343.57" r="4" fill="#0969da"><title>491,520 tokens: 471.74</title></circle>
-<path d="M100.73 323.28 L320.35 283.19 L550.00 247.79 L779.65 234.49 L1009.31 265.76" fill="none" stroke="#cf222e" stroke-width="2.7" stroke-dasharray="8 5"/>
-<circle cx="100.73" cy="323.28" r="4" fill="#cf222e"><title>2,040 tokens: 766.86</title></circle>
-<circle cx="320.35" cy="283.19" r="4" fill="#cf222e"><title>7,680 tokens: 1349.97</title></circle>
-<circle cx="550.00" cy="247.79" r="4" fill="#cf222e"><title>30,720 tokens: 1864.93</title></circle>
-<circle cx="779.65" cy="234.49" r="4" fill="#cf222e"><title>122,879 tokens: 2058.36</title></circle>
-<circle cx="1009.31" cy="265.76" r="4" fill="#cf222e"><title>491,520 tokens: 1603.46</title></circle>
+<path d="M100.73 323.11 L320.35 282.79 L550.00 247.91 L779.65 234.46 L1009.31 265.58" fill="none" stroke="#cf222e" stroke-width="2.7" stroke-dasharray="8 5"/>
+<circle cx="100.73" cy="323.11" r="4" fill="#cf222e"><title>2,040 tokens: 769.35</title></circle>
+<circle cx="320.35" cy="282.79" r="4" fill="#cf222e"><title>7,680 tokens: 1355.84</title></circle>
+<circle cx="550.00" cy="247.91" r="4" fill="#cf222e"><title>30,720 tokens: 1863.11</title></circle>
+<circle cx="779.65" cy="234.46" r="4" fill="#cf222e"><title>122,879 tokens: 2058.82</title></circle>
+<circle cx="1009.31" cy="265.58" r="4" fill="#cf222e"><title>491,520 tokens: 1606.05</title></circle>
 <path d="M100.73 357.05 L320.35 324.50 L550.00 297.01 L779.65 286.37 L1009.31 299.75" fill="none" stroke="#bc4c00" stroke-width="2.7" stroke-dasharray="8 5"/>
 <circle cx="100.73" cy="357.05" r="4" fill="#bc4c00"><title>2,040 tokens: 275.67</title></circle>
 <circle cx="320.35" cy="324.50" r="4" fill="#bc4c00"><title>7,680 tokens: 749.14</title></circle>
@@ -76,18 +76,18 @@
 <circle cx="550.00" cy="337.65" r="4" fill="#0969da"><title>30,720 tokens: 557.82</title></circle>
 <circle cx="779.65" cy="335.16" r="4" fill="#0969da"><title>122,879 tokens: 593.97</title></circle>
 <circle cx="1009.31" cy="343.36" r="4" fill="#0969da"><title>491,520 tokens: 474.79</title></circle>
-<line x1="1009.31" y1="265.76" x2="1032.31" y2="257.99" stroke="#cf222e" stroke-width="1"/>
-<text class="value" x="1040.31" y="261.99" text-anchor="start" style="fill:#cf222e">1603.5</text>
-<line x1="1009.31" y1="266.01" x2="1032.31" y2="273.99" stroke="#cf222e" stroke-width="1"/>
-<text class="value" x="1040.31" y="277.99" text-anchor="start" style="fill:#cf222e">1599.8</text>
-<line x1="1009.31" y1="299.75" x2="1032.31" y2="291.97" stroke="#bc4c00" stroke-width="1"/>
-<text class="value" x="1040.31" y="295.97" text-anchor="start" style="fill:#bc4c00">1109.1</text>
-<line x1="1009.31" y1="300.64" x2="1032.31" y2="307.97" stroke="#bc4c00" stroke-width="1"/>
-<text class="value" x="1040.31" y="311.97" text-anchor="start" style="fill:#bc4c00">1096.2</text>
-<line x1="1009.31" y1="343.36" x2="1032.31" y2="335.58" stroke="#0969da" stroke-width="1"/>
-<text class="value" x="1040.31" y="339.58" text-anchor="start" style="fill:#0969da">474.8</text>
-<line x1="1009.31" y1="343.57" x2="1032.31" y2="351.58" stroke="#0969da" stroke-width="1"/>
-<text class="value" x="1040.31" y="355.58" text-anchor="start" style="fill:#0969da">471.7</text>
+<line x1="1009.31" y1="265.58" x2="1032.31" y2="257.83" stroke="#cf222e" stroke-width="1"/>
+<text class="value" x="1040.31" y="261.83" text-anchor="start" style="fill:#cf222e">1606.1</text>
+<line x1="1009.31" y1="265.98" x2="1032.31" y2="273.83" stroke="#cf222e" stroke-width="1"/>
+<text class="value" x="1040.31" y="277.83" text-anchor="start" style="fill:#cf222e">1600.3</text>
+<line x1="1009.31" y1="299.75" x2="1032.31" y2="292.00" stroke="#bc4c00" stroke-width="1"/>
+<text class="value" x="1040.31" y="296.00" text-anchor="start" style="fill:#bc4c00">1109.1</text>
+<line x1="1009.31" y1="300.64" x2="1032.31" y2="308.00" stroke="#bc4c00" stroke-width="1"/>
+<text class="value" x="1040.31" y="312.00" text-anchor="start" style="fill:#bc4c00">1096.2</text>
+<line x1="1009.31" y1="343.36" x2="1032.31" y2="335.61" stroke="#0969da" stroke-width="1"/>
+<text class="value" x="1040.31" y="339.61" text-anchor="start" style="fill:#0969da">474.8</text>
+<line x1="1009.31" y1="343.57" x2="1032.31" y2="351.61" stroke="#0969da" stroke-width="1"/>
+<text class="value" x="1040.31" y="355.61" text-anchor="start" style="fill:#0969da">471.7</text>
 <text x="80" y="436" class="panel">Writing the answer (tokens/second) · higher is better</text>
 <line class="grid" x1="80" y1="621.00" x2="1020" y2="621.00"/>
 <text class="tick" x="68" y="625.00" text-anchor="end">0</text>
@@ -117,12 +117,12 @@
 <text class="tick" x="905.17" y="643" text-anchor="middle">256K</text>
 <line class="grid" x1="1020.00" y1="456" x2="1020.00" y2="621"/>
 <text class="tick" x="1020.00" y="643" text-anchor="middle">512K</text>
-<path d="M100.73 524.31 L320.35 524.87 L550.00 529.07 L779.65 529.49 L1009.31 533.77" fill="none" stroke="#cf222e" stroke-width="2.7"/>
-<circle cx="100.73" cy="524.31" r="4" fill="#cf222e"><title>2,040 tokens: 93.76</title></circle>
-<circle cx="320.35" cy="524.87" r="4" fill="#cf222e"><title>7,680 tokens: 93.21</title></circle>
-<circle cx="550.00" cy="529.07" r="4" fill="#cf222e"><title>30,720 tokens: 89.15</title></circle>
-<circle cx="779.65" cy="529.49" r="4" fill="#cf222e"><title>122,879 tokens: 88.74</title></circle>
-<circle cx="1009.31" cy="533.77" r="4" fill="#cf222e"><title>491,520 tokens: 84.59</title></circle>
+<path d="M100.73 522.71 L320.35 524.75 L550.00 525.14 L779.65 526.15 L1009.31 532.23" fill="none" stroke="#cf222e" stroke-width="2.7"/>
+<circle cx="100.73" cy="522.71" r="4" fill="#cf222e"><title>2,040 tokens: 95.31</title></circle>
+<circle cx="320.35" cy="524.75" r="4" fill="#cf222e"><title>7,680 tokens: 93.34</title></circle>
+<circle cx="550.00" cy="525.14" r="4" fill="#cf222e"><title>30,720 tokens: 92.96</title></circle>
+<circle cx="779.65" cy="526.15" r="4" fill="#cf222e"><title>122,879 tokens: 91.98</title></circle>
+<circle cx="1009.31" cy="532.23" r="4" fill="#cf222e"><title>491,520 tokens: 86.08</title></circle>
 <path d="M100.73 554.52 L320.35 554.68 L550.00 554.95 L779.65 555.65 L1009.31 557.05" fill="none" stroke="#bc4c00" stroke-width="2.7"/>
 <circle cx="100.73" cy="554.52" r="4" fill="#bc4c00"><title>2,040 tokens: 64.46</title></circle>
 <circle cx="320.35" cy="554.68" r="4" fill="#bc4c00"><title>7,680 tokens: 64.31</title></circle>
@@ -135,12 +135,12 @@
 <circle cx="550.00" cy="597.56" r="4" fill="#0969da"><title>30,720 tokens: 22.73</title></circle>
 <circle cx="779.65" cy="597.68" r="4" fill="#0969da"><title>122,879 tokens: 22.61</title></circle>
 <circle cx="1009.31" cy="597.44" r="4" fill="#0969da"><title>491,520 tokens: 22.84</title></circle>
-<path d="M100.73 473.38 L320.35 474.63 L550.00 477.93 L779.65 484.24 L1009.31 491.23" fill="none" stroke="#cf222e" stroke-width="2.7" stroke-dasharray="8 5"/>
-<circle cx="100.73" cy="473.38" r="4" fill="#cf222e"><title>2,040 tokens: 143.14</title></circle>
-<circle cx="320.35" cy="474.63" r="4" fill="#cf222e"><title>7,680 tokens: 141.94</title></circle>
-<circle cx="550.00" cy="477.93" r="4" fill="#cf222e"><title>30,720 tokens: 138.74</title></circle>
-<circle cx="779.65" cy="484.24" r="4" fill="#cf222e"><title>122,879 tokens: 132.62</title></circle>
-<circle cx="1009.31" cy="491.23" r="4" fill="#cf222e"><title>491,520 tokens: 125.84</title></circle>
+<path d="M100.73 467.69 L320.35 470.14 L550.00 479.49 L779.65 484.95 L1009.31 492.60" fill="none" stroke="#cf222e" stroke-width="2.7" stroke-dasharray="8 5"/>
+<circle cx="100.73" cy="467.69" r="4" fill="#cf222e"><title>2,040 tokens: 148.66</title></circle>
+<circle cx="320.35" cy="470.14" r="4" fill="#cf222e"><title>7,680 tokens: 146.29</title></circle>
+<circle cx="550.00" cy="479.49" r="4" fill="#cf222e"><title>30,720 tokens: 137.22</title></circle>
+<circle cx="779.65" cy="484.95" r="4" fill="#cf222e"><title>122,879 tokens: 131.93</title></circle>
+<circle cx="1009.31" cy="492.60" r="4" fill="#cf222e"><title>491,520 tokens: 124.51</title></circle>
 <path d="M100.73 514.05 L320.35 511.98 L550.00 516.77 L779.65 526.34 L1009.31 524.89" fill="none" stroke="#bc4c00" stroke-width="2.7" stroke-dasharray="8 5"/>
 <circle cx="100.73" cy="514.05" r="4" fill="#bc4c00"><title>2,040 tokens: 103.71</title></circle>
 <circle cx="320.35" cy="511.98" r="4" fill="#bc4c00"><title>7,680 tokens: 105.72</title></circle>
@@ -153,18 +153,18 @@
 <circle cx="550.00" cy="578.58" r="4" fill="#0969da"><title>30,720 tokens: 41.14</title></circle>
 <circle cx="779.65" cy="579.04" r="4" fill="#0969da"><title>122,879 tokens: 40.68</title></circle>
 <circle cx="1009.31" cy="581.09" r="4" fill="#0969da"><title>491,520 tokens: 38.70</title></circle>
-<line x1="1009.31" y1="491.23" x2="1032.31" y2="490.05" stroke="#cf222e" stroke-width="1"/>
-<text class="value" x="1040.31" y="494.05" text-anchor="start" style="fill:#cf222e">125.8</text>
-<line x1="1009.31" y1="524.89" x2="1032.31" y2="523.70" stroke="#bc4c00" stroke-width="1"/>
-<text class="value" x="1040.31" y="527.70" text-anchor="start" style="fill:#bc4c00">93.2</text>
-<line x1="1009.31" y1="533.77" x2="1032.31" y2="539.70" stroke="#cf222e" stroke-width="1"/>
-<text class="value" x="1040.31" y="543.70" text-anchor="start" style="fill:#cf222e">84.6</text>
-<line x1="1009.31" y1="557.05" x2="1032.31" y2="555.87" stroke="#bc4c00" stroke-width="1"/>
-<text class="value" x="1040.31" y="559.87" text-anchor="start" style="fill:#bc4c00">62.0</text>
-<line x1="1009.31" y1="581.09" x2="1032.31" y2="579.90" stroke="#0969da" stroke-width="1"/>
-<text class="value" x="1040.31" y="583.90" text-anchor="start" style="fill:#0969da">38.7</text>
-<line x1="1009.31" y1="597.44" x2="1032.31" y2="596.26" stroke="#0969da" stroke-width="1"/>
-<text class="value" x="1040.31" y="600.26" text-anchor="start" style="fill:#0969da">22.8</text>
+<line x1="1009.31" y1="492.60" x2="1032.31" y2="491.15" stroke="#cf222e" stroke-width="1"/>
+<text class="value" x="1040.31" y="495.15" text-anchor="start" style="fill:#cf222e">124.5</text>
+<line x1="1009.31" y1="524.89" x2="1032.31" y2="523.45" stroke="#bc4c00" stroke-width="1"/>
+<text class="value" x="1040.31" y="527.45" text-anchor="start" style="fill:#bc4c00">93.2</text>
+<line x1="1009.31" y1="532.23" x2="1032.31" y2="539.45" stroke="#cf222e" stroke-width="1"/>
+<text class="value" x="1040.31" y="543.45" text-anchor="start" style="fill:#cf222e">86.1</text>
+<line x1="1009.31" y1="557.05" x2="1032.31" y2="555.61" stroke="#bc4c00" stroke-width="1"/>
+<text class="value" x="1040.31" y="559.61" text-anchor="start" style="fill:#bc4c00">62.0</text>
+<line x1="1009.31" y1="581.09" x2="1032.31" y2="579.65" stroke="#0969da" stroke-width="1"/>
+<text class="value" x="1040.31" y="583.65" text-anchor="start" style="fill:#0969da">38.7</text>
+<line x1="1009.31" y1="597.44" x2="1032.31" y2="596.00" stroke="#0969da" stroke-width="1"/>
+<text class="value" x="1040.31" y="600.00" text-anchor="start" style="fill:#0969da">22.8</text>
 <text x="550" y="676" text-anchor="middle" class="label">Input length (tokens; each tick doubles)</text>
 <text x="550" y="711" text-anchor="middle" class="label">Test: find five phrases hidden in a long text. Every run found all five correctly.</text>
 <text x="550" y="741" text-anchor="middle" class="tick">Solid: first run on a fresh load · dashed: the same request again after 60 s idle · 1M allocation · runtime versions and full protocol in BENCHMARKS.md</text>

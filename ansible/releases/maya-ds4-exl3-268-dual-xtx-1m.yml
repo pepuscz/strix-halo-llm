@@ -46,7 +46,7 @@ strix_runtime:
   upstream_repository: https://github.com/mw00/project-maya
   upstream_tag: v1.1.67
   upstream_commit: 56b5216ab4464ac41c26b1be32eb63b98de53d0a
-  server_sha256: 1ac735f41cf4edd71185e2b927d07f6cc66673c97c598c30c55d29979884c091
+  server_sha256: dcd843491149af0dcaeedff76172dadcd6eb46cea726900c871841a0190c350f
   binary_hash_policy: reference build identity; the engine compiles for the host CPU and embeds build paths, so
     a portable install seals its own binary after the pinned source, toolchain and pack checks
   ggml_commit: 3cf03257f219afbe7334045ff7c6a06ac68c627d
@@ -525,10 +525,10 @@ strix_qualification:
     gsm8k: 10
     math: 10
     total: 30
-    scoring: 30/30 reviewed on 2026-11-20 with this release (raw 29/30, math_08 gold corrected); perplexity measured with this release.
+    scoring: 30/30 reviewed on 2026-11-21 with this release (raw 29/30, math_08 gold corrected); perplexity measured with this release.
     thinking: false
     math_10_output_cap: 4096
-    measured: '2026-11-20'
+    measured: '2026-11-21'
     perplexity: 7.0833
   retrieval_ladder:
     allocation_tokens: 1048576
@@ -540,16 +540,17 @@ strix_qualification:
     allocation_tokens: 1048576
     input_tokens: 130048
     output_tokens: 768
-    first_request_prefill_tokens_per_second: 1258.9156411904557
-    first_request_decode_tokens_per_second: 43.910053000806165
-    second_run_prefill_tokens_per_second: 1256.1929186528923
-    second_run_decode_tokens_per_second: 58.62505915940214
+    first_request_prefill_tokens_per_second: 1250.7922768039625
+    first_request_decode_tokens_per_second: 46.91394223720862
+    second_run_prefill_tokens_per_second: 1280.0806350006299
+    second_run_decode_tokens_per_second: 55.45406627049743
   deep_needle:
     allocation_tokens: 1048576
     input_tokens: 1040000
     values: 5/5
-    measured: '2026-11-20'
+    measured: '2026-11-21'
   qualified_configuration: "EXL3 2.68 bpw with original FP8 Engram, 1M context, 16K chunks, TP2, DSpark and the\
     \ helper\u2019s 109 GB pool, PROMPT_LIGHT=64, idle expert re-placement that also fills the helper\u2019s pool\
     \ (SETTLE_POOL, SETTLE_POOL_PROMPT=1024), optimized HIP EXL3 kernels and short prompt reads (HC_MIX_ROWS,\
-    \ LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=384, RUN_POLL_MS=1)."
+    \ LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=384, RUN_POLL_MS=1); the decode all-reduces in FP16\
+    \ (AR2_DECODE=2)."

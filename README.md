@@ -11,12 +11,12 @@ Runs on the M5 alone, or with one or two [RX 7900 XTX cards](#hardware), and ser
 <!-- exl3-hardware-table -->
 | EXL3 2.25 bpw, first / second run | M5 alone | 1 × RX 7900 XTX | **2 × RX 7900 XTX** |
 |---|---:|---:|---:|
-| Decode, short prompt | 22 / 26 | 54 / 71 | 77 / 97 |
-| Decode, 128K input | 23 / 41 | 63 / 92 | 89 / 133 |
-| Decode, real code (130K tokens) | 20 / 24 | 46 / 61 | 60 / 77 |
-| Prefill, 8K input | 285 / 319 | 537 / 626 | 1,062 / 1,235 |
-| Prefill, 128K input | 574 / 594 | 1,252 / 1,304 | 1,985 / 2,058 |
-| Prefill, real code (130K tokens) | 535 / 546 | 900 / 916 | 1,686 / 1,750 |
+| Decode, short prompt | 22 / 26 | 53 / 71 | 79 / 102 |
+| Decode, 128K input | 23 / 41 | 63 / 92 | 92 / 132 |
+| Decode, real code (130K tokens) | 20 / 24 | 46 / 61 | 64 / 94 |
+| Prefill, 8K input | 286 / 318 | 541 / 624 | 1,032 / 1,142 |
+| Prefill, 128K input | 574 / 594 | 1,252 / 1,304 | 1,994 / 2,059 |
+| Prefill, real code (130K tokens) | 535 / 546 | 900 / 916 | 1,679 / 1,751 |
 | Ansible recipe | [recipe](ansible/releases/maya-ds4-exl3-apu-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-single-xtx-1m.yml) | [recipe](ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml) |
 <!-- /exl3-hardware-table -->
 
@@ -25,7 +25,7 @@ The second run is the same request again after 60 s idle, with the experts it us
 ![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw reading and answer-writing speeds on each hardware option](docs/benchmark-deepseek-v41-hardware.svg)
 
 <!-- quant-comparison-note -->
-EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity. EXL3 2.68 bpw stays closer to the original model (KL 0.098 against 0.165) and decodes a short prompt at 55 % of 2.25 bpw's speed.
+EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also reads prompts fastest. Maya-XS v2 decodes fastest, with higher perplexity. EXL3 2.68 bpw stays closer to the original model (KL 0.098 against 0.165) and decodes a short prompt at 54 % of 2.25 bpw's speed.
 <!-- /quant-comparison-note -->
 
 <!-- quant-comparison-table -->
@@ -35,10 +35,10 @@ EXL3 supports 1M context and decodes faster than GSQ-RCO at long inputs; it also
 | Model size, excluding Engram | 159 GB | 193 GB | 155 GB | 178 GB | 117 GB |
 | Perplexity (lower is better) | 7.19 | 7.08 | 7.37 | 7.25 | 7.94 |
 | Quality checks passed | 30/30 | 30/30 | 30/30 | 30/30 | 30/30 |
-| Decode, short prompt | 77 | 42 | 61 | 42 | 81 |
-| Decode, 128K input | 89 | 42 | 56 | 26 | 96 |
-| Prefill, 8K input | 1,062 | 472 | 537 | 478 | 661 |
-| Prefill, 128K input | 1,985 | 1,746 | 1,673 | 1,669 | 1,762 |
+| Decode, short prompt | 79 | 43 | 61 | 42 | 81 |
+| Decode, 128K input | 92 | 40 | 56 | 26 | 96 |
+| Prefill, 8K input | 1,032 | 539 | 537 | 478 | 661 |
+| Prefill, 128K input | 1,994 | 1,736 | 1,673 | 1,669 | 1,762 |
 <!-- /quant-comparison-table -->
 
 EXL3 2.68 bpw and GSQ-RCO have their own recipes ([EXL3 2.68 bpw](ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml), [GSQ-RCO](ansible/releases/maya-ds4-gsq-dual-xtx-512k.yml)); Maya-S and Maya-XS v2 were measured for comparison only.

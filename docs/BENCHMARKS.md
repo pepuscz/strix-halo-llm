@@ -10,26 +10,26 @@ The cold retrieval test places five labelled phrases at different positions in a
 
 ![DeepSeek-V4.1-Flash-1017 EXL3 2.25 bpw context scaling on each hardware option](benchmark-deepseek-v41-hardware.svg)
 
-**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files and v1.1.67-based engine (`maya-ds4-exl3-1m-20261119`) on the M5 alone, with one RX 7900 XTX, or with two. Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.
+**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files and v1.1.67-based engine (`maya-ds4-exl3-1m-20261121`) on the M5 alone, with one RX 7900 XTX, or with two. The context ladders for one card and the M5 alone were measured with `maya-ds4-exl3-1m-20261119`: this engine changes only the two-card decode all-reduce, which those setups never run, and their `--bench` rows were measured again with it. Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.
 
 | First / second run | M5 alone | 1 × RX 7900 XTX | **2 × RX 7900 XTX** |
 |---|---:|---:|---:|
-| Maya `--bench` decode | 21.9 / 26.2 | 54.1 / 70.8 | 76.5 / 97.3 |
-| Maya `--bench` prefill, 2K | 113 / 113 | 201 / 229 | 667 / 641 |
-| Maya `--bench` prefill, 8K | 285 / 319 | 537 / 626 | 1,062 / 1,235 |
-| 128K five-phrase: decode | 22.6 / 40.7 | 63.4 / 91.8 | 88.7 / 132.6 |
-| 128K five-phrase: prefill | 574 / 594 | 1,252 / 1,304 | 1,985 / 2,058 |
-| 480K five-phrase: decode | 22.8 / 38.7 | 62.0 / 93.2 | 84.6 / 125.8 |
-| 480K five-phrase: prefill | 472 / 475 | 1,096 / 1,109 | 1,600 / 1,603 |
-| Real code, 130,048 tokens: decode | 20.3 / 24.5 | 46.2 / 61.5 | 60.2 / 77.1 |
-| Real code, 130,048 tokens: prefill | 535 / 546 | 900 / 916 | 1,686 / 1,750 |
+| Maya `--bench` decode | 21.9 / 26.1 | 53.0 / 70.7 | 78.6 / 102.0 |
+| Maya `--bench` prefill, 2K | 113 / 110 | 205 / 227 | 652 / 647 |
+| Maya `--bench` prefill, 8K | 286 / 318 | 541 / 624 | 1,032 / 1,142 |
+| 128K five-phrase: decode | 22.6 / 40.7 | 63.4 / 91.8 | 92.0 / 131.9 |
+| 128K five-phrase: prefill | 574 / 594 | 1,252 / 1,304 | 1,994 / 2,059 |
+| 480K five-phrase: decode | 22.8 / 38.7 | 62.0 / 93.2 | 86.1 / 124.5 |
+| 480K five-phrase: prefill | 472 / 475 | 1,096 / 1,109 | 1,600 / 1,606 |
+| Real code, 130,048 tokens: decode | 20.3 / 24.5 | 46.2 / 61.5 | 64.1 / 93.6 |
+| Real code, 130,048 tokens: prefill | 535 / 546 | 900 / 916 | 1,679 / 1,751 |
 | Expert picks served from GPU memory | 85 % / 88 % | 24 % / 65 % | 48 % / 87 % |
 
 - **M5 alone** ([recipe](../ansible/releases/maya-ds4-exl3-apu-1m.yml)): the Radeon 8060S runs the whole model, with 20 GiB of RAM kept out of its expert budget; 16K prompt chunks.
 - **1 × RX 7900 XTX** ([recipe](../ansible/releases/maya-ds4-exl3-single-xtx-1m.yml)): the card runs the model and the Radeon 8060S holds a 113 GB expert pool; 8K prompt chunks.
 - **2 × RX 7900 XTX** ([recipe](../ansible/releases/maya-ds4-exl3-dual-xtx-1m.yml)): the two cards run the model tensor parallel and the Radeon 8060S holds a 109 GB expert pool; 16K prompt chunks.
 
-On two cards the **1,040,000-token** check found **5/5** values: **1,129 prefill / 78.7 decode tok/s**. Perplexity with this engine: **7.1937** (23 × 2,048 tokens). The answer-quality score (**30/30**) and the Lucebox KL below were measured with this engine; the one-card and M5-alone recipes run the same model files and engine.
+On two cards the **1,040,000-token** check found **5/5** values: **1,129 prefill / 80.2 decode tok/s**. Perplexity with this engine: **7.1937** (23 × 2,048 tokens). The answer-quality score (**30/30**) and the Lucebox KL below were measured with this engine; the one-card and M5-alone recipes run the same model files and engine.
 
 #### Recorded context scaling
 
@@ -57,11 +57,11 @@ On two cards the **1,040,000-token** check found **5/5** values: **1,129 prefill
 
 | Input tokens | Prefill, first / second run | Decode, first / second run | Values |
 |---:|---:|---:|---:|
-| 2,040 | 524.7 / 766.9 | 93.8 / 143.1 | 5/5 |
-| 7,680 | 984.2 / 1,350.0 | 93.2 / 141.9 | 5/5 |
-| 30,720 | 1,632.3 / 1,864.9 | 89.1 / 138.7 | 5/5 |
-| 122,879 | 1,984.6 / 2,058.4 | 88.7 / 132.6 | 5/5 |
-| 491,520 | 1,599.8 / 1,603.5 | 84.6 / 125.8 | 5/5 |
+| 2,040 | 523.2 / 769.3 | 95.3 / 148.7 | 5/5 |
+| 7,680 | 1,006.3 / 1,355.8 | 93.3 / 146.3 | 5/5 |
+| 30,720 | 1,650.4 / 1,863.1 | 93.0 / 137.2 | 5/5 |
+| 122,879 | 1,994.2 / 2,058.8 | 92.0 / 131.9 | 5/5 |
+| 491,520 | 1,600.3 / 1,606.1 | 86.1 / 124.5 | 5/5 |
 
 ### Quants on two RX 7900 XTX
 
@@ -76,29 +76,29 @@ GSQ, Maya-S and Maya-XS were measured with the v1.1.48 indexer engine at 512K: e
 | Perplexity (23 × 2,048 tokens; lower is better) | 7.1937 | 7.0833 | 7.3695 | 7.2498 | 7.9435 |
 | Quality | 30/30 | 30/30 | 30/30 | 30/30 | 30/30 |
 | Deepest retrieval | 5/5 at 1.04M | 5/5 at 1.04M | 5/5 at 520K | 5/5 at 520K | 5/5 at 520K |
-| Maya benchmark: decode | 76.5 | 42.3 | 60.9 | 41.7 | 80.7 |
-| Maya benchmark: prefill 2K / 8K | 667 / 1,062 | 169 / 472 | 210 / 537 | 169 / 478 | 286 / 661 |
-| 128K five-phrase: decode / prefill | 88.7 / 1,985 | 41.9 / 1,746 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
-| 480K five-phrase: decode / prefill | 84.6 / 1,600 | 40.7 / 1,513 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
-| Real code, 130,048 tokens: decode / prefill | 60.2 / 1,686 | 43.9 / 1,259 | 52.5 / 1,464 | 37.3 / 1,378 | 66.2 / 1,587 |
+| Maya benchmark: decode | 78.6 | 42.8 | 60.9 | 41.7 | 80.7 |
+| Maya benchmark: prefill 2K / 8K | 652 / 1,032 | 189 / 539 | 210 / 537 | 169 / 478 | 286 / 661 |
+| 128K five-phrase: decode / prefill | 92.0 / 1,994 | 39.8 / 1,736 | 55.8 / 1,673 | 26.3 / 1,669 | 95.9 / 1,762 |
+| 480K five-phrase: decode / prefill | 86.1 / 1,600 | 39.8 / 1,516 | 54.8 / 1,436 | 33.2 / 1,423 | 90.1 / 1,447 |
+| Real code, 130,048 tokens: decode / prefill | 64.1 / 1,679 | 46.9 / 1,251 | 52.5 / 1,464 | 37.3 / 1,378 | 66.2 / 1,587 |
 
-EXL3 supports 1M context. 2.68 bpw has the lowest measured perplexity (7.0833; 2.25 bpw 7.1937), 2.25 bpw the faster decode (76.5 against 42.3 tokens/s on the Maya benchmark). 2.25 bpw also decodes faster at long context than GSQ-RCO (88.7 against 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
+EXL3 supports 1M context. 2.68 bpw has the lowest measured perplexity (7.0833; 2.25 bpw 7.1937), 2.25 bpw the faster decode (78.6 against 42.8 tokens/s on the Maya benchmark). 2.25 bpw also decodes faster at long context than GSQ-RCO (92.0 against 55.8 tokens/s at 128K). Maya-XS v2 has the fastest recorded decode, with higher perplexity (7.9435).
 
 Different answer text and draft acceptance mean these decode rates do not isolate kernel speed.
 
 #### Maya DS4 HIP EXL3 2.68 bpw dual RX 7900 XTX
 
-([recipe](../ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml)) The 2.25 bpw two-card recipe on turboderp's larger 2.68 bpw files (193 GB of shards against 159 GB): fewer experts fit in VRAM and the 8060S's pool, so idle re-placement also fills the pool, steered by what prompts read (`DS4_SETTLE_POOL`, `DS4_SETTLE_POOL_PROMPT=1024`), and reads under 384 tokens take the window path (`DS4_CHUNK_MIN=384`), where experts only the drive holds are not copied whole. Same procedure as the two-card 2.25 bpw release above: first run / second run after 60 s idle. The **1,040,000-token** check found **5/5** values: **1,093 prefill / 38.5 decode tok/s**.
+([recipe](../ansible/releases/maya-ds4-exl3-268-dual-xtx-1m.yml)) The 2.25 bpw two-card recipe on turboderp's larger 2.68 bpw files (193 GB of shards against 159 GB): fewer experts fit in VRAM and the 8060S's pool, so idle re-placement also fills the pool, steered by what prompts read (`DS4_SETTLE_POOL`, `DS4_SETTLE_POOL_PROMPT=1024`), and reads under 384 tokens take the window path (`DS4_CHUNK_MIN=384`), where experts only the drive holds are not copied whole. Same procedure as the two-card 2.25 bpw release above: first run / second run after 60 s idle. The **1,040,000-token** check found **5/5** values: **1,094 prefill / 37.1 decode tok/s**.
 
 | Input tokens | Prefill, first / second run | Decode, first / second run | Values |
 |---:|---:|---:|---:|
-| 2,040 | 206.0 / 271.6 | 41.5 / 92.3 | 5/5 |
-| 7,680 | 609.1 / 769.2 | 42.1 / 92.1 | 5/5 |
-| 30,720 | 1,227.9 / 1,403.0 | 36.5 / 85.9 | 5/5 |
-| 122,879 | 1,745.9 / 1,792.2 | 41.9 / 82.8 | 5/5 |
-| 491,520 | 1,513.4 / 1,510.8 | 40.7 / 101.6 | 5/5 |
+| 2,040 | 223.9 / 281.4 | 42.9 / 89.4 | 5/5 |
+| 7,680 | 600.8 / 759.1 | 43.2 / 86.3 | 5/5 |
+| 30,720 | 1,248.9 / 1,390.0 | 40.3 / 85.8 | 5/5 |
+| 122,879 | 1,736.2 / 1,793.6 | 39.8 / 78.5 | 5/5 |
+| 491,520 | 1,515.9 / 1,512.0 | 39.8 / 102.6 | 5/5 |
 
-Real code, 130,048 tokens: **1,259 / 1,256** prefill and **43.9 / 58.6** decode tok/s (first / second run); Maya `--bench`: decode **42.3 / 67.1**, prefill 2K / 8K **169 / 472**; expert picks served from GPU memory 44 % / 84 %.
+Real code, 130,048 tokens: **1,251 / 1,280** prefill and **46.9 / 55.5** decode tok/s (first / second run); Maya `--bench`: decode **42.8 / 67.2**, prefill 2K / 8K **189 / 539**; expert picks served from GPU memory 44 % / 84 %.
 
 #### Maya DS4 HIP GSQ-RCO IQ2_XS dual RX 7900 XTX
 
