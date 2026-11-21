@@ -1969,11 +1969,11 @@
       },
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-exl3-1m-20261119",
-        "source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
-        "source_tree": "2db470ee1067ec6411ef17156b17b5e16d9afd43",
+        "release_tag": "maya-ds4-exl3-1m-20261121",
+        "source_commit": "cbea981ecb8db180b0bcd272a30db0999336232c",
+        "source_tree": "eba8757f8f2ba0230ce23c4ed11a59dd815d7521",
         "upstream": "Project Maya v1.1.67-based fork with DS4_HELPER_DRAFT, DS4_PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 decode kernels and shorter prompt reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)",
-        "benchmark_binary_sha256": "1ac735f41cf4edd71185e2b927d07f6cc66673c97c598c30c55d29979884c091"
+        "benchmark_binary_sha256": "dcd843491149af0dcaeedff76172dadcd6eb46cea726900c871841a0190c350f"
       },
       "power_watts": {
         "stapm": 120,
@@ -2016,7 +2016,7 @@
           "scored_tokens": 47081,
           "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
         },
-        "scoring": "Answer quality and Lucebox KL measured 2026-11-19 with this release (30/30 reviewed); perplexity measured with this release.",
+        "scoring": "Answer quality and Lucebox KL measured 2026-11-21 with this release (30/30 reviewed); perplexity measured with this release.",
         "lucebox_kl": {
           "all": {
             "tokens": 8184,
@@ -2043,11 +2043,11 @@
             "teacher_idx.i32": "ed0fade255c0b6c4a8606e3b21a9c52b024a0d5f37e5c69ff548486c16a8ffb1",
             "teacher_lp.f32": "e689eabd99c20cdf2edc1d24fc6516121b34fd8e05b3fedcefbe12a36004350d"
           },
-          "runtime_source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
+          "runtime_source_commit": "cbea981ecb8db180b0bcd272a30db0999336232c",
           "allocation_tokens": 1048576,
           "ppl_check": {
             "engine_exit": 0,
-            "seconds": 75.8,
+            "seconds": 74.9,
             "ppl": 9.1759,
             "tokens": 8184,
             "sequences": 8,
@@ -2055,24 +2055,24 @@
             "within_tolerance": true
           }
         },
-        "measured_with": "maya-ds4-exl3-1m-20261119"
+        "measured_with": "maya-ds4-exl3-1m-20261121"
       },
       "long_context": {
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 1686.1255855503102,
-        "decode_tokens_per_second": 60.18054162487462,
+        "prefill_tokens_per_second": 1679.4841495842227,
+        "decode_tokens_per_second": 64.12825651302605,
         "allocation_tokens": 1048576,
         "second_run": {
-          "prefill_tokens_per_second": 1749.5937059399655,
-          "decode_tokens_per_second": 77.08598901926146,
+          "prefill_tokens_per_second": 1751.063715193623,
+          "decode_tokens_per_second": 93.6356986100951,
           "cached_tokens": 0
         },
         "prompt_sha256": "5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a"
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "release_id": "maya-ds4-exl3-dual-xtx-1m-v7",
+      "release_id": "maya-ds4-exl3-dual-xtx-1m-v8",
       "selection": "added_hardware",
       "context_scaling": [
         {
@@ -2080,14 +2080,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 2040,
           "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 524.7453441712111,
+          "prefill_tokens_per_second": 523.170825532788,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 93.75915616759448,
+          "decode_tokens_per_second": 95.3090096798213,
           "second_run": {
-            "prefill_tokens_per_second": 766.8596346139389,
-            "decode_tokens_per_second": 143.14471035562514,
+            "prefill_tokens_per_second": 769.3468094735255,
+            "decode_tokens_per_second": 148.664343786295,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2098,14 +2098,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 7680,
           "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 984.2116054951815,
+          "prefill_tokens_per_second": 1006.3420514702028,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 93.2129332944946,
+          "decode_tokens_per_second": 93.33527781828788,
           "second_run": {
-            "prefill_tokens_per_second": 1349.973633327474,
-            "decode_tokens_per_second": 141.9383455311599,
+            "prefill_tokens_per_second": 1355.83645222795,
+            "decode_tokens_per_second": 146.28571428571428,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2116,14 +2116,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 30720,
           "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 1632.3234040744323,
+          "prefill_tokens_per_second": 1650.4238881665894,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 89.14890653294331,
+          "decode_tokens_per_second": 92.95570079883805,
           "second_run": {
-            "prefill_tokens_per_second": 1864.9263924723023,
-            "decode_tokens_per_second": 138.73834814654236,
+            "prefill_tokens_per_second": 1863.1054182889998,
+            "decode_tokens_per_second": 137.221269296741,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2134,14 +2134,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 122879,
           "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 1984.5536898172898,
+          "prefill_tokens_per_second": 1994.1868202133771,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 88.74098724348308,
+          "decode_tokens_per_second": 91.98045415349239,
           "second_run": {
-            "prefill_tokens_per_second": 2058.35745490606,
-            "decode_tokens_per_second": 132.6150020721094,
+            "prefill_tokens_per_second": 2058.8230366211437,
+            "decode_tokens_per_second": 131.93156050298907,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2152,14 +2152,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 491520,
           "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-          "prefill_tokens_per_second": 1599.8062734590733,
+          "prefill_tokens_per_second": 1600.2568120469853,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 84.58895056833201,
+          "decode_tokens_per_second": 86.07935440484196,
           "second_run": {
-            "prefill_tokens_per_second": 1603.464778385065,
-            "decode_tokens_per_second": 125.83562721195437,
+            "prefill_tokens_per_second": 1606.0535462277903,
+            "decode_tokens_per_second": 124.5136186770428,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2170,23 +2170,23 @@
       "maya_bench": {
         "procedure": "Project Maya v1.1.67 maya.py --bench requests in one fresh load: three 256-token greedy answers, thinking off (decode is their mean), then 2,048- and 8,192-token prompts; the second run is the same seven requests after 60 s idle, every prompt read (cold=1).",
         "this_release": {
-          "decode_mean_tokens_per_second": 76.53398696726931,
+          "decode_mean_tokens_per_second": 78.62572039513991,
           "prefill_tokens_per_second": {
-            "2048": 666.6449659841802,
-            "8192": 1062.1717990275527
+            "2048": 652.083930334002,
+            "8192": 1032.427186913179
           },
           "second_run": {
-            "decode_mean_tokens_per_second": 97.25389850775382,
+            "decode_mean_tokens_per_second": 102.00879221775517,
             "prefill_tokens_per_second": {
-              "2048": 641.2624855183643,
-              "8192": 1235.3908099711962
+              "2048": 647.2001011250157,
+              "8192": 1142.1241948526335
             }
           }
         },
         "aggregation": "one load"
       },
-      "qualification_note": "EXL3 v7 at 1M: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.1937 on 23 x 2,048 tokens; answer quality and Lucebox KL measured 2026-11-19 with this release.",
-      "manifest_sha256": "393f052889a4dffc039785110191c6d2d3b817bfdd22871f0761a94b6fe12dc6",
+      "qualification_note": "EXL3 2.25 bpw v8 at 1M: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.1937 on 23 x 2,048 tokens; answer quality and Lucebox KL measured 2026-11-21 with this release.",
+      "manifest_sha256": "a10f3e88db511b8d3c2975e07aaa2ff4a201107b919a05a5f8c5fea8ca974ffe",
       "measurement_profile": {
         "strix_gpu_od_enabled": true,
         "public_default_enabled": false,
@@ -2207,14 +2207,14 @@
       },
       "placement": {
         "vram_share_of_picks": {
-          "run1": 0.4767,
-          "run2": 0.87148
+          "run1": 0.47700000000000004,
+          "run2": 0.86944
         },
         "cpu_lane_picks_per_token": {
-          "run1": 0.2096,
-          "run2": 0.19619999999999999
+          "run1": 0.197,
+          "run2": 0.2132
         },
-        "idle_moves": 4178,
+        "idle_moves": 4170,
         "note": "ladder means; the second run is the same request again in the same load after 60 s idle"
       },
       "near_capacity_needle": {
@@ -2222,11 +2222,11 @@
         "allocation_tokens": 1048576,
         "actual_input_tokens": 1040000,
         "prompt_sha256": "1420bcb32be6877eae9e491927e03654d25bafab3a4c0ea0241cf8953ca59881",
-        "prefill_tokens_per_second": 1129.367039727006,
+        "prefill_tokens_per_second": 1129.4121735428682,
         "completion_tokens": 64,
         "cached_tokens": 0,
         "needle_passes": 5,
-        "decode_tokens_per_second": 78.72078720787208
+        "decode_tokens_per_second": 80.20050125313283
       }
     },
     "maya-ds4-exl3-268-dual-xtx": {
@@ -2238,11 +2238,11 @@
       },
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-exl3-1m-20261119",
-        "source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
-        "source_tree": "2db470ee1067ec6411ef17156b17b5e16d9afd43",
+        "release_tag": "maya-ds4-exl3-1m-20261121",
+        "source_commit": "cbea981ecb8db180b0bcd272a30db0999336232c",
+        "source_tree": "eba8757f8f2ba0230ce23c4ed11a59dd815d7521",
         "upstream": "Project Maya v1.1.67-based fork with DS4_HELPER_DRAFT, DS4_PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 decode kernels and shorter prompt reads (HC_MIX_ROWS, LIGHT_X_ONCE, PROMPT_LIGHT_SMALL=32, EG_LATE, CHUNK_MIN=64, RUN_POLL_MS=1)",
-        "benchmark_binary_sha256": "1ac735f41cf4edd71185e2b927d07f6cc66673c97c598c30c55d29979884c091"
+        "benchmark_binary_sha256": "dcd843491149af0dcaeedff76172dadcd6eb46cea726900c871841a0190c350f"
       },
       "power_watts": {
         "stapm": 120,
@@ -2285,7 +2285,7 @@
           "scored_tokens": 47081,
           "input_sha256": "2ea24f10d1e31799528f1f5f871cd258194d421c44ae6ce556708ba04a7ab3b1"
         },
-        "scoring": "Answer quality and Lucebox KL measured 2026-11-20 with this release (30/30 reviewed); perplexity measured with this release.",
+        "scoring": "Answer quality and Lucebox KL measured 2026-11-21 with this release (30/30 reviewed); perplexity measured with this release.",
         "lucebox_kl": {
           "all": {
             "tokens": 8184,
@@ -2312,11 +2312,11 @@
             "teacher_idx.i32": "ed0fade255c0b6c4a8606e3b21a9c52b024a0d5f37e5c69ff548486c16a8ffb1",
             "teacher_lp.f32": "e689eabd99c20cdf2edc1d24fc6516121b34fd8e05b3fedcefbe12a36004350d"
           },
-          "runtime_source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
+          "runtime_source_commit": "cbea981ecb8db180b0bcd272a30db0999336232c",
           "allocation_tokens": 1048576,
           "ppl_check": {
             "engine_exit": 0,
-            "seconds": 124.9,
+            "seconds": 123.7,
             "ppl": 8.8301,
             "tokens": 8184,
             "sequences": 8,
@@ -2324,24 +2324,24 @@
             "within_tolerance": true
           }
         },
-        "measured_with": "maya-ds4-exl3-1m-20261119"
+        "measured_with": "maya-ds4-exl3-1m-20261121"
       },
       "long_context": {
         "input_tokens": 130048,
         "output_tokens": 768,
         "cached_tokens": 0,
-        "prefill_tokens_per_second": 1258.9156411904557,
-        "decode_tokens_per_second": 43.910053000806165,
+        "prefill_tokens_per_second": 1250.7922768039625,
+        "decode_tokens_per_second": 46.91394223720862,
         "allocation_tokens": 1048576,
         "second_run": {
-          "prefill_tokens_per_second": 1256.1929186528923,
-          "decode_tokens_per_second": 58.62505915940214,
+          "prefill_tokens_per_second": 1280.0806350006299,
+          "decode_tokens_per_second": 55.45406627049743,
           "cached_tokens": 0
         },
         "prompt_sha256": "5a271c6f442dfb7df1146b79cceaeb5cdad86bb2954f5d9a2698ee8367375b4a"
       },
       "model": "DeepSeek-V4.1-Flash-1017",
-      "release_id": "maya-ds4-exl3-268-dual-xtx-1m-v1",
+      "release_id": "maya-ds4-exl3-268-dual-xtx-1m-v2",
       "selection": "added_hardware",
       "context_scaling": [
         {
@@ -2349,14 +2349,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 2040,
           "prompt_sha256": "43c4f2c4f02b5cd72255992888d11e76d31d3bcb15aeb8188b59cb97aab6ab2b",
-          "prefill_tokens_per_second": 206.01274451390083,
+          "prefill_tokens_per_second": 223.88059701492537,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 41.50992346607861,
+          "decode_tokens_per_second": 42.918454935622314,
           "second_run": {
-            "prefill_tokens_per_second": 271.5691103449194,
-            "decode_tokens_per_second": 92.2589015424535,
+            "prefill_tokens_per_second": 281.44142155510184,
+            "decode_tokens_per_second": 89.44793850454228,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2367,14 +2367,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 7680,
           "prompt_sha256": "7e0dc9335f919a541ecfb424d57bc9b1ef5c3b990b8b600087a3fe7ffa16c3ed",
-          "prefill_tokens_per_second": 609.0790851124575,
+          "prefill_tokens_per_second": 600.8214355564248,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 42.069282850193915,
+          "decode_tokens_per_second": 43.2169626578432,
           "second_run": {
-            "prefill_tokens_per_second": 769.199951925003,
-            "decode_tokens_per_second": 92.05983889528193,
+            "prefill_tokens_per_second": 759.1108123869489,
+            "decode_tokens_per_second": 86.2533692722372,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2385,14 +2385,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 30720,
           "prompt_sha256": "870891577591a004311ca66d539beafd9ba2af319c04e61b8c3dc1331a17b1a2",
-          "prefill_tokens_per_second": 1227.9355333844974,
+          "prefill_tokens_per_second": 1248.9378742849708,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 36.53802237953871,
+          "decode_tokens_per_second": 40.27183488547697,
           "second_run": {
-            "prefill_tokens_per_second": 1402.9639440093165,
-            "decode_tokens_per_second": 85.85994097129058,
+            "prefill_tokens_per_second": 1389.969775396811,
+            "decode_tokens_per_second": 85.81389112362564,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2403,14 +2403,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 122879,
           "prompt_sha256": "f5d337a32fbf5e29f150974500a8d49cff172c2d03c125a243f6c990e1dbd7a3",
-          "prefill_tokens_per_second": 1745.8668879328472,
+          "prefill_tokens_per_second": 1736.2215961273805,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 41.88755808626219,
+          "decode_tokens_per_second": 39.76884359659479,
           "second_run": {
-            "prefill_tokens_per_second": 1792.1874111227953,
-            "decode_tokens_per_second": 82.81573498964804,
+            "prefill_tokens_per_second": 1793.589558327896,
+            "decode_tokens_per_second": 78.48908511160167,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2421,14 +2421,14 @@
           "allocation_tokens": 1048576,
           "actual_input_tokens": 491520,
           "prompt_sha256": "c0d21b6084d82783f2f427d48081845b5002f907882dab9b9a35d3c8d86bb5e2",
-          "prefill_tokens_per_second": 1513.3536090860332,
+          "prefill_tokens_per_second": 1515.9300338086448,
           "completion_tokens": 64,
           "cached_tokens": 0,
           "needle_passes": 5,
-          "decode_tokens_per_second": 40.6865861411316,
+          "decode_tokens_per_second": 39.833198481359304,
           "second_run": {
-            "prefill_tokens_per_second": 1510.759922814528,
-            "decode_tokens_per_second": 101.55506188511583,
+            "prefill_tokens_per_second": 1512.0128609687688,
+            "decode_tokens_per_second": 102.61343594676927,
             "cached_tokens": 0,
             "needle_passes": 5
           },
@@ -2439,23 +2439,23 @@
       "maya_bench": {
         "procedure": "Project Maya v1.1.67 maya.py --bench requests in one fresh load: three 256-token greedy answers, thinking off (decode is their mean), then 2,048- and 8,192-token prompts; the second run is the same seven requests after 60 s idle, every prompt read (cold=1).",
         "this_release": {
-          "decode_mean_tokens_per_second": 42.28825053972266,
+          "decode_mean_tokens_per_second": 42.81150141334259,
           "prefill_tokens_per_second": {
-            "2048": 168.7096349018057,
-            "8192": 472.30566109532015
+            "2048": 189.0083521757187,
+            "8192": 539.2311743022643
           },
           "second_run": {
-            "decode_mean_tokens_per_second": 67.12796434153512,
+            "decode_mean_tokens_per_second": 67.24201809941052,
             "prefill_tokens_per_second": {
-              "2048": 188.417130502783,
-              "8192": 548.418410041841
+              "2048": 192.1777644320997,
+              "8192": 579.5953021083911
             }
           }
         },
         "aggregation": "one load"
       },
-      "qualification_note": "EXL3 2.68 bpw at 1M on the v7 engine: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.0833 on 23 x 2,048 tokens; answer quality and Lucebox KL measured 2026-11-20 with this release.",
-      "manifest_sha256": "3d1d16bfe0034c1de596206a960eb244c3c96110b214f070306804d05b356d5d",
+      "qualification_note": "EXL3 2.68 bpw v8 at 1M: 25/25 ladder values on fresh loads, 5/5 at 1,040,000 tokens, PPL 7.0833 on 23 x 2,048 tokens; answer quality and Lucebox KL measured 2026-11-21 with this release.",
+      "manifest_sha256": "42d5e610553e31f0acccd4628091497e90a90a41cd2d4b514994af9911e1cee0",
       "measurement_profile": {
         "strix_gpu_od_enabled": true,
         "public_default_enabled": false,
@@ -2476,14 +2476,14 @@
       },
       "placement": {
         "vram_share_of_picks": {
-          "run1": 0.43566,
-          "run2": 0.83974
+          "run1": 0.43582,
+          "run2": 0.8390799999999999
         },
         "cpu_lane_picks_per_token": {
-          "run1": 9.9086,
-          "run2": 1.8344
+          "run1": 9.9438,
+          "run2": 1.8594
         },
-        "idle_moves": 5465,
+        "idle_moves": 5469,
         "note": "ladder means; the second run is the same request again in the same load after 60 s idle"
       },
       "near_capacity_needle": {
@@ -2491,11 +2491,11 @@
         "allocation_tokens": 1048576,
         "actual_input_tokens": 1040000,
         "prompt_sha256": "1420bcb32be6877eae9e491927e03654d25bafab3a4c0ea0241cf8953ca59881",
-        "prefill_tokens_per_second": 1092.7597521452765,
+        "prefill_tokens_per_second": 1093.5931738755312,
         "completion_tokens": 64,
         "cached_tokens": 0,
         "needle_passes": 5,
-        "decode_tokens_per_second": 38.524047432733404
+        "decode_tokens_per_second": 37.12296983758701
       }
     },
     "maya-ds4-exl3-single-xtx": {
@@ -2523,11 +2523,11 @@
       "selection": "added_hardware",
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-exl3-1m-20261119",
-        "source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
-        "source_tree": "2db470ee1067ec6411ef17156b17b5e16d9afd43",
+        "release_tag": "maya-ds4-exl3-1m-20261121",
+        "source_commit": "cbea981ecb8db180b0bcd272a30db0999336232c",
+        "source_tree": "eba8757f8f2ba0230ce23c4ed11a59dd815d7521",
         "upstream": "Project Maya v1.1.67-based fork with DS4_HELPER_DRAFT, DS4_PROMPT_LIGHT=64, idle expert re-placement, optimized HIP EXL3 decode kernels and shorter prompt reads (LIGHT_X_ONCE, EG_LATE, RUN_POLL_MS=1)",
-        "benchmark_binary_sha256": "1ac735f41cf4edd71185e2b927d07f6cc66673c97c598c30c55d29979884c091"
+        "benchmark_binary_sha256": "dcd843491149af0dcaeedff76172dadcd6eb46cea726900c871841a0190c350f"
       },
       "draft": {
         "type": "DSpark",
@@ -2537,8 +2537,8 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw single RX 7900 XTX",
       "manifest": "ansible/releases/maya-ds4-exl3-single-xtx-1m.yml",
-      "manifest_sha256": "083c3a0ba50f745bd75b2d219938195e894b4e71e34b18a5ec1a1469212d83e0",
-      "release_id": "maya-ds4-exl3-single-xtx-1m-v4",
+      "manifest_sha256": "4366a6a313af27187b4b745caf546ce133055862093985bb1499805d9d6bb127",
+      "release_id": "maya-ds4-exl3-single-xtx-1m-v5",
       "hardware": {
         "added_gpus": "1 x AMD Radeon RX 7900 XTX (1002:744c), on a PCIe 4.0 x4 link",
         "helper_gpu": "AMD Radeon 8060S (1002:1586), 113 GB helper budget"
@@ -2656,22 +2656,22 @@
       "maya_bench": {
         "procedure": "Project Maya v1.1.67 maya.py --bench requests in one fresh load: three 256-token greedy answers, thinking off (decode is their mean), then 2,048- and 8,192-token prompts; the second run is the same seven requests after 60 s idle, every prompt read (cold=1).",
         "this_release": {
-          "decode_mean_tokens_per_second": 54.103367008231395,
+          "decode_mean_tokens_per_second": 53.04473783742396,
           "prefill_tokens_per_second": {
-            "2048": 201.12938865700957,
-            "8192": 536.6981793405268
+            "2048": 204.50142791524374,
+            "8192": 541.1261130340582
           },
           "second_run": {
-            "decode_mean_tokens_per_second": 70.82694048425176,
+            "decode_mean_tokens_per_second": 70.709767235736,
             "prefill_tokens_per_second": {
-              "2048": 229.33416944749277,
-              "8192": 625.7399726544298
+              "2048": 227.11646372568592,
+              "8192": 624.1238495764003
             }
           }
         },
         "aggregation": "one load"
       },
-      "qualification_note": "EXL3 v7 on one card: 25/25 ladder values on fresh loads at 1M; answer quality, KL and perplexity are the two-card release's (the same model files and engine).",
+      "qualification_note": "EXL3 v8 on one card: 25/25 ladder values on fresh loads at 1M; answer quality, KL and perplexity are the two-card release's (the same model files and engine). The ladder was measured with maya-ds4-exl3-1m-20261119 (v7): v8 changes only the two-card decode all-reduce, which this setup never runs; --bench measured with v8 on 2026-11-21.",
       "placement": {
         "vram_share_of_picks": {
           "run1": 0.2383,
@@ -2701,7 +2701,8 @@
         "cpu_boost": 0,
         "public_policy_source_commit": "39a98df5d295751a34e84269277e7359989fb45f",
         "MAYA_DS4_PROMPT_LIGHT": "64"
-      }
+      },
+      "ladder_measured_with": "maya-ds4-exl3-1m-20261119"
     },
     "maya-ds4-exl3-apu": {
       "power_watts": {
@@ -2728,11 +2729,11 @@
       "selection": "m5_only",
       "runtime": {
         "repository": "https://github.com/pepuscz/project-maya",
-        "release_tag": "maya-ds4-exl3-1m-20261119",
-        "source_commit": "90fcbd1720994c39de3ba08ffd0e9abe68ba60b6",
-        "source_tree": "2db470ee1067ec6411ef17156b17b5e16d9afd43",
+        "release_tag": "maya-ds4-exl3-1m-20261121",
+        "source_commit": "cbea981ecb8db180b0bcd272a30db0999336232c",
+        "source_tree": "eba8757f8f2ba0230ce23c4ed11a59dd815d7521",
         "upstream": "Project Maya v1.1.67-based fork with DS4_HELPER_DRAFT, DS4_PROMPT_LIGHT=64, idle expert re-placement and optimized HIP EXL3 decode kernels",
-        "benchmark_binary_sha256": "1ac735f41cf4edd71185e2b927d07f6cc66673c97c598c30c55d29979884c091"
+        "benchmark_binary_sha256": "dcd843491149af0dcaeedff76172dadcd6eb46cea726900c871841a0190c350f"
       },
       "draft": {
         "type": "DSpark",
@@ -2742,8 +2743,8 @@
       },
       "name": "Maya DS4 HIP EXL3 2.25 bpw Radeon 8060S",
       "manifest": "ansible/releases/maya-ds4-exl3-apu-1m.yml",
-      "manifest_sha256": "a17f1b4cfad68a65156540167a02ff76b5c75215420829a7baa2557ee5b4b11e",
-      "release_id": "maya-ds4-exl3-apu-1m-v2",
+      "manifest_sha256": "e7052eb391afbf3daa29368c81656dd57855fc5cfc91f93c2ff27227ba527b7f",
+      "release_id": "maya-ds4-exl3-apu-1m-v3",
       "hardware": {
         "added_gpus": "none",
         "gpu": "AMD Radeon 8060S (1002:1586) runs the whole model; 20 GiB of RAM kept out of its expert budget (--reserve-mib 20480)"
@@ -2861,22 +2862,22 @@
       "maya_bench": {
         "procedure": "Project Maya v1.1.67 maya.py --bench requests in one fresh load: three 256-token greedy answers, thinking off (decode is their mean), then 2,048- and 8,192-token prompts; the second run is the same seven requests after 60 s idle, every prompt read (cold=1).",
         "this_release": {
-          "decode_mean_tokens_per_second": 21.919911768683136,
+          "decode_mean_tokens_per_second": 21.869291839988204,
           "prefill_tokens_per_second": {
-            "2048": 112.63887361126389,
-            "8192": 284.54225584489114
+            "2048": 113.25867551500069,
+            "8192": 285.7870481812124
           },
           "second_run": {
-            "decode_mean_tokens_per_second": 26.218915028558886,
+            "decode_mean_tokens_per_second": 26.14128009810862,
             "prefill_tokens_per_second": {
-              "2048": 113.48649577196306,
-              "8192": 318.9074926910545
+              "2048": 109.90308351131766,
+              "8192": 318.27311967488896
             }
           }
         },
         "aggregation": "one load"
       },
-      "qualification_note": "EXL3 v7 on the M5 alone: 25/25 ladder values on fresh loads at 1M; answer quality, KL and perplexity are the two-card release's (the same model files and engine).",
+      "qualification_note": "EXL3 v8 on the M5 alone: 25/25 ladder values on fresh loads at 1M; answer quality, KL and perplexity are the two-card release's (the same model files and engine). The ladder was measured with maya-ds4-exl3-1m-20261119 (v7): v8 changes only the two-card decode all-reduce, which this setup never runs; --bench measured with v8 on 2026-11-21.",
       "placement": {
         "vram_share_of_picks": {
           "run1": 0.85188,
@@ -2896,7 +2897,8 @@
         "cpu_boost": 0,
         "public_policy_source_commit": "39a98df5d295751a34e84269277e7359989fb45f",
         "MAYA_DS4_PROMPT_LIGHT": "64"
-      }
+      },
+      "ladder_measured_with": "maya-ds4-exl3-1m-20261119"
     }
   },
   "winning_setups": {

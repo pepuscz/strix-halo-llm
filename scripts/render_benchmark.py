@@ -343,6 +343,7 @@ def exl3_details(data):
               (lambda names, old: f"**Maya DS4 HIP EXL3 2.25 bpw** runs the same model files on the M5 alone, with one RX 7900 XTX, or with two: "
                f"{join_names([n for _, n in EXL3_SETUPS if n not in names])} on the newer engine (`{e['runtime']['release_tag']}`, shorter prompt reads), "
                f"{join_names(names)} on `{old}`.")(*exl3_others(data)))
+             + carried_ladders(data)
              + " Every request is a fresh cold load at a 1M allocation, thinking off, nothing read from a cache. Each cell gives the first run and the second run: the same request again in the same load after 60 s idle. With a card, the engine moves the experts the request used from the 8060S's pool into VRAM while idle; on the M5 alone the expert cache and the page cache warm up instead.", '',
              *table(data, 'First / second run', cols, rows), '']
     for sid, name in cols:
@@ -474,6 +475,18 @@ def render_deepseek_details(data, text):
     a = text.index('\n## DeepSeek-V4.1-Flash-1017\n') + 1
     b = text.index('\n## GLM-5.3-Flash\n', a) + 1
     return text[:a] + '\n'.join(lines) + '\n' + text[b:]
+
+
+def carried_ladders(data: dict) -> str:
+    """A setup whose ladder an earlier engine measured (its code path unchanged): the sentence that says so."""
+    systems = data['systems']
+    old = [(n, systems[sid]['ladder_measured_with']) for sid, n in EXL3_SETUPS
+           if sid in systems and systems[sid].get('ladder_measured_with')]
+    if not old:
+        return ''
+    tags = sorted({t for _, t in old})
+    return (f" The context ladders for {join_names([n for n, _ in old])} were measured with `{'`, `'.join(tags)}`: this engine changes only the"
+            " two-card decode all-reduce, which those setups never run, and their `--bench` rows were measured again with it.")
 
 
 def main():
