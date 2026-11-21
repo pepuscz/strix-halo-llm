@@ -471,6 +471,8 @@ def validate_maya_deepseek(data: dict, root: Path) -> None:
         # waiting for its own table's rows, and reads of 64 tokens or more through the chunk path
         expected_env.update({"DS4_RUN_POLL_MS": "1", "DS4_HC_MIX_ROWS": "1", "DS4_LIGHT_X_ONCE": "1",
                              "DS4_PROMPT_LIGHT_SMALL": "32", "DS4_EG_LATE": "1", "DS4_CHUNK_MIN": "64"})
+        # v8: the decode windows' two all-reduces a layer with FP16 on the wire, as a prompt chunk's (DS4_AR2=2)
+        expected_env["DS4_AR2_DECODE"] = "2"
     if data["strix_system"]["id"] == EXL3_268:
         expected_env.update(EXL3_268_ENV)
     if exl3 and single:
